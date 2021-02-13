@@ -7,9 +7,6 @@ module.exports = {
   entry: './src/main.ts',
   target: 'electron-main',
   resolve: {
-    alias: {
-      ['@']: path.resolve(__dirname, 'src')
-    },
     extensions: ['.tsx', '.ts', '.js'],
   },
   devtool: 'source-map',
