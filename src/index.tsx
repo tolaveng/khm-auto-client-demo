@@ -1,6 +1,6 @@
 // Render React App
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './React/App';
+import Invoice from './React/Invoices';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<Invoice />, document.getElementById('root'));
