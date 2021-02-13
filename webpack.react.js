@@ -33,6 +33,18 @@ module.exports = {
             {
                 test: /\.(png|jp?g|gif)$/i,
                 use:[{loader: "file-loader"}]
+            },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader', 'resolve-url-loader'],
+                include: [
+                  path.join(__dirname, 'src'),
+                  /node_modules/
+                ],
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|svg)$/,
+                use:[{loader: "url-loader"}]
             }
         ]
     },
