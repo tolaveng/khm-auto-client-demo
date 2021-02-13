@@ -6,30 +6,28 @@ const isMac = process.platform === 'darwin';
 
 const createWindow = (): void => {
     mainWindow = new BrowserWindow({
-        title: "KHM Auto",
+        title: 'KHM Auto',
         width: 800,
         height: 600,
         minWidth: 800,
         minHeight: 600,
         webPreferences: {
-            nodeIntegration: true
-        }
+            nodeIntegration: true,
+        },
     });
 
     console.log(`Running in development: ${isDev}`);
     //const mainUrl = 'http://localhost:9000';
-    const mainUrl = isDev? 'http://localhost:9000': `file://${app.getAppPath()}/index.html`;
+    const mainUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}/index.html`;
 
     mainWindow.maximize();
     mainWindow.loadURL(mainUrl);
-    
+
     // Main menu
-    const mainMenuTemplate: Electron.MenuItemConstructorOptions[]= [
+    const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
         {
             label: 'KHM Auto',
-            submenu: [
-                isMac ? { role: 'close' } : { role: 'quit' }
-            ]
+            submenu: [isMac ? { role: 'close' } : { role: 'quit' }],
         },
         {
             label: 'Edit',
@@ -43,45 +41,37 @@ const createWindow = (): void => {
                 { type: 'separator' },
                 { role: 'selectAll' },
                 { role: 'delete' },
-            ]
+            ],
         },
         {
             label: 'Invoices',
             submenu: [
                 {
                     label: 'Create new invoice',
-                    click() {}
+                    click() {},
                 },
                 {
                     label: 'View all invoices',
-                    click() {}
-                }
-            ]
-        }
+                    click() {},
+                },
+            ],
+        },
     ];
-    
+
     if (isDev) {
-        mainMenuTemplate.push(
-            {
-                label: 'Tools',
-                submenu: [
-                    { role: 'forceReload' },
-                    { role: 'toggleDevTools' },
-                ]
-            }
-        );
+        mainMenuTemplate.push({
+            label: 'Tools',
+            submenu: [{ role: 'forceReload' }, { role: 'toggleDevTools' }],
+        });
         mainWindow.webContents.openDevTools();
     }
-    const menu = Menu.buildFromTemplate(mainMenuTemplate)
-    Menu.setApplicationMenu(menu)
+    const menu = Menu.buildFromTemplate(mainMenuTemplate);
+    Menu.setApplicationMenu(menu);
     // End main menu
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-
-
 }; // end create main window
 
-  
 app.on('ready', createWindow);

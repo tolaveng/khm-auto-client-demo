@@ -1,11 +1,11 @@
 import React from 'react';
 
-const App = () => {
-  return (
-    <div className="app">
-      <h1>I'm React running in Electron App :)</h1>
-    </div>
-  );
-}
+const App: React.FunctionComponent = () => {
+    return (
+        <div className="app">
+            <h1>React running in Electron App :)</h1>
+        </div>
+    );
+};
 
 export default App;
