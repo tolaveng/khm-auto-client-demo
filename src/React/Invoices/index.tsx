@@ -1,6 +1,7 @@
 import moment from 'moment';
 import React from 'react';
-import { Button, Container, Form, Grid, Icon, List, Table } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
 import { Invoice } from '../models/invoice';
 import { getToDay } from '../utils/helper';
@@ -99,36 +100,34 @@ const generateFilterForm = () => {
     );
 };
 
-const InvoiceComp: React.FC = () => {
+const InvoicePage: React.FC = () => {
     return (
         <Container fluid>
-            <HeaderLine label='Invoices'>
-                <Button type='button' primary>
+            <HeaderLine label="Invoices">
+                <Button type="button" primary as={Link} to="invoice/invoice-edit">
                     Create Invoice
                 </Button>
             </HeaderLine>
-            <Grid>
-                <Grid.Row>
-                    <Grid.Column width={12}>
-                        <Table celled selectable striped>
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell>No</Table.HeaderCell>
-                                    <Table.HeaderCell>Date</Table.HeaderCell>
-                                    <Table.HeaderCell>Plate No</Table.HeaderCell>
-                                    <Table.HeaderCell>Customer</Table.HeaderCell>
-                                    <Table.HeaderCell>Phone</Table.HeaderCell>
-                                    <Table.HeaderCell></Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>{generateInvoices()}</Table.Body>
-                        </Table>
-                    </Grid.Column>
-                    <Grid.Column width={4}>{generateFilterForm()}</Grid.Column>
-                </Grid.Row>
+            <Grid columns={2} relaxed="very">
+                <Grid.Column width={12}>
+                    <Table celled selectable striped>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell>No</Table.HeaderCell>
+                                <Table.HeaderCell>Date</Table.HeaderCell>
+                                <Table.HeaderCell>Plate No</Table.HeaderCell>
+                                <Table.HeaderCell>Customer</Table.HeaderCell>
+                                <Table.HeaderCell>Phone</Table.HeaderCell>
+                                <Table.HeaderCell></Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>{generateInvoices()}</Table.Body>
+                    </Table>
+                </Grid.Column>
+                <Grid.Column width={4}>{generateFilterForm()}</Grid.Column>
             </Grid>
         </Container>
     );
 };
 
-export default InvoiceComp;
+export default InvoicePage;
