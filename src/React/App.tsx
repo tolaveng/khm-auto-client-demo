@@ -23,7 +23,7 @@ const App: React.FunctionComponent = () => {
                     <InvoicePage />
                 </Route>
 
-                {/* Root */}
+                {/* Invoice */}
                 <Route path="/">
                     <InvoicePage />
                 </Route>

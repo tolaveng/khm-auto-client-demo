@@ -1,10 +1,10 @@
 import moment from 'moment';
-import React from 'react';
+import React, { useState } from 'react';
+import ReactDatePicker from 'react-datepicker';
 import { Link } from 'react-router-dom';
 import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
 import { Invoice } from '../models/invoice';
-import { getToDay } from '../utils/helper';
 
 const generateInvoices = () => {
     const invoices: Invoice[] = [
@@ -67,7 +67,7 @@ const generateInvoices = () => {
                 <Table.Cell>{inv.customerId}</Table.Cell>
                 <Table.Cell>{inv.customerId}</Table.Cell>
                 <Table.Cell collapsing>
-                    <Icon name="pencil" />
+                    <Icon name='pencil' />
                 </Table.Cell>
             </Table.Row>
         );
@@ -77,6 +77,7 @@ const generateInvoices = () => {
 };
 
 const generateFilterForm = () => {
+    const [invoiceDate, setInvoiceDate] = useState(new Date());
     return (
         <Form>
             <Form.Field>
@@ -93,9 +94,9 @@ const generateFilterForm = () => {
             </Form.Field>
             <Form.Field>
                 <label>Date</label>
-                <input type="date" placeholder="invoice date" defaultValue={getToDay()} />
+                <ReactDatePicker dateFormat='dd/MM/yyyy' selected={invoiceDate} onChange={date => setInvoiceDate(date as Date)}/>
             </Form.Field>
-            <Button type="submit">Filter</Button>
+            <Button type="button" basic color='blue'>Filter</Button>
         </Form>
     );
 };

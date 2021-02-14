@@ -3,3 +3,23 @@ body {
     font-size: 1.1rem;
     margin: 32px;
 }
+
+fieldset {
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    margin: 24px auto;
+}
+
+fieldset legend {
+    color: #888888;
+    font-weight: bold;
+    padding: 4px;
+}
+
+
+/* Date picker */
+.react-datepicker-wrapper,
+.react-datepicker__input-container
+{
+    width: 100%;
+}
