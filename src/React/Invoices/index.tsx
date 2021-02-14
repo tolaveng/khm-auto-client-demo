@@ -1,63 +1,13 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { Link } from 'react-router-dom';
-import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
+import { Button, Container, Dimmer, Form, Grid, Icon, Loader, Table } from 'semantic-ui-react';
+import agent from '../api/agent';
 import { HeaderLine } from '../components/header-line';
 import { Invoice } from '../models/invoice';
 
-const generateInvoices = () => {
-    const invoices: Invoice[] = [
-        {
-            invoiceId: 1,
-            invoiceNo: 1,
-            invoiceDateTime: new Date(),
-            modifiedDateTime: new Date(),
-            isPaid: false,
-            paidDate: new Date(),
-            paymentMethod: 1,
-            gst: 10,
-            note: 'test note',
-            odo: 1111,
-            carId: 1,
-            customerId: 1,
-            userId: 1,
-            archived: false,
-        },
-        {
-            invoiceId: 22222,
-            invoiceNo: 2,
-            invoiceDateTime: new Date(),
-            modifiedDateTime: new Date(),
-            isPaid: false,
-            paidDate: new Date(),
-            paymentMethod: 1,
-            gst: 10,
-            note: 'test note',
-            odo: 22222,
-            carId: 1,
-            customerId: 1,
-            userId: 1,
-            archived: false,
-        },
-        {
-            invoiceId: 333333,
-            invoiceNo: 4,
-            invoiceDateTime: new Date(),
-            modifiedDateTime: new Date(),
-            isPaid: false,
-            paidDate: new Date(),
-            paymentMethod: 1,
-            gst: 10,
-            note: 'test note',
-            odo: 3333,
-            carId: 1,
-            customerId: 1,
-            userId: 1,
-            archived: false,
-        },
-    ];
-
+const generateInvoices = (invoices: Invoice[]) => {
     var invoiceList = invoices.map((inv) => {
         return (
             <Table.Row key={inv.invoiceId}>
@@ -67,7 +17,7 @@ const generateInvoices = () => {
                 <Table.Cell>{inv.customerId}</Table.Cell>
                 <Table.Cell>{inv.customerId}</Table.Cell>
                 <Table.Cell collapsing>
-                    <Icon name='pencil' />
+                    <Icon name="pencil" />
                 </Table.Cell>
             </Table.Row>
         );
@@ -94,14 +44,36 @@ const generateFilterForm = () => {
             </Form.Field>
             <Form.Field>
                 <label>Date</label>
-                <ReactDatePicker dateFormat='dd/MM/yyyy' selected={invoiceDate} onChange={date => setInvoiceDate(date as Date)}/>
+                <ReactDatePicker
+                    dateFormat="dd/MM/yyyy"
+                    selected={invoiceDate}
+                    onChange={(date) => setInvoiceDate(date as Date)}
+                />
             </Form.Field>
-            <Button type="button" basic color='blue'>Filter</Button>
+            <Button type="button" basic color="blue">
+                Filter
+            </Button>
         </Form>
     );
 };
 
 const InvoicePage: React.FC = () => {
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const pageRequest = {
+        PageNumber: 1,
+        PageSize: 10,
+    };
+
+    useEffect(() => {
+        agent.Invoices.listPaged(pageRequest).then((response) => {
+            console.log('response',response);
+            setInvoices(response.data);
+            setLoading(false);
+        });
+    }, []);
+
     return (
         <Container fluid>
             <HeaderLine label="Invoices">
@@ -111,6 +83,11 @@ const InvoicePage: React.FC = () => {
             </HeaderLine>
             <Grid columns={2} relaxed="very">
                 <Grid.Column width={12}>
+                    {loading && (
+                        <Dimmer active inverted>
+                            <Loader inverted>Loading</Loader>
+                        </Dimmer>
+                    )}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
@@ -122,7 +99,7 @@ const InvoicePage: React.FC = () => {
                                 <Table.HeaderCell></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <Table.Body>{generateInvoices()}</Table.Body>
+                        <Table.Body>{invoices != null && generateInvoices(invoices!)}</Table.Body>
                     </Table>
                 </Grid.Column>
                 <Grid.Column width={4}>{generateFilterForm()}</Grid.Column>

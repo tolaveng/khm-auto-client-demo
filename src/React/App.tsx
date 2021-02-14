@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import InvoicePage from './Invoices';
-import { InvoiceEdit } from './Invoices/invoice-edit';
+import InvoicePage from './invoices';
+import { InvoiceEdit } from './invoices/invoice-edit';
 
 const App: React.FunctionComponent = () => {
     return (
