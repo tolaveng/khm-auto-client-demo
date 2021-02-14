@@ -11,6 +11,7 @@ const createWindow = (): void => {
         height: 600,
         minWidth: 800,
         minHeight: 600,
+        x: 0, y: 0,
         webPreferences: {
             nodeIntegration: true,
         },
@@ -72,6 +73,21 @@ const createWindow = (): void => {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    mainWindow.on('close', function(e) {
+        const choice = require('electron').dialog.showMessageBoxSync(mainWindow!,
+          {
+            type: 'question',
+            buttons: ['Yes', 'No'],
+            defaultId: 1,
+            title: 'Confirm Close',
+            message: 'Are you sure you want to close?'
+          });
+        if (choice === 1) {
+          e.preventDefault();
+        }
+      });
+
 }; // end create main window
 
 app.on('ready', createWindow);
