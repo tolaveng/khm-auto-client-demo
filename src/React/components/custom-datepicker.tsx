@@ -3,7 +3,7 @@ import ReactDatePicker from 'react-datepicker';
 
 interface CompProp {
     component: React.ReactNode;
-    onchange(date: Date): any;
+    onchange: (date: Date) => any;
 }
 
 export const CustomDatePicker: React.FC<CompProp> = ({ component, onchange }) => {

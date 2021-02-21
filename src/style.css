@@ -4,6 +4,14 @@ body {
     margin: 32px;
 }
 
+.container {
+    padding-bottom: 64px;
+}
+
+.action-button {
+    margin: 8px !important;
+}
+
 fieldset {
     border: 1px solid #dddddd;
     border-radius: 8px;
@@ -15,6 +23,20 @@ fieldset legend {
     font-weight: bold;
     padding: 4px;
 }
+
+
+/* input */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 
 
 /* Date picker */

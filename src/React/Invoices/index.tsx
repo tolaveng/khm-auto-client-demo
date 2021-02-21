@@ -2,22 +2,23 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { Link } from 'react-router-dom';
-import { Button, Container, Dimmer, Form, Grid, Icon, Loader, Table } from 'semantic-ui-react';
-import agent from '../api/agent';
+import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
+import api from '../api/api';
 import { HeaderLine } from '../components/header-line';
+import Loading from '../components/loading';
 import { Invoice } from '../models/invoice';
 
 const generateInvoices = (invoices: Invoice[]) => {
     var invoiceList = invoices.map((inv) => {
         return (
             <Table.Row key={inv.invoiceId}>
-                <Table.Cell collapsing>{inv.invoiceNo}</Table.Cell>
-                <Table.Cell collapsing>{moment(inv.invoiceDateTime).format('DD/MM/YYYY')}</Table.Cell>
-                <Table.Cell>{inv.carId}</Table.Cell>
-                <Table.Cell>{inv.customerId}</Table.Cell>
-                <Table.Cell>{inv.customerId}</Table.Cell>
-                <Table.Cell collapsing>
-                    <Icon name="pencil" />
+                <Table.Cell>{inv.invoiceNo}</Table.Cell>
+                <Table.Cell>{moment(inv.invoiceDateTime).format('DD/MM/YYYY')}</Table.Cell>
+                <Table.Cell>{inv.car != null ? inv.car.plateNo : ''}</Table.Cell>
+                <Table.Cell>{inv.customer != null ? inv.customer.fullName : ''}</Table.Cell>
+                <Table.Cell>{inv.customer != null ? inv.customer.phone : ''}</Table.Cell>
+                <Table.Cell>
+                    <Icon name='pencil' />
                 </Table.Cell>
             </Table.Row>
         );
@@ -40,17 +41,17 @@ const generateFilterForm = () => {
             </Form.Field>
             <Form.Field>
                 <label>Customer</label>
-                <input placeholder="name or phone" />
+                <input placeholder='name or phone' />
             </Form.Field>
             <Form.Field>
                 <label>Date</label>
                 <ReactDatePicker
-                    dateFormat="dd/MM/yyyy"
+                    dateFormat='dd/MM/yyyy'
                     selected={invoiceDate}
                     onChange={(date) => setInvoiceDate(date as Date)}
                 />
             </Form.Field>
-            <Button type="button" basic color="blue">
+            <Button type='button' basic color='blue'>
                 Filter
             </Button>
         </Form>
@@ -67,36 +68,34 @@ const InvoicePage: React.FC = () => {
     };
 
     useEffect(() => {
-        agent.Invoices.listPaged(pageRequest).then((response) => {
-            console.log('response',response);
-            setInvoices(response.data);
+        (async function fetchData() {
+            try {
+                const response = await api.Invoices.listPaged(pageRequest);
+                setInvoices(response.data);
+            } catch (Exception) {}
             setLoading(false);
-        });
+        })();
     }, []);
 
     return (
         <Container fluid>
-            <HeaderLine label="Invoices">
-                <Button type="button" primary as={Link} to="invoice/invoice-edit">
+            <HeaderLine label='Invoices'>
+                <Button type='button' primary as={Link} to='invoice/invoice-edit'>
                     Create Invoice
                 </Button>
             </HeaderLine>
-            <Grid columns={2} relaxed="very">
+            <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                    {loading && (
-                        <Dimmer active inverted>
-                            <Loader inverted>Loading</Loader>
-                        </Dimmer>
-                    )}
+                    {loading && <Loading />}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
-                                <Table.HeaderCell>No</Table.HeaderCell>
-                                <Table.HeaderCell>Date</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>No</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>Date</Table.HeaderCell>
                                 <Table.HeaderCell>Plate No</Table.HeaderCell>
                                 <Table.HeaderCell>Customer</Table.HeaderCell>
                                 <Table.HeaderCell>Phone</Table.HeaderCell>
-                                <Table.HeaderCell></Table.HeaderCell>
+                                <Table.HeaderCell collapsing></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>{invoices != null && generateInvoices(invoices!)}</Table.Body>
