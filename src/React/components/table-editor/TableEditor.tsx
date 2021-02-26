@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ButtonGroup, Icon, Table } from 'semantic-ui-react';
+import { Table } from 'semantic-ui-react';
 import { TableEditorRow } from '.';
 import { TableEditorDataColumn, TableEditorDataRow } from './@type';
 
@@ -7,27 +7,18 @@ export interface TableEditorProp {
     columns: TableEditorDataColumn[];
     rows?: TableEditorDataRow[];
     readonly?: boolean;
-    onAddNewRow?: (newRow: TableEditorDataRow) => void;
+    onRowAdded?: (row: TableEditorDataRow) => void;
+    onRowSaved?: (row: TableEditorDataRow) => void;
+    onRowDeleted?: (rowId: number) => void;
 }
 
 export class TableEditor extends React.Component<TableEditorProp> {
     constructor(props: TableEditorProp) {
         super(props);
 
-        this.addNewRow = this.addNewRow.bind(this);
-
         this.renderColumnHeader = this.renderColumnHeader.bind(this);
         this.renderNewRow = this.renderNewRow.bind(this);
         this.renderDataRow = this.renderDataRow.bind(this);
-
-        this.generateDataCell = this.generateDataCell.bind(this);
-    }
-
-    addNewRow(newRow: TableEditorDataRow) {
-        const { onAddNewRow } = this.props;
-        if (onAddNewRow) {
-            onAddNewRow(newRow);
-        }
     }
 
     renderColumnHeader() {
@@ -54,33 +45,25 @@ export class TableEditor extends React.Component<TableEditorProp> {
     }
 
     renderNewRow() {
-        const { readonly, columns } = this.props;
+        const { readonly, columns, onRowAdded } = this.props;
         if (readonly) return null;
-        return <TableEditorRow isNew={true} row={{ cells: null }} columns={columns} onAddNewRow={this.addNewRow} />;
+        return <TableEditorRow isNew={true} row={{ cells: null }} columns={columns} onRowAdded={onRowAdded} />;
     }
 
     renderDataRow() {
-        const { rows, columns } = this.props;
-        if (!rows || rows.length === 0) return null;
+        const { rows, columns, onRowSaved, onRowDeleted } = this.props;
+        if (!rows || !Array.isArray(rows) ) {
+            return <Table.Row><Table.Cell error>Rows property must be array or empty array.</Table.Cell></Table.Row>
+        }
+        if (rows.length === 0) return null;
 
-        return rows.map((row, index) => <TableEditorRow key={index} row={row} columns={columns} />);
+        return rows.map((row, index) => <TableEditorRow key={index} row={row} columns={columns} onRowSaved={onRowSaved} onRowDeleted={onRowDeleted} />);
     }
 
-    generateDataCell(cells: any[], rowId: number) {
-        const { columns } = this.props;
-        return cells.map((cell, index) => {
-            const textalign = columns[index].textAlign ? columns[index].textAlign! : 'left';
-            return (
-                <Table.Cell key={rowId + index} style={{ textAlign: textalign }}>
-                    {cell}
-                </Table.Cell>
-            );
-        });
-    }
 
     render() {
         return (
-            <Table celled color='grey'>
+            <Table celled color='grey' className='table-editor'>
                 {this.renderColumnHeader()}
                 <Table.Body>
                     {this.renderDataRow()}

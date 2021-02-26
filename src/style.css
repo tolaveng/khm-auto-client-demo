@@ -24,24 +24,47 @@ fieldset legend {
     padding: 4px;
 }
 
-
 /* input */
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
 /* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+
+/* override semantic ui */
+.ui.input.error > input {
+    border-color: #ff0000 !important;
+}
+
+/* .ui.input > input {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+} */
+
+
+/* table editor */
+.table-editor tr td {
+    margin: 2px !important;
+    padding: 4px !important;
+}
+
+
+.table-editor .table-editor-input input,
+.table-editor textarea.table-editor-input
+ {
+    margin: 2px !important;
+    padding: 4px  6px !important;
 }
 
 
 
 /* Date picker */
 .react-datepicker-wrapper,
-.react-datepicker__input-container
-{
+.react-datepicker__input-container {
     width: 100%;
 }

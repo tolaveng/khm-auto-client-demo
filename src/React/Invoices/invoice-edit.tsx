@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Button, ButtonGroup, Container, Form, Grid, Tab, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
@@ -23,17 +23,19 @@ export const InvoiceEdit: React.FC = () => {
             collapse: true,
             type: 'number',
             textAlign: 'right',
-            maxLength: 2
+            maxLength: 2,
+            required: true
         },
         {
             name: 'Total',
             collapse: true,
             type: 'number',
-            textAlign: 'right'
+            textAlign: 'right',
+            readOnly: true
         },
     ];
 
-    const serviceData: TableEditorDataRow[] = [
+    const serviceRawData: TableEditorDataRow[] = [
         {
             id: 1,
             cells: ['test 1', 11, 11, 111]
@@ -48,8 +50,20 @@ export const InvoiceEdit: React.FC = () => {
         }
     ];
 
-    function addNew (newRow: TableEditorDataRow) {
-        console.log('add new Row')
+    const [serviceData, setServiceData] = useState(serviceRawData);
+
+    function addNew (row: TableEditorDataRow) {
+        const cells = row.cells!;
+        cells[3] = cells[1] * cells[2];
+        setServiceData([...serviceData, row])
+    }
+
+    function saveRow (row: TableEditorDataRow) {
+        console.log('save Row', row)
+    }
+
+    function deleteRow (rowId: number) {
+        console.log('delete row', rowId);
     }
 
     return (
@@ -58,7 +72,7 @@ export const InvoiceEdit: React.FC = () => {
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <Form>
+                    <Form autoComplete='none'>
                         <Form.Group widths='equal'>
                             <Form.Field>
                                 <label>Invoice Date</label>
@@ -74,8 +88,9 @@ export const InvoiceEdit: React.FC = () => {
                                     fluid
                                     label='Full name'
                                     icon={{ name: 'search', circular: true, link: true }}
+                                    autoComplete='off'
                                 />
-                                <Form.Input fluid label='Phone number' />
+                                <Form.Input fluid label='Phone number' autoComplete='off' />
                                 <Form.Input fluid label='Email' />
                             </Form.Group>
                             <Form.Group widths='equal'>
@@ -102,7 +117,7 @@ export const InvoiceEdit: React.FC = () => {
                         </fieldset>
                         <fieldset style={{ minHeight: 200 }}>
                             <legend>Services</legend>
-                            <TableEditor columns={serviceTableColumns} rows={serviceData} onAddNewRow={addNew}/>
+                            <TableEditor columns={serviceTableColumns} rows={serviceData} onRowAdded={addNew} onRowSaved={saveRow} onRowDeleted={deleteRow}/>
                         </fieldset>
 
                         <Grid columns='2'>
@@ -111,9 +126,20 @@ export const InvoiceEdit: React.FC = () => {
                                 <fieldset>
                                     <legend>Payment</legend>
                                     <Form.Group inline>
-                                        <Form.Radio label='Cash' name='paymentmethod' value='cash' />
-                                        <Form.Radio label='Card' name='paymentmethod' value='card' />
-                                        <Form.Radio label='Not Pay' name='paymentmethod' value='notpay' />
+                                        <Form.Field>
+                                            <input type='radio' id='paymentMethodCash' name='paymentmethod' value='cash' defaultChecked />
+                                            <label htmlFor='paymentMethodCash'>Cash</label>
+                                        </Form.Field>
+                                        <span>&nbsp; &nbsp; &nbsp;</span>
+                                        <Form.Field>
+                                            <input type='radio'  id='paymentMethodCard' name='paymentmethod' value='card' />
+                                            <label htmlFor='paymentMethodCard'>Card</label>
+                                        </Form.Field>
+                                        <span>&nbsp; &nbsp; &nbsp;</span>
+                                        <Form.Field>
+                                            <input type='radio'  id='paymentMethodUnpaid' name='paymentmethod' value='notpay' />
+                                            <label htmlFor='paymentMethodUnpaid'>UnPaid</label>
+                                        </Form.Field>
                                     </Form.Group>
                                 </fieldset>
                             </Grid.Column>
