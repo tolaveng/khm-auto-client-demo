@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { Invoice } from '../models/invoice';
+import { Invoice } from '../stores/types/invoice';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
 

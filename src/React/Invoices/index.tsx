@@ -6,9 +6,11 @@ import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
 import api from '../api/api';
 import { HeaderLine } from '../components/header-line';
 import Loading from '../components/loading';
-import { Invoice } from '../models/invoice';
+import { Invoice } from '../stores/types/invoice';
 
 const generateInvoices = (invoices: Invoice[]) => {
+    
+
     var invoiceList = invoices.map((inv) => {
         return (
             <Table.Row key={inv.invoiceId}>

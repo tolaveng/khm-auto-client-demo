@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import { Button, ButtonGroup, Container, Form, Grid, Tab, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
 import { TableEditor, TableEditorRow } from '../components/table-editor';
-import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/@type';
+import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
 
 
 export const InvoiceEdit: React.FC = () => {

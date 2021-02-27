@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, ButtonGroup, Input, Table, TextArea } from 'semantic-ui-react';
-import { TableEditorDataColumn, TableEditorDataRow } from './@type';
+import { TableEditorDataColumn, TableEditorDataRow } from './type';
 import CSS from 'csstype';
 
 interface TableEditorRowProp {

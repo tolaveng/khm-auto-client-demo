@@ -1,7 +1,8 @@
 import React from 'react';
 import { Table } from 'semantic-ui-react';
+import { StoreContext } from '../../stores';
 import { TableEditorRow } from '.';
-import { TableEditorDataColumn, TableEditorDataRow } from './@type';
+import { TableEditorDataColumn, TableEditorDataRow } from './type';
 
 export interface TableEditorProp {
     columns: TableEditorDataColumn[];
@@ -13,6 +14,9 @@ export interface TableEditorProp {
 }
 
 export class TableEditor extends React.Component<TableEditorProp> {
+    static contextType = StoreContext;
+    context!: React.ContextType<typeof StoreContext>;
+
     constructor(props: TableEditorProp) {
         super(props);
 
