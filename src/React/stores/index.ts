@@ -1,22 +1,22 @@
 import { createContext, useContext } from "react";
-import Car from "./Car";
-import Customer from "./Customer";
-import Invoice from "./Invoice";
-import Service from "./Service";
+import CarStore from "./CarStore";
+import CustomerStore from "./CustomerStore";
+import InvoiceStore from "./InvoiceStore";
+import ServiceStore from "./ServiceStore";
 
 interface Store {
-    invoice: Invoice;
-    customer: Customer;
-    car: Car;
-    services: Service[];
+    invoiceStore: InvoiceStore;
+    customerStore: CustomerStore;
+    carStore: CarStore;
+    serviceStore: ServiceStore;
 }
 
 
 export const store: Store = {
-    invoice: new Invoice(),
-    customer: new Customer(),
-    car: new Car(),
-    services: [new Service()]
+    invoiceStore: new InvoiceStore(),
+    customerStore: new CustomerStore(),
+    carStore: new CarStore(),
+    serviceStore: new ServiceStore()
 }
 
 export const StoreContext = createContext(store);

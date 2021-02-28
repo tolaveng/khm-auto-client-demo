@@ -1,83 +1,84 @@
+import { observer, PropTypes } from 'mobx-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
-import api from '../api/api';
 import { HeaderLine } from '../components/header-line';
 import Loading from '../components/loading';
+import { useStore } from '../stores';
 import { Invoice } from '../stores/types/invoice';
 
-const generateInvoices = (invoices: Invoice[]) => {
-    
 
-    var invoiceList = invoices.map((inv) => {
-        return (
-            <Table.Row key={inv.invoiceId}>
-                <Table.Cell>{inv.invoiceNo}</Table.Cell>
-                <Table.Cell>{moment(inv.invoiceDateTime).format('DD/MM/YYYY')}</Table.Cell>
-                <Table.Cell>{inv.car != null ? inv.car.plateNo : ''}</Table.Cell>
-                <Table.Cell>{inv.customer != null ? inv.customer.fullName : ''}</Table.Cell>
-                <Table.Cell>{inv.customer != null ? inv.customer.phone : ''}</Table.Cell>
-                <Table.Cell>
-                    <Icon name='pencil' />
-                </Table.Cell>
-            </Table.Row>
-        );
-    });
+const InvoicePage: React.FC = (props) => {
+    const {invoiceStore} = useStore();
+    const history = useHistory();
 
-    return invoiceList;
-};
-
-const generateFilterForm = () => {
-    const [invoiceDate, setInvoiceDate] = useState(new Date());
-    return (
-        <Form>
-            <Form.Field>
-                <label>Invoice No</label>
-                <input />
-            </Form.Field>
-            <Form.Field>
-                <label>Plate No</label>
-                <input />
-            </Form.Field>
-            <Form.Field>
-                <label>Customer</label>
-                <input placeholder='name or phone' />
-            </Form.Field>
-            <Form.Field>
-                <label>Date</label>
-                <ReactDatePicker
-                    dateFormat='dd/MM/yyyy'
-                    selected={invoiceDate}
-                    onChange={(date) => setInvoiceDate(date as Date)}
-                />
-            </Form.Field>
-            <Button type='button' basic color='blue'>
-                Filter
-            </Button>
-        </Form>
-    );
-};
-
-const InvoicePage: React.FC = () => {
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const pageRequest = {
+    const pageRequest: PageRequest = {
         PageNumber: 1,
         PageSize: 10,
     };
 
     useEffect(() => {
-        (async function fetchData() {
-            try {
-                const response = await api.Invoices.listPaged(pageRequest);
-                setInvoices(response.data);
-            } catch (Exception) {}
-            setLoading(false);
-        })();
-    }, []);
+        invoiceStore.fetchInvoices(pageRequest);
+    }, [invoiceStore]);
+
+
+    const renderInvoices = () => {
+        if (!invoiceStore.invoices || invoiceStore.invoices.length === 0) return null;
+
+        var invoiceList = invoiceStore.invoices.map((inv) => {
+            return (
+                <Table.Row key={inv.invoiceId}>
+                    <Table.Cell>{inv.invoiceNo}</Table.Cell>
+                    <Table.Cell>{moment(inv.invoiceDateTime).format('DD/MM/YYYY')}</Table.Cell>
+                    <Table.Cell>{inv.car != null ? inv.car.plateNo : ''}</Table.Cell>
+                    <Table.Cell>{inv.customer != null ? inv.customer.fullName : ''}</Table.Cell>
+                    <Table.Cell>{inv.customer != null ? inv.customer.phone : ''}</Table.Cell>
+                    <Table.Cell>
+                        <Button basic icon='pencil' onClick={() => goToEditInvoice(inv.invoiceId)} title={'Edit Invoice'} />
+                    </Table.Cell>
+                </Table.Row>
+            );
+        });
+    
+        return invoiceList;
+    };
+    
+    const goToEditInvoice = (invoiceId: number) => {
+        history.push(`/invoice-edit?id:${invoiceId}`);
+    }
+
+    const renderFilterForm = () => {
+        const [invoiceDate, setInvoiceDate] = useState(new Date());
+        return (
+            <Form>
+                <Form.Field>
+                    <label>Invoice No</label>
+                    <input />
+                </Form.Field>
+                <Form.Field>
+                    <label>Plate No</label>
+                    <input />
+                </Form.Field>
+                <Form.Field>
+                    <label>Customer</label>
+                    <input placeholder='name or phone' />
+                </Form.Field>
+                <Form.Field>
+                    <label>Date</label>
+                    <ReactDatePicker
+                        dateFormat='dd/MM/yyyy'
+                        selected={invoiceDate}
+                        onChange={(date) => setInvoiceDate(date as Date)}
+                    />
+                </Form.Field>
+                <Button type='button' basic color='blue'>
+                    Filter
+                </Button>
+            </Form>
+        );
+    };
 
     return (
         <Container fluid>
@@ -88,7 +89,7 @@ const InvoicePage: React.FC = () => {
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                    {loading && <Loading />}
+                    {invoiceStore.isLoading && <Loading />}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
@@ -100,13 +101,13 @@ const InvoicePage: React.FC = () => {
                                 <Table.HeaderCell collapsing></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <Table.Body>{invoices != null && generateInvoices(invoices!)}</Table.Body>
+                        <Table.Body>{invoiceStore.invoices != null && renderInvoices()}</Table.Body>
                     </Table>
                 </Grid.Column>
-                <Grid.Column width={4}>{generateFilterForm()}</Grid.Column>
+                <Grid.Column width={4}>{renderFilterForm()}</Grid.Column>
             </Grid>
         </Container>
     );
 };
 
-export default InvoicePage;
+export default observer(InvoicePage);

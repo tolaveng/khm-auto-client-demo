@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
 
-export default class Customer {
+export default class CustomerStore {
     customerId: number;
     fullName: string;
     company: string;

@@ -1,7 +1,7 @@
 import {makeAutoObservable} from 'mobx'
 
 
-export default class Service {
+export default class ServiceStore {
     serviceId: number;
     serviceName: string;
     servicePrice: number;

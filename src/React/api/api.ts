@@ -3,32 +3,24 @@ import { Invoice } from '../stores/types/invoice';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
 
-interface pageResponse<T = any>
-{
-    data: T[],
-    hasNext: boolean,
-    pageNumber: number,
-    pageSize: number,
-    totalCount: number
-}
 
-const responseData = <pageResponse>(response: AxiosResponse<pageResponse>) => response.data;
+const responseData = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
-    get: <pageResponse>(url: string) => axios.get<pageResponse>(url).then(responseData),
-    getWithParams: <pageResponse>(url: string, params: {}) => axios.get<pageResponse>(url, params).then(responseData),
+    get: <T>(url: string) => axios.get<T>(url).then(responseData),
+    getWithParams: <T>(url: string, params: {}) => axios.get<T>(url, params).then(responseData),
     post: <T>(url: string, body: {}) => axios.post<T>(url, body).then(responseData),
     put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseData),
     delete: <T>(url: string) => axios.delete<T>(url).then(responseData),
 };
 
 const Invoices = {
-    list: () => requests.get<pageResponse<Invoice>>('/invoice/getall'),
-    listPaged: (pageRequest: {}) => requests.getWithParams<pageResponse<Invoice>>('/invoice/getall', {params:{...pageRequest}}),
+    getAll: () => requests.get<PageResponse<Invoice>>('/invoice/getall'),
+    getAllPaged: (pageRequest: PageRequest) => requests.getWithParams<PageResponse<Invoice>>('/invoice/getall', {params:{...pageRequest}}),
 };
 
-const agent = {
+const Api = {
     Invoices,
 };
 
-export default agent;
+export default Api;

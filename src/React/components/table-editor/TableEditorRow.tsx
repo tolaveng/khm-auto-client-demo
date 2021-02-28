@@ -202,8 +202,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 {cells.map((cell, index) => this.renderDataCell(rowId, cell, index))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button basic icon='pencil' onClick={this.editRow}></Button>
-                        <Button basic icon='trash' onClick={this.deleteRow}></Button>
+                        <Button basic icon='pencil' onClick={this.editRow} title={'Edit'}></Button>
+                        <Button basic icon='trash' onClick={this.deleteRow} title={'Delete'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -236,8 +236,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 ))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button basic icon='add' onClick={this.addNewRow}></Button>
-                        <Button basic icon='cancel' onClick={this.resetRow}></Button>
+                        <Button basic icon='add' onClick={this.addNewRow} title={'Add'}></Button>
+                        <Button basic icon='cancel' onClick={this.resetRow} title={'Clear'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -257,8 +257,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 ))}
                 <Table.Cell key={rowId + columns.length}>
                     <ButtonGroup>
-                        <Button basic icon='save' onClick={this.saveRow}></Button>
-                        <Button basic icon='cancel' onClick={this.resetRow}></Button>
+                        <Button basic icon='save' onClick={this.saveRow} title={'Save'}></Button>
+                        <Button basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
