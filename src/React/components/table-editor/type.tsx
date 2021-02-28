@@ -8,6 +8,7 @@ export interface TableEditorDataColumn {
     textAlign?: string;
     maxLength?: number;
     readOnly?: boolean;
+    default?: any;
 }
 
 export interface TableEditorDataRow {

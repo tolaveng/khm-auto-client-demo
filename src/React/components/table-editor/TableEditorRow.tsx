@@ -1,22 +1,23 @@
 import React from 'react';
 import { Button, ButtonGroup, Input, Table, TextArea } from 'semantic-ui-react';
 import { TableEditorDataColumn, TableEditorDataRow } from './type';
-import CSS from 'csstype';
 
 interface TableEditorRowProp {
     columns: TableEditorDataColumn[];
     row: TableEditorDataRow;
     isNew?: boolean;
     onRowAdded?: (row: TableEditorDataRow) => void;
-    onRowSaved?: (row: TableEditorDataRow) => void;
+    onRowUpdated?: (row: TableEditorDataRow) => void;
     onRowDeleted?: (rowId: number) => void;
 }
 
 interface TableEditorCell {
     data: any;
+    type: string;
     isInValid?: boolean;
     isRequired?: boolean;
     error?: string;
+    maxLength?: number;
 }
 
 interface TableEditorRowState {
@@ -24,7 +25,6 @@ interface TableEditorRowState {
     rowState: number;
     cells: TableEditorCell[];
 }
-
 
 const RowState = { New: 1, Edit: 2, View: 3 };
 const InitState: TableEditorRowState = {
@@ -56,17 +56,33 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.renderDataCell = this.renderDataCell.bind(this);
     }
 
-    initState() {
-        const { isNew, row, columns } = this.props;
-        const id = row.id ? row.id : (-1 * Date.now());
+    static getDataCellsFromProps(props: TableEditorRowProp) {
+        const { columns, row } = props;
         const cells: TableEditorCell[] = new Array(columns.length);
         columns.forEach((c, i) => {
             if (row.cells && row.cells[i]) {
-                cells[i] = { data: row.cells[i] };
+                cells[i] = {
+                    data: row.cells[i],
+                    type: c.type ?? 'text',
+                    maxLength: c.maxLength,
+                    isRequired: c.required,
+                };
             } else {
-                cells[i] = { data: '' };
+                cells[i] = {
+                    data: c.default ?? '',
+                    type: c.type ?? 'text',
+                    maxLength: c.maxLength,
+                    isRequired: c.required,
+                };
             }
         });
+        return cells;
+    }
+
+    initState() {
+        const { isNew, row, columns } = this.props;
+        const id = row.id ? row.id : -1 * Date.now();
+        const cells = TableEditorRow.getDataCellsFromProps(this.props);
 
         this.setState({
             rowId: id,
@@ -105,10 +121,10 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
     }
 
     cellInputKeyPress(evt: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, cellIndex: number) {
+        const { rowState } = this.state;
         if (!evt.shiftKey && evt.key === 'Enter') {
-            console.log('enter press');
             evt.preventDefault();
-            this.addNewRow();
+            rowState == RowState.New ? this.addNewRow() : this.saveRow();
         }
     }
 
@@ -123,7 +139,6 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 cell.isRequired = true;
                 cell.error = 'Field is required';
                 isValid = false;
-                console.log('invalid cell', i);
             } else {
                 cell.isInValid = false;
                 cell.error = '';
@@ -142,20 +157,19 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const { onRowAdded } = this.props;
         const { rowId, rowState, cells } = this.state;
         if (!this.validateRequiredCells()) {
-            console.log('invalid');
             return;
         }
         if (onRowAdded) {
-            const cellData = cells.map(c => c.data);
+            const cellData = cells.map((c) => (c.type === 'number' ? Number(c.data) : c.data));
             onRowAdded({ id: rowId, cells: cellData });
         }
         this.initState();
     }
 
-    
     editRow() {
         this.setState({
-            ...this.state, rowState: RowState.Edit
+            ...this.state,
+            rowState: RowState.Edit,
         });
     }
 
@@ -166,29 +180,40 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         }
     }
 
-
     saveRow() {
-        const { onRowSaved } = this.props;
-        const { rowId, rowState, cells } = this.state;
+        const { onRowUpdated } = this.props;
+        const { rowId, cells } = this.state;
         if (!this.validateRequiredCells()) {
-            console.log('invalid');
             return;
         }
-        if (onRowSaved) {
-            console.log('call row save');
-            onRowSaved({ id: rowId, cells });
-        }
-        console.log('saved');
+
         this.setState({
             ...this.state,
-            rowState: RowState.View
-        })
-    }
+            rowState: RowState.View,
+        });
 
+        if (onRowUpdated) {
+            const cellData = cells.map((c) => (c.type === 'number' ? Number(c.data) : c.data));
+            onRowUpdated({ id: rowId, cells: cellData });
+        }
+    }
 
     resetRow() {
         this.initState();
     }
+
+    static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
+        //this.initState();
+        if (state.rowState == RowState.View) {
+            const cells = TableEditorRow.getDataCellsFromProps(props);
+            return {
+                cells,
+            };
+        }
+        return null;
+    }
+
+    componentDidUpdate() {}
 
     componentDidMount() {
         this.initState();
@@ -216,7 +241,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const align = column.textAlign ? column.textAlign! : 'left';
 
         return (
-            <Table.Cell key={`${rowId}_${cellIndex}`} style={{ textAlign: align, padding: 8}}>
+            <Table.Cell key={`${rowId}_${cellIndex}`} style={{ textAlign: align }}>
                 {cell.data}
             </Table.Cell>
         );
@@ -251,9 +276,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return (
             <Table.Row key={`edit_row_${rowId}`}>
                 {cells.map((cell, index) => (
-                    <Table.Cell key={`edit_${rowId}_${index}`}>
-                        {this.renderInputType(rowId, cell, index)}
-                    </Table.Cell>
+                    <Table.Cell key={`edit_${rowId}_${index}`}>{this.renderInputType(rowId, cell, index)}</Table.Cell>
                 ))}
                 <Table.Cell key={rowId + columns.length}>
                     <ButtonGroup>
@@ -271,7 +294,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
         const cellName = `cell_${rowId}_${cellIndex}`;
         const align = column.textAlign && column.textAlign === 'right' ? 'right' : 'left';
-        
+
         switch (column.type) {
             case 'textarea':
                 return (
@@ -283,9 +306,9 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                         onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
                             this.cellInputKeyPress(e, cellIndex)
                         }
-                        rows={1}
+                        rows={3}
                         autoComplete='off'
-                        className='table-editor-input'
+                        className={`table-editor-input ${cell.isInValid ? 'table-editor-input-error' : ''}`}
                     />
                 );
             default:
@@ -314,7 +337,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
             return this.renderNewRow();
         } else if (rowState === RowState.Edit) {
             return this.renderEditRow();
-        }else{
+        } else {
             return this.renderDataRow();
         }
     }

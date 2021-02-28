@@ -9,7 +9,7 @@ export interface TableEditorProp {
     rows?: TableEditorDataRow[];
     readonly?: boolean;
     onRowAdded?: (row: TableEditorDataRow) => void;
-    onRowSaved?: (row: TableEditorDataRow) => void;
+    onRowUpdated?: (row: TableEditorDataRow) => void;
     onRowDeleted?: (rowId: number) => void;
 }
 
@@ -55,13 +55,12 @@ export class TableEditor extends React.Component<TableEditorProp> {
     }
 
     renderDataRow() {
-        const { rows, columns, onRowSaved, onRowDeleted } = this.props;
+        const { rows, columns, onRowUpdated, onRowDeleted } = this.props;
         if (!rows || !Array.isArray(rows) ) {
             return <Table.Row><Table.Cell error>Rows property must be array or empty array.</Table.Cell></Table.Row>
         }
         if (rows.length === 0) return null;
-
-        return rows.map((row, index) => <TableEditorRow key={index} row={row} columns={columns} onRowSaved={onRowSaved} onRowDeleted={onRowDeleted} />);
+        return rows.map((row, index) => <TableEditorRow key={index} row={row} columns={columns} onRowUpdated={onRowUpdated} onRowDeleted={onRowDeleted} />);
     }
 
 

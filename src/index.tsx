@@ -6,6 +6,7 @@ import App from './React/App';
 import 'react-datepicker/dist/react-datepicker.css';
 import './style.css';
 import { store, StoreContext } from './React/stores';
+import './script'
 
 ReactDOM.render(
     <StoreContext.Provider value={store}>
@@ -13,3 +14,4 @@ ReactDOM.render(
     </StoreContext.Provider>,
     document.getElementById('root'),
 );
+

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button, Container, Grid, Table } from 'semantic-ui-react';
 import { HeaderLine } from './components/header-line';
 
-export const InvoiceEdit : React.FC = () => {
+const tempPage : React.FC = () => {
     return (
         <Container fluid>
             <HeaderLine label="Invoices">

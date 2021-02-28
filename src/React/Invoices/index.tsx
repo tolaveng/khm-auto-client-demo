@@ -1,4 +1,4 @@
-import { observer, PropTypes } from 'mobx-react';
+import { observer } from 'mobx-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
@@ -7,10 +7,9 @@ import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
 import Loading from '../components/loading';
 import { useStore } from '../stores';
-import { Invoice } from '../stores/types/invoice';
 
 
-const InvoicePage: React.FC = (props) => {
+const InvoiceComp: React.FC = (props) => {
     const {invoiceStore} = useStore();
     const history = useHistory();
 
@@ -36,7 +35,7 @@ const InvoicePage: React.FC = (props) => {
                     <Table.Cell>{inv.customer != null ? inv.customer.fullName : ''}</Table.Cell>
                     <Table.Cell>{inv.customer != null ? inv.customer.phone : ''}</Table.Cell>
                     <Table.Cell>
-                        <Button basic icon='pencil' onClick={() => goToEditInvoice(inv.invoiceId)} title={'Edit Invoice'} />
+                        <Button basic icon='pencil' as={Link} to={`/invoice/edit/${inv.invoiceId}`} title={'Edit Invoice'} />
                     </Table.Cell>
                 </Table.Row>
             );
@@ -45,10 +44,6 @@ const InvoicePage: React.FC = (props) => {
         return invoiceList;
     };
     
-    const goToEditInvoice = (invoiceId: number) => {
-        history.push(`/invoice-edit?id:${invoiceId}`);
-    }
-
     const renderFilterForm = () => {
         const [invoiceDate, setInvoiceDate] = useState(new Date());
         return (
@@ -83,7 +78,7 @@ const InvoicePage: React.FC = (props) => {
     return (
         <Container fluid>
             <HeaderLine label='Invoices'>
-                <Button type='button' primary as={Link} to='invoice/invoice-edit'>
+                <Button type='button' primary as={Link} to='/invoice/new'>
                     Create Invoice
                 </Button>
             </HeaderLine>
@@ -110,4 +105,4 @@ const InvoicePage: React.FC = (props) => {
     );
 };
 
-export default observer(InvoicePage);
+export const InvoicePage = observer(InvoiceComp);

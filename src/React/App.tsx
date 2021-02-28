@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import InvoicePage from './invoices';
-import { InvoiceEdit } from './invoices/invoice-edit';
+import { InvoicePage } from './invoices';
+import { InvoiceEditPage } from './invoices/invoice-edit';
+
 
 const App: React.FC = () => {
     
@@ -14,17 +15,16 @@ const App: React.FC = () => {
                 <Route exact path="/" component={InvoicePage} /> */}
 
                 {/* Invoice */}
-                <Route path="/invoice/invoice-edit">
-                    <InvoiceEdit />
+                <Route path="/invoice/edit/:id">
+                    <InvoiceEditPage />
                 </Route>
-                <Route path="/invoice-edit">
-                    <InvoiceEdit />
+                <Route path="/invoice/new">
+                    <InvoiceEditPage />
                 </Route>
                 <Route path="/invoice">
                     <InvoicePage />
                 </Route>
 
-                {/* Invoice */}
                 <Route path="/">
                     <InvoicePage />
                 </Route>

@@ -51,16 +51,21 @@ input[type='number'] {
 .table-editor tr td {
     margin: 2px !important;
     padding: 4px !important;
+    padding-left: 8px !important;
+    white-space: pre-wrap !important;
 }
 
 
 .table-editor .table-editor-input input,
 .table-editor textarea.table-editor-input
  {
-    margin: 2px !important;
+    flex: none !important;
     padding: 4px  6px !important;
 }
 
+.table-editor-input-error {
+    border-color: #ff0000 !important;
+}
 
 
 /* Date picker */

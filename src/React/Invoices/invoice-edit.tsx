@@ -1,22 +1,35 @@
-import React, { useState } from 'react';
+import { observer } from 'mobx-react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { Button, ButtonGroup, Container, Form, Grid, Tab, Table } from 'semantic-ui-react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { Button, Container, Form, Grid } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
-import { TableEditor, TableEditorRow } from '../components/table-editor';
+import Loading from '../components/loading';
+import { TableEditor } from '../components/table-editor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
+import { useStore } from '../stores';
+import { PaymentMethod } from '../stores/PaymentMethod';
 
+const InvoiceEditComp: React.FC = (props) => {
+    const { invoiceStore } = useStore();
+    const history = useHistory();
+    const location = useLocation();
+    const param = useParams();
+    const invoiceId = param.id ? param.id : 0;
 
-export const InvoiceEdit: React.FC = () => {
     const serviceTableColumns: TableEditorDataColumn[] = [
         {
-            name: 'Service Description', type: 'textarea'
+            name: 'Service Description',
+            type: 'textarea',
+            required: true
         },
         {
             name: 'Price',
             collapse: true,
             type: 'number',
             textAlign: 'right',
-            required: true
+            required: true,
         },
         {
             name: 'Qty',
@@ -24,51 +37,46 @@ export const InvoiceEdit: React.FC = () => {
             type: 'number',
             textAlign: 'right',
             maxLength: 2,
-            required: true
+            required: true,
+            default: 1,
         },
         {
             name: 'Total',
             collapse: true,
             type: 'number',
             textAlign: 'right',
-            readOnly: true
+            readOnly: true,
         },
     ];
 
-    const serviceRawData: TableEditorDataRow[] = [
-        {
-            id: 1,
-            cells: ['test 1', 11, 11, 111]
-        },
-        {
-            id: 2,
-            cells: ['test 2', 22, 2222, 222]
-        },
-        {
-            id: 3,
-            cells: ['test 3', 33, 33, 3]
-        }
-    ];
-
-    const [serviceData, setServiceData] = useState(serviceRawData);
-
-    function addNew (row: TableEditorDataRow) {
-        const cells = row.cells!;
-        cells[3] = cells[1] * cells[2];
-        setServiceData([...serviceData, row])
+    function addService(row: TableEditorDataRow) {
+        invoiceStore.addService(row.id!, row.cells!);
     }
 
-    function saveRow (row: TableEditorDataRow) {
-        console.log('save Row', row)
+    function updateService(row: TableEditorDataRow) {
+        invoiceStore.updateService(row.id!, row.cells!);
     }
 
-    function deleteRow (rowId: number) {
-        console.log('delete row', rowId);
+    function deleteService(rowId: number) {
+        invoiceStore.deleteService(rowId);
     }
 
-    return (
-        <Container fluid>
-            <HeaderLine label='New Invoice' />
+    useEffect(() => {
+        (async () => {
+            if (invoiceId && invoiceId !== 0) {
+                await invoiceStore.loadInvoice(invoiceId);
+            }
+        })();
+    }, [invoiceStore]);
+
+    function renderForm() {
+        const {invoice, setPaymentMethod, setInvoiceDate, grandTotal, gstTotal, subTotal, getServiceData} = invoiceStore;
+        const invoiceDate = moment(invoice.invoiceDateTime).format('DD/MM/YYYY');
+        const isPaidByCash = invoice.paymentMethod === PaymentMethod.Cash;
+        const isPaidByCard = invoice.paymentMethod === PaymentMethod.Card;
+        const isUnPaid = !isPaidByCard && !isPaidByCash;
+        
+        return (
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
@@ -76,7 +84,12 @@ export const InvoiceEdit: React.FC = () => {
                         <Form.Group widths='equal'>
                             <Form.Field>
                                 <label>Invoice Date</label>
-                                <DatePicker onChange={() => {}} />
+                                <DatePicker
+                                    value={invoiceDate}
+                                    onChange={(date) => {
+                                        setInvoiceDate(date);
+                                    }}
+                                />
                             </Form.Field>
                             <Form.Field />
                             <Form.Field />
@@ -89,15 +102,21 @@ export const InvoiceEdit: React.FC = () => {
                                     label='Full name'
                                     icon={{ name: 'search', circular: true, link: true }}
                                     autoComplete='off'
+                                    value={invoice.customer?.fullName}
                                 />
-                                <Form.Input fluid label='Phone number' autoComplete='off' />
-                                <Form.Input fluid label='Email' />
+                                <Form.Input
+                                    fluid
+                                    label='Phone number'
+                                    autoComplete='off'
+                                    value={invoice.customer?.phone}
+                                />
+                                <Form.Input fluid label='Email' autoComplete='off' value={invoice.customer?.email} />
                             </Form.Group>
                             <Form.Group widths='equal'>
-                                <Form.Input fluid label='Company' />
-                                <Form.Input fluid label='ABN' />
+                                <Form.Input fluid label='Company' value={invoice.customer?.company} />
+                                <Form.Input fluid label='ABN' value={invoice.customer?.abn} />
                             </Form.Group>
-                            <Form.Input fluid label='Address' />
+                            <Form.Input fluid label='Address' value={invoice.customer?.address} />
                         </fieldset>
                         <fieldset>
                             <legend>Car</legend>
@@ -106,38 +125,66 @@ export const InvoiceEdit: React.FC = () => {
                                     fluid
                                     label='Reg. No'
                                     icon={{ name: 'search', circular: true, link: true }}
+                                    value={invoice.car?.plateNo}
                                 />
-                                <Form.Input fluid label='ODO' type='number' />
+                                <Form.Input fluid label='ODO' type='number' value={invoice.odo} />
                             </Form.Group>
                             <Form.Group widths='equal'>
-                                <Form.Input fluid label='Make' />
-                                <Form.Input fluid label='Model' />
-                                <Form.Input fluid label='Year' type='number' />
+                                <Form.Input fluid label='Make' value={invoice.car?.carMake} />
+                                <Form.Input fluid label='Model' value={invoice.car?.carModel} />
+                                <Form.Input fluid label='Year' type='number' value={invoice.car?.carYear} />
                             </Form.Group>
                         </fieldset>
                         <fieldset style={{ minHeight: 200 }}>
                             <legend>Services</legend>
-                            <TableEditor columns={serviceTableColumns} rows={serviceData} onRowAdded={addNew} onRowSaved={saveRow} onRowDeleted={deleteRow}/>
+                            <TableEditor
+                                columns={serviceTableColumns}
+                                rows={getServiceData}
+                                onRowAdded={addService}
+                                onRowUpdated={updateService}
+                                onRowDeleted={deleteService}
+                            />
                         </fieldset>
 
                         <Grid columns='2'>
                             <Grid.Column>
-                                <Form.TextArea label='Note' rows='2' />
+                                <Form.TextArea label='Note' rows='3' />
                                 <fieldset>
                                     <legend>Payment</legend>
                                     <Form.Group inline>
                                         <Form.Field>
-                                            <input type='radio' id='paymentMethodCash' name='paymentmethod' value='cash' defaultChecked />
+                                            <input
+                                                type='radio'
+                                                id='paymentMethodCash'
+                                                name='paymentmethod'
+                                                value='cash'
+                                                checked={isPaidByCash}
+                                                onChange={() => setPaymentMethod(PaymentMethod.Cash)}
+                                            />
                                             <label htmlFor='paymentMethodCash'>Cash</label>
                                         </Form.Field>
                                         <span>&nbsp; &nbsp; &nbsp;</span>
                                         <Form.Field>
-                                            <input type='radio'  id='paymentMethodCard' name='paymentmethod' value='card' />
+                                            <input
+                                                type='radio'
+                                                id='paymentMethodCard'
+                                                name='paymentmethod'
+                                                value='card'
+                                                checked={isPaidByCard}
+                                                onChange={() => setPaymentMethod(PaymentMethod.Card)}
+                                            />
                                             <label htmlFor='paymentMethodCard'>Card</label>
                                         </Form.Field>
                                         <span>&nbsp; &nbsp; &nbsp;</span>
                                         <Form.Field>
-                                            <input type='radio'  id='paymentMethodUnpaid' name='paymentmethod' value='notpay' />
+                                            <input
+                                                type='radio'
+                                                id='paymentMethodUnpaid'
+                                                name='paymentmethod'
+                                                value='notpay'
+                                                checked={isUnPaid}
+                                                onChange={() => setPaymentMethod(PaymentMethod.Unpaid)}
+                                            />
                                             <label htmlFor='paymentMethodUnpaid'>UnPaid</label>
                                         </Form.Field>
                                     </Form.Group>
@@ -145,20 +192,21 @@ export const InvoiceEdit: React.FC = () => {
                             </Grid.Column>
                             <Grid.Column textAlign='right'>
                                 <Form.Field inline>
-                                    <label>Sub Total</label>
-                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} />
+                                    <label>Total (ex. GST)</label>
+                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} value={subTotal.toFixed(2)} />
                                 </Form.Field>
                                 <Form.Field inline>
                                     <label>GST</label>
-                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} />
+                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} value={gstTotal.toFixed(2)}/>
                                 </Form.Field>
                                 <Form.Field inline>
-                                    <label style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (incl.GST)</label>
+                                    <label style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in. GST)</label>
                                     <input
                                         type='number'
                                         readOnly
                                         placeholder='0'
                                         style={{ textAlign: 'right', fontWeight: 'bold' }}
+                                        value={grandTotal.toFixed(2)}
                                     />
                                 </Form.Field>
                             </Grid.Column>
@@ -178,6 +226,16 @@ export const InvoiceEdit: React.FC = () => {
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
+        );
+    }
+
+    return (
+        <Container fluid>
+            <HeaderLine label={invoiceId ? 'Edit Invoice' : 'New Invoice'} />
+            {invoiceStore.isLoading && <Loading />}
+            {!invoiceStore.isLoading && renderForm()}
         </Container>
     );
 };
+
+export const InvoiceEditPage = observer(InvoiceEditComp);
