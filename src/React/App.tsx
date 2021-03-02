@@ -9,25 +9,13 @@ const App: React.FC = () => {
     return (
         <Router>
             <Switch>
-                {/* <Route path="/invoice-edit:{id}" component={InvoiceEdit} />
-                <Route path="/invoice-edit" component={InvoiceEdit} />
-                <Route path="/invoice" component={InvoicePage} />
-                <Route exact path="/" component={InvoicePage} /> */}
-
+                
                 {/* Invoice */}
-                <Route path="/invoice/edit/:id">
-                    <InvoiceEditPage />
-                </Route>
-                <Route path="/invoice/new">
-                    <InvoiceEditPage />
-                </Route>
-                <Route path="/invoice">
-                    <InvoicePage />
-                </Route>
-
-                <Route path="/">
-                    <InvoicePage />
-                </Route>
+                <Route exact path="/invoice/edit/:id" component={InvoiceEditPage} />
+                <Route path="/invoice/new" component={InvoiceEditPage} />
+                <Route path={"/invoice"} component={InvoicePage} />
+                
+                <Route path="/" component={InvoicePage} />
             </Switch>
         </Router>
     );

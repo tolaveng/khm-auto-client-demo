@@ -1,9 +1,6 @@
-import { Car } from './types/car';
-import { Customer } from './types/customer';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Invoice } from './types/invoice';
 import Api from '../api/api';
-import { PaymentMethod } from './PaymentMethod';
 import { Service } from './types/service';
 import { TableEditorDataRow } from '../components/table-editor/type';
 
@@ -39,7 +36,6 @@ export default class InvoiceStore {
     }
 
     setInvoiceDate = (date: any) => {
-        console.log(date);
         this.invoice.invoiceDateTime = date;
     }
 
@@ -55,7 +51,6 @@ export default class InvoiceStore {
         this.setLoading(true);
         try {
             const newInvoice = await Api.Invoices.create(invoice);
-            console.log('newInvoice', newInvoice);
             runInAction(() => {
                 this.invoice = newInvoice;
             });

@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { RouteComponentProps, useHistory, useLocation, useParams } from 'react-router-dom';
 import { Button, Container, Form, Grid } from 'semantic-ui-react';
 import { HeaderLine } from '../components/header-line';
 import Loading from '../components/loading';
@@ -11,12 +11,13 @@ import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-e
 import { useStore } from '../stores';
 import { PaymentMethod } from '../stores/PaymentMethod';
 
-const InvoiceEditComp: React.FC = (props) => {
+const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     const { invoiceStore } = useStore();
     const history = useHistory();
     const location = useLocation();
     const param = useParams();
-    const invoiceId = param.id ? param.id : 0;
+    
+    const invoiceId = Number(props.match.params.id)?? 0;
 
     const serviceTableColumns: TableEditorDataColumn[] = [
         {
