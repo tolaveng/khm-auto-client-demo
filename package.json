@@ -50,10 +50,12 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "final-form": "^4.20.1",
     "mobx": "^6.1.7",
     "mobx-react": "^7.1.0",
     "moment": "^2.29.1",
     "react-datepicker": "^3.4.1",
+    "react-final-form": "^6.5.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "semantic-ui-css": "^2.4.1",

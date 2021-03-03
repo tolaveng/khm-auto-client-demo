@@ -3,27 +3,30 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { RouteComponentProps, useHistory, useLocation, useParams } from 'react-router-dom';
-import { Button, Container, Form, Grid } from 'semantic-ui-react';
-import { HeaderLine } from '../components/header-line';
+import { Button, Container, Form, Grid, Radio } from 'semantic-ui-react';
+import { HeaderLine } from '../components/HeaderLine';
 import Loading from '../components/loading';
 import { TableEditor } from '../components/table-editor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
 import { useStore } from '../stores';
 import { PaymentMethod } from '../stores/PaymentMethod';
+import { Field, Form as FinalForm, FormRenderProps } from 'react-final-form';
+import TextInput from '../components/form/TextInput';
+import RadioInput from '../components/form/RadioInput';
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     const { invoiceStore } = useStore();
     const history = useHistory();
     const location = useLocation();
     const param = useParams();
-    
-    const invoiceId = Number(props.match.params.id)?? 0;
+
+    const invoiceId = Number(props.match.params.id) ?? 0;
 
     const serviceTableColumns: TableEditorDataColumn[] = [
         {
             name: 'Service Description',
             type: 'textarea',
-            required: true
+            required: true,
         },
         {
             name: 'Price',
@@ -70,160 +73,226 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
         })();
     }, [invoiceStore]);
 
-    function renderForm() {
-        const {invoice, setPaymentMethod, setInvoiceDate, grandTotal, gstTotal, subTotal, getServiceData} = invoiceStore;
+    function renderInputForm({ handleSubmit }: FormRenderProps) {
+        const {
+            invoice,
+            setPaymentMethod,
+            setInvoiceDate,
+            grandTotal,
+            gstTotal,
+            subTotal,
+            getServiceData,
+        } = invoiceStore;
         const invoiceDate = moment(invoice.invoiceDateTime).format('DD/MM/YYYY');
         const isPaidByCash = invoice.paymentMethod === PaymentMethod.Cash;
         const isPaidByCard = invoice.paymentMethod === PaymentMethod.Card;
         const isUnPaid = !isPaidByCard && !isPaidByCash;
-        
+        return (
+            <Form onSubmit={handleSubmit} autoComplete='none'>
+                <Form.Group widths='equal'>
+                    <Form.Field>
+                        <label>Invoice Date</label>
+                        <DatePicker
+                            value={invoiceDate}
+                            onChange={(date) => {
+                                setInvoiceDate(date);
+                            }}
+                        />
+                    </Form.Field>
+                    <Form.Field />
+                    <Form.Field />
+                </Form.Group>
+                <fieldset>
+                    <legend>Customer</legend>
+                    <Form.Group widths='equal'>
+                        <Field
+                            label='Full Name'
+                            name='txtFullName'
+                            component={TextInput}
+                            value={invoice.customer?.fullName}
+                            icon='search'
+                            fluid
+                            autoComplete='off'
+                            onIconClick={() => {
+                                console.log('customer search');
+                            }}
+                        />
+
+                        <Field
+                            label='Phone number'
+                            name='txtPhoneNumber'
+                            component={TextInput}
+                            value={invoice.customer?.phone}
+                            fluid
+                            autoComplete='off'
+                            error={'test error'}
+                        />
+                        <Field
+                            label='Email'
+                            name='txtEmail'
+                            component={TextInput}
+                            value={invoice.customer?.email}
+                            fluid
+                            autoComplete='off'
+                        />
+                    </Form.Group>
+                    <Form.Group widths='equal'>
+                        <Field
+                            label='Company'
+                            name='txtCompany'
+                            component={TextInput}
+                            value={invoice.customer?.company}
+                            fluid
+                        />
+                        <Field label='ABN' name='txtABN' component={TextInput} value={invoice.customer?.abn} fluid />
+                    </Form.Group>
+                    <Field
+                        label='Address'
+                        name='txtAddress'
+                        component={TextInput}
+                        value={invoice.customer?.address}
+                        fluid
+                    />
+                </fieldset>
+                <fieldset>
+                    <legend>Car</legend>
+                    <Form.Group widths='equal'>
+                        <Field
+                            label='Reg. No'
+                            name='txtPlateNo'
+                            component={TextInput}
+                            value={invoice.car?.plateNo}
+                            icon='search'
+                            fluid
+                        />
+                        <Field
+                            label='ODO'
+                            name='txtODO'
+                            type='number'
+                            component={TextInput}
+                            value={invoice.odo}
+                            fluid
+                        />
+                    </Form.Group>
+                    <Form.Group widths='equal'>
+                        <Field label='Make' name='txtMake' component={TextInput} value={invoice.car?.carMake} fluid />
+                        <Field
+                            label='Model'
+                            name='txtModel'
+                            component={TextInput}
+                            value={invoice.car?.carModel}
+                            fluid
+                        />
+                        <Field
+                            label='Year'
+                            name='txtYear'
+                            component={TextInput}
+                            type='number'
+                            value={invoice.car?.carYear}
+                            fluid
+                        />
+                    </Form.Group>
+                </fieldset>
+                <fieldset style={{ minHeight: 200 }}>
+                    <legend>Services</legend>
+                    <TableEditor
+                        columns={serviceTableColumns}
+                        rows={getServiceData}
+                        onRowAdded={addService}
+                        onRowUpdated={updateService}
+                        onRowDeleted={deleteService}
+                    />
+                </fieldset>
+
+                <Grid columns='2'>
+                    <Grid.Column>
+                        <Form.TextArea label='Note' rows='3' />
+                        <fieldset>
+                            <legend>Payment</legend>
+                            <Form.Group inline>
+                                <Field
+                                    label='Cash'
+                                    name='paymentMethod'
+                                    component={RadioInput}
+                                    value='cash'
+                                    htmlFor='cash'
+                                    checked={isPaidByCash}
+                                />
+                                <span>&nbsp; &nbsp; &nbsp;</span>
+                                <Field
+                                    label='Card'
+                                    name='paymentMethod'
+                                    component={RadioInput}
+                                    value='card'
+                                    htmlFor='card'
+                                    checked={isPaidByCard}
+                                />
+                                <span>&nbsp; &nbsp; &nbsp;</span>
+                                <Field
+                                    label='UnPaid'
+                                    name='paymentMethod'
+                                    component={RadioInput}
+                                    value='unpaid'
+                                    htmlFor='unpaid'
+                                    checked={isUnPaid}
+                                />
+                            </Form.Group>
+                        </fieldset>
+                    </Grid.Column>
+                    <Grid.Column textAlign='right'>
+                        <Form.Field inline>
+                            <label>Total (ex. GST)</label>
+                            <input
+                                type='number'
+                                readOnly
+                                placeholder='0'
+                                style={{ textAlign: 'right' }}
+                                value={subTotal.toFixed(2)}
+                            />
+                        </Form.Field>
+                        <Form.Field inline>
+                            <label>GST</label>
+                            <input
+                                type='number'
+                                readOnly
+                                placeholder='0'
+                                style={{ textAlign: 'right' }}
+                                value={gstTotal.toFixed(2)}
+                            />
+                        </Form.Field>
+                        <Form.Field inline>
+                            <label style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in. GST)</label>
+                            <input
+                                type='number'
+                                readOnly
+                                placeholder='0'
+                                style={{ textAlign: 'right', fontWeight: 'bold' }}
+                                value={grandTotal.toFixed(2)}
+                            />
+                        </Form.Field>
+                    </Grid.Column>
+                </Grid>
+                <div style={{ textAlign: 'right' }}>
+                    <Button primary className='action-button'>
+                        Print
+                    </Button>
+                    <Button basic color='blue' className='action-button'>
+                        Save
+                    </Button>
+                    <Button basic color='blue' className='action-button'>
+                        Close
+                    </Button>
+                </div>
+            </Form>
+        );
+    }
+
+    function renderForm() {
         return (
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <Form autoComplete='none'>
-                        <Form.Group widths='equal'>
-                            <Form.Field>
-                                <label>Invoice Date</label>
-                                <DatePicker
-                                    value={invoiceDate}
-                                    onChange={(date) => {
-                                        setInvoiceDate(date);
-                                    }}
-                                />
-                            </Form.Field>
-                            <Form.Field />
-                            <Form.Field />
-                        </Form.Group>
-                        <fieldset>
-                            <legend>Customer</legend>
-                            <Form.Group widths='equal'>
-                                <Form.Input
-                                    fluid
-                                    label='Full name'
-                                    icon={{ name: 'search', circular: true, link: true }}
-                                    autoComplete='off'
-                                    value={invoice.customer?.fullName}
-                                />
-                                <Form.Input
-                                    fluid
-                                    label='Phone number'
-                                    autoComplete='off'
-                                    value={invoice.customer?.phone}
-                                />
-                                <Form.Input fluid label='Email' autoComplete='off' value={invoice.customer?.email} />
-                            </Form.Group>
-                            <Form.Group widths='equal'>
-                                <Form.Input fluid label='Company' value={invoice.customer?.company} />
-                                <Form.Input fluid label='ABN' value={invoice.customer?.abn} />
-                            </Form.Group>
-                            <Form.Input fluid label='Address' value={invoice.customer?.address} />
-                        </fieldset>
-                        <fieldset>
-                            <legend>Car</legend>
-                            <Form.Group widths='equal'>
-                                <Form.Input
-                                    fluid
-                                    label='Reg. No'
-                                    icon={{ name: 'search', circular: true, link: true }}
-                                    value={invoice.car?.plateNo}
-                                />
-                                <Form.Input fluid label='ODO' type='number' value={invoice.odo} />
-                            </Form.Group>
-                            <Form.Group widths='equal'>
-                                <Form.Input fluid label='Make' value={invoice.car?.carMake} />
-                                <Form.Input fluid label='Model' value={invoice.car?.carModel} />
-                                <Form.Input fluid label='Year' type='number' value={invoice.car?.carYear} />
-                            </Form.Group>
-                        </fieldset>
-                        <fieldset style={{ minHeight: 200 }}>
-                            <legend>Services</legend>
-                            <TableEditor
-                                columns={serviceTableColumns}
-                                rows={getServiceData}
-                                onRowAdded={addService}
-                                onRowUpdated={updateService}
-                                onRowDeleted={deleteService}
-                            />
-                        </fieldset>
-
-                        <Grid columns='2'>
-                            <Grid.Column>
-                                <Form.TextArea label='Note' rows='3' />
-                                <fieldset>
-                                    <legend>Payment</legend>
-                                    <Form.Group inline>
-                                        <Form.Field>
-                                            <input
-                                                type='radio'
-                                                id='paymentMethodCash'
-                                                name='paymentmethod'
-                                                value='cash'
-                                                checked={isPaidByCash}
-                                                onChange={() => setPaymentMethod(PaymentMethod.Cash)}
-                                            />
-                                            <label htmlFor='paymentMethodCash'>Cash</label>
-                                        </Form.Field>
-                                        <span>&nbsp; &nbsp; &nbsp;</span>
-                                        <Form.Field>
-                                            <input
-                                                type='radio'
-                                                id='paymentMethodCard'
-                                                name='paymentmethod'
-                                                value='card'
-                                                checked={isPaidByCard}
-                                                onChange={() => setPaymentMethod(PaymentMethod.Card)}
-                                            />
-                                            <label htmlFor='paymentMethodCard'>Card</label>
-                                        </Form.Field>
-                                        <span>&nbsp; &nbsp; &nbsp;</span>
-                                        <Form.Field>
-                                            <input
-                                                type='radio'
-                                                id='paymentMethodUnpaid'
-                                                name='paymentmethod'
-                                                value='notpay'
-                                                checked={isUnPaid}
-                                                onChange={() => setPaymentMethod(PaymentMethod.Unpaid)}
-                                            />
-                                            <label htmlFor='paymentMethodUnpaid'>UnPaid</label>
-                                        </Form.Field>
-                                    </Form.Group>
-                                </fieldset>
-                            </Grid.Column>
-                            <Grid.Column textAlign='right'>
-                                <Form.Field inline>
-                                    <label>Total (ex. GST)</label>
-                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} value={subTotal.toFixed(2)} />
-                                </Form.Field>
-                                <Form.Field inline>
-                                    <label>GST</label>
-                                    <input type='number' readOnly placeholder='0' style={{ textAlign: 'right' }} value={gstTotal.toFixed(2)}/>
-                                </Form.Field>
-                                <Form.Field inline>
-                                    <label style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in. GST)</label>
-                                    <input
-                                        type='number'
-                                        readOnly
-                                        placeholder='0'
-                                        style={{ textAlign: 'right', fontWeight: 'bold' }}
-                                        value={grandTotal.toFixed(2)}
-                                    />
-                                </Form.Field>
-                            </Grid.Column>
-                        </Grid>
-                        <div style={{ textAlign: 'right' }}>
-                            <Button primary className='action-button'>
-                                Print
-                            </Button>
-                            <Button basic color='blue' className='action-button'>
-                                Save
-                            </Button>
-                            <Button basic color='blue' className='action-button'>
-                                Close
-                            </Button>
-                        </div>
-                    </Form>
+                    <FinalForm onSubmit={() => {}} render={renderInputForm} />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>

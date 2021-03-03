@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Container, Grid, Table } from 'semantic-ui-react';
-import { HeaderLine } from './components/header-line';
+import { HeaderLine } from './components/HeaderLine';
 
 const tempPage : React.FC = () => {
     return (
