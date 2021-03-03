@@ -13,7 +13,7 @@ const RadioInput: React.FC<RadioInputProps> = (props) => {
 
     return (
         <Form.Field error={isError} inline>
-            <Input type='radio' {...input} id={htmlFor} />
+            <input type='radio' {...input} id={htmlFor} style={{margin: 8}} />
             <label htmlFor={htmlFor}>{label}</label>
             {isError && <label style={{ color: 'red', fontSize: 'small' }}>{meta.error}</label>}
         </Form.Field>
