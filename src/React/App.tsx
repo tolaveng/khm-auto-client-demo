@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import { InvoicePage } from './invoices';
+import { InvoicePage } from './invoices/invoice-page';
 import { InvoiceEditPage } from './invoices/invoice-edit';
 
 

@@ -4,12 +4,12 @@ import ReactDatePicker from 'react-datepicker';
 import { connect } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
-import { loadInvoices } from '../actions/invoiceAction';
+import { Button, Container, Form, Grid, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
 import Loading from '../components/loading';
 import { State } from '../types';
 import { Invoice } from '../types/invoice';
+import { loadInvoices } from './actions';
 
 
 interface InvoicePageDispatchProps {
@@ -20,13 +20,14 @@ interface InvoicePageDispatchProps {
 
 
 interface InvoicePageStateProps {
+    isLoading: boolean;
     invoices: PageResponse<Invoice>
 }
 
 type Props = InvoicePageStateProps & InvoicePageDispatchProps;
 
 const InvoicePageComp: React.FC<Props> = (props) => {
-    const invoices = props.invoices.data;
+    const {isLoading, invoices} = props;
     const history = useHistory();
 
     const pageRequest: PageRequest = {
@@ -36,13 +37,13 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 
     useEffect(() => {
         props.actions.loadInvoices(pageRequest);
-    }, [invoices]);
+    }, []);
 
 
     const renderInvoices = () => {
-        if (!invoices || invoices.length === 0) return null;
+        if (!invoices || invoices.data.length === 0) return null;
 
-        var invoiceList = invoices.map((inv) => {
+        var invoiceList = invoices.data.map((inv) => {
             return (
                 <Table.Row key={inv.invoiceId}>
                     <Table.Cell>{inv.invoiceNo}</Table.Cell>
@@ -100,7 +101,7 @@ const InvoicePageComp: React.FC<Props> = (props) => {
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                    {false && <Loading />}
+                    {isLoading && <Loading />}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
@@ -124,11 +125,12 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 const mapStateToProps = (state: State): InvoicePageStateProps => {
     console.log('state', state);
     return {
+        isLoading: !!state.invoiceState.isLoading,
         invoices: state.invoiceState.invoices
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => ({
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoicePageDispatchProps => ({
     actions: {
         loadInvoices: bindActionCreators(loadInvoices, dispatch)
     }
