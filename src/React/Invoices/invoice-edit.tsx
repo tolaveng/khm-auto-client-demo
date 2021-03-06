@@ -6,7 +6,7 @@ import { HeaderLine } from '../components/HeaderLine';
 import Loading from '../components/loading';
 import { TableEditor } from '../components/table-editor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
-import { useStore } from '../stores';
+
 import { PaymentMethod } from '../stores/PaymentMethod';
 
 import TextInput from '../components/form/TextInput';
@@ -16,7 +16,7 @@ import DatePickerInput from '../components/form/DatePickerInput';
 
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
-    const { invoiceStore } = useStore();
+
     const history = useHistory();
     const location = useLocation();
     const param = useParams();
@@ -327,4 +327,4 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     );
 };
 
-export const InvoiceEditPage = observer(InvoiceEditComp);
+export const InvoiceEditPage = InvoiceEditComp;

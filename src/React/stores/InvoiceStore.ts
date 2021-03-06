@@ -1,7 +1,7 @@
 
-import { Invoice } from './types/invoice';
+import { Invoice } from '../types/invoice';
 import Api from '../api/api';
-import { Service } from './types/service';
+import { Service } from '../types/service';
 import { TableEditorDataRow } from '../components/table-editor/type';
 
 export default class InvoiceStore {

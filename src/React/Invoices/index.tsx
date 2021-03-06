@@ -1,16 +1,32 @@
-import { observer } from 'mobx-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
+import { connect } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
+import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Button, Container, Form, Grid, Icon, Table } from 'semantic-ui-react';
+import { loadInvoices } from '../actions/invoiceAction';
 import { HeaderLine } from '../components/HeaderLine';
 import Loading from '../components/loading';
-import { useStore } from '../stores';
+import { State } from '../types';
+import { Invoice } from '../types/invoice';
 
 
-const InvoiceComp: React.FC = (props) => {
-    const {invoiceStore} = useStore();
+interface InvoicePageDispatchProps {
+    actions: {
+      loadInvoices: (pageRequest: PageRequest) => void
+    };
+  }
+
+
+interface InvoicePageStateProps {
+    invoices: PageResponse<Invoice>
+}
+
+type Props = InvoicePageStateProps & InvoicePageDispatchProps;
+
+const InvoicePageComp: React.FC<Props> = (props) => {
+    const invoices = props.invoices.data;
     const history = useHistory();
 
     const pageRequest: PageRequest = {
@@ -19,14 +35,14 @@ const InvoiceComp: React.FC = (props) => {
     };
 
     useEffect(() => {
-        invoiceStore.fetchInvoices(pageRequest);
-    }, [invoiceStore]);
+        props.actions.loadInvoices(pageRequest);
+    }, [invoices]);
 
 
     const renderInvoices = () => {
-        if (!invoiceStore.invoices || invoiceStore.invoices.length === 0) return null;
+        if (!invoices || invoices.length === 0) return null;
 
-        var invoiceList = invoiceStore.invoices.map((inv) => {
+        var invoiceList = invoices.map((inv) => {
             return (
                 <Table.Row key={inv.invoiceId}>
                     <Table.Cell>{inv.invoiceNo}</Table.Cell>
@@ -84,7 +100,7 @@ const InvoiceComp: React.FC = (props) => {
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                    {invoiceStore.isLoading && <Loading />}
+                    {false && <Loading />}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
@@ -96,7 +112,7 @@ const InvoiceComp: React.FC = (props) => {
                                 <Table.HeaderCell collapsing></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <Table.Body>{invoiceStore.invoices != null && renderInvoices()}</Table.Body>
+                        <Table.Body>{invoices != null && renderInvoices()}</Table.Body>
                     </Table>
                 </Grid.Column>
                 <Grid.Column width={4}>{renderFilterForm()}</Grid.Column>
@@ -105,4 +121,17 @@ const InvoiceComp: React.FC = (props) => {
     );
 };
 
-export const InvoicePage = observer(InvoiceComp);
+const mapStateToProps = (state: State): InvoicePageStateProps => {
+    console.log('state', state);
+    return {
+        invoices: state.invoiceState.invoices
+    };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => ({
+    actions: {
+        loadInvoices: bindActionCreators(loadInvoices, dispatch)
+    }
+});
+
+export const InvoicePage = connect(mapStateToProps, mapDispatchToProps )(InvoicePageComp);

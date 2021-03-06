@@ -1,7 +1,7 @@
 interface PageResponse<T = any>
 {
     data: T[],
-    hasNext: boolean,
+    hasNext?: boolean,
     pageNumber: number,
     pageSize: number,
     totalCount: number
