@@ -46,6 +46,10 @@ input[type='number'] {
     padding-right: 4px !important;
 } */
 
+.ui.form .fields {
+    margin: 2px !important;
+}
+
 
 /* table editor */
 .table-editor tr td {

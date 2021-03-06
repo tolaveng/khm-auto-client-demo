@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+
 
 
 export default class CustomerStore {
@@ -11,7 +11,7 @@ export default class CustomerStore {
     abn: string;
 
     constructor(){
-        makeAutoObservable(this);
+       
 
         this.customerId = 0;
         this.fullName = '';

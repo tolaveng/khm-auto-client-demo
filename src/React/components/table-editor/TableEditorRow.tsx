@@ -153,7 +153,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return isValid;
     }
 
-    addNewRow() {
+    addNewRow(evt: React.MouseEvent | any) {
+        if(evt) evt.preventDefault();
         const { onRowAdded } = this.props;
         const { rowId, rowState, cells } = this.state;
         if (!this.validateRequiredCells()) {
@@ -166,21 +167,24 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.initState();
     }
 
-    editRow() {
+    editRow(e: React.MouseEvent) {
+        e.preventDefault();
         this.setState({
             ...this.state,
             rowState: RowState.Edit,
         });
     }
 
-    deleteRow() {
+    deleteRow(e: React.MouseEvent) {
+        e.preventDefault();
         const { onRowDeleted } = this.props;
         if (onRowDeleted) {
             onRowDeleted(this.state.rowId);
         }
     }
 
-    saveRow() {
+    saveRow(evt: React.MouseEvent | any) {
+        if(evt) evt.preventDefault();
         const { onRowUpdated } = this.props;
         const { rowId, cells } = this.state;
         if (!this.validateRequiredCells()) {
@@ -198,7 +202,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         }
     }
 
-    resetRow() {
+    resetRow(e: React.MouseEvent) {
+        e.preventDefault();
         this.initState();
     }
 
@@ -227,8 +232,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 {cells.map((cell, index) => this.renderDataCell(rowId, cell, index))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button basic icon='pencil' onClick={this.editRow} title={'Edit'}></Button>
-                        <Button basic icon='trash' onClick={this.deleteRow} title={'Delete'}></Button>
+                        <Button type='button' basic icon='pencil' onClick={this.editRow} title={'Edit'}></Button>
+                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title={'Delete'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -261,8 +266,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 ))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button basic icon='add' onClick={this.addNewRow} title={'Add'}></Button>
-                        <Button basic icon='cancel' onClick={this.resetRow} title={'Clear'}></Button>
+                        <Button type='button' basic icon='add' onClick={this.addNewRow} title={'Add'}></Button>
+                        <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Clear'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -280,8 +285,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 ))}
                 <Table.Cell key={rowId + columns.length}>
                     <ButtonGroup>
-                        <Button basic icon='save' onClick={this.saveRow} title={'Save'}></Button>
-                        <Button basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
+                        <Button type='button' basic icon='save' onClick={this.saveRow} title={'Save'}></Button>
+                        <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -306,7 +311,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                         onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
                             this.cellInputKeyPress(e, cellIndex)
                         }
-                        rows={3}
+                        rows={2}
                         autoComplete='off'
                         className={`table-editor-input ${cell.isInValid ? 'table-editor-input-error' : ''}`}
                     />

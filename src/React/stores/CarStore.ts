@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx';
 
 export default class CarStore {
     carId: number;
@@ -16,7 +15,7 @@ export default class CarStore {
         this.carYear = 0;
         this.odo = 0;
         
-        makeAutoObservable(this);
+
 
     }
 }

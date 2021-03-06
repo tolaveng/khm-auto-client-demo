@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+
 import { Invoice } from './types/invoice';
 import Api from '../api/api';
 import { Service } from './types/service';
@@ -11,7 +11,7 @@ export default class InvoiceStore {
     invoice: Invoice;
     
     constructor() {
-        makeAutoObservable(this);
+        
         
         this.invoice = {
             invoiceId:0,
@@ -51,9 +51,9 @@ export default class InvoiceStore {
         this.setLoading(true);
         try {
             const newInvoice = await Api.Invoices.create(invoice);
-            runInAction(() => {
+            
                 this.invoice = newInvoice;
-            });
+            
         } catch (ex) {
             console.log('invoice store error', ex);
         }
@@ -67,9 +67,7 @@ export default class InvoiceStore {
         try {
             const updateInvoice = await Api.Invoices.update(invoice);
             console.log('newInvoice', updateInvoice);
-            runInAction(() => {
-                this.invoice = updateInvoice;
-            });
+            this.invoice = updateInvoice;
         } catch (ex) {
             console.log('invoice store error', ex);
         }
@@ -92,9 +90,9 @@ export default class InvoiceStore {
         this.setLoading(true);
         try {
             const response = await Api.Invoices.getAllPaged(pageRequest);
-            runInAction(() => {
+            
                 this.invoices = response.data;
-            });
+            
         } catch (ex) {
             console.log('invoice store error', ex);
         }

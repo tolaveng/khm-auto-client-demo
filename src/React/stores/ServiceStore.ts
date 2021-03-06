@@ -1,4 +1,3 @@
-import {makeAutoObservable} from 'mobx'
 
 
 export default class ServiceStore {
@@ -9,7 +8,6 @@ export default class ServiceStore {
     invoiceId: number;
 
     constructor() {
-        makeAutoObservable(this);
 
         this.serviceId = 0;
         this.invoiceId = 0;

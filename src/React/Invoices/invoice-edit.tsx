@@ -1,7 +1,5 @@
-import { observer } from 'mobx-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
 import { RouteComponentProps, useHistory, useLocation, useParams } from 'react-router-dom';
 import { Button, Container, Form, Grid, Radio } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
@@ -10,9 +8,12 @@ import { TableEditor } from '../components/table-editor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
 import { useStore } from '../stores';
 import { PaymentMethod } from '../stores/PaymentMethod';
-import { Field, Form as FinalForm, FormRenderProps } from 'react-final-form';
+
 import TextInput from '../components/form/TextInput';
 import RadioInput from '../components/form/RadioInput';
+import TextAreaInput from '../components/form/TextAreaInput';
+import DatePickerInput from '../components/form/DatePickerInput';
+
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     const { invoiceStore } = useStore();
@@ -21,6 +22,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     const param = useParams();
 
     const invoiceId = Number(props.match.params.id) ?? 0;
+
+    const [serviceStore, setServiceStore] = useState<TableEditorDataRow[]>([]);
 
     const serviceTableColumns: TableEditorDataColumn[] = [
         {
@@ -54,7 +57,9 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
     ];
 
     function addService(row: TableEditorDataRow) {
-        invoiceStore.addService(row.id!, row.cells!);
+        console.log('add service');
+        //invoiceStore.addService(row.id!, row.cells!);
+        setServiceStore([...serviceStore, row]);
     }
 
     function updateService(row: TableEditorDataRow) {
@@ -65,6 +70,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
         invoiceStore.deleteService(rowId);
     }
 
+    function saveInvoice(value: any) {
+        console.log(value);
+    }
+
     useEffect(() => {
         (async () => {
             if (invoiceId && invoiceId !== 0) {
@@ -73,7 +82,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
         })();
     }, [invoiceStore]);
 
-    function renderInputForm({ handleSubmit }: FormRenderProps) {
+    function renderInputForm({ handleSubmit, values, form, pristine, submitting }: FormRenderProps) {
+        console.log(values.getServiceData);
         const {
             invoice,
             setPaymentMethod,
@@ -87,21 +97,27 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
         const isPaidByCash = invoice.paymentMethod === PaymentMethod.Cash;
         const isPaidByCard = invoice.paymentMethod === PaymentMethod.Card;
         const isUnPaid = !isPaidByCard && !isPaidByCash;
+        const test = serviceStore.map(sv => {
+            return sv.cells![1] * sv.cells![2];
+        })
+        const total = test.reduce(((a, v) => a + v), 0);
+        console.log('test', total);
+        console.log('total', total);
         return (
             <Form onSubmit={handleSubmit} autoComplete='none'>
-                <Form.Group widths='equal'>
-                    <Form.Field>
-                        <label>Invoice Date</label>
-                        <DatePicker
+                <fieldset>
+                    <Form.Group widths='equal'>
+                        <Field
+                            label='Invoice Date'
+                            name='txtInvoiceDate'
+                            component={DatePickerInput}
                             value={invoiceDate}
-                            onChange={(date) => {
-                                setInvoiceDate(date);
-                            }}
                         />
-                    </Form.Field>
-                    <Form.Field />
-                    <Form.Field />
-                </Form.Group>
+                        <Form.Field />
+                        <Form.Field />
+                    </Form.Group>
+                </fieldset>
+
                 <fieldset>
                     <legend>Customer</legend>
                     <Form.Group widths='equal'>
@@ -197,7 +213,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
                     <legend>Services</legend>
                     <TableEditor
                         columns={serviceTableColumns}
-                        rows={getServiceData}
+                        rows={serviceStore}
                         onRowAdded={addService}
                         onRowUpdated={updateService}
                         onRowDeleted={deleteService}
@@ -206,13 +222,14 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
 
                 <Grid columns='2'>
                     <Grid.Column>
-                        <Form.TextArea label='Note' rows='3' />
+                        <Field label='Note' name='txtNote' component={TextAreaInput} rows='3' />
                         <fieldset>
                             <legend>Payment</legend>
                             <Form.Group inline>
                                 <Field
                                     label='Cash'
                                     name='paymentMethod'
+                                    type='radio'
                                     component={RadioInput}
                                     value='cash'
                                     htmlFor='cash'
@@ -222,6 +239,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
                                 <Field
                                     label='Card'
                                     name='paymentMethod'
+                                    type='radio'
                                     component={RadioInput}
                                     value='card'
                                     htmlFor='card'
@@ -231,6 +249,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
                                 <Field
                                     label='UnPaid'
                                     name='paymentMethod'
+                                    type='radio'
                                     component={RadioInput}
                                     value='unpaid'
                                     htmlFor='unpaid'
@@ -240,43 +259,43 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
                         </fieldset>
                     </Grid.Column>
                     <Grid.Column textAlign='right'>
-                        <Form.Field inline>
-                            <label>Total (ex. GST)</label>
-                            <input
-                                type='number'
-                                readOnly
-                                placeholder='0'
-                                style={{ textAlign: 'right' }}
-                                value={subTotal.toFixed(2)}
-                            />
-                        </Form.Field>
-                        <Form.Field inline>
-                            <label>GST</label>
-                            <input
-                                type='number'
-                                readOnly
-                                placeholder='0'
-                                style={{ textAlign: 'right' }}
-                                value={gstTotal.toFixed(2)}
-                            />
-                        </Form.Field>
-                        <Form.Field inline>
-                            <label style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in. GST)</label>
-                            <input
-                                type='number'
-                                readOnly
-                                placeholder='0'
-                                style={{ textAlign: 'right', fontWeight: 'bold' }}
-                                value={grandTotal.toFixed(2)}
-                            />
-                        </Form.Field>
+                        <Field
+                            label='Total (ex.GST)'
+                            name='txtSubTotal'
+                            type='number'
+                            component={TextInput}
+                            value={subTotal.toFixed(2)}
+                            inline
+                            style={{ textAlign: 'right' }}
+                            readOnly
+                        />
+                        <Field
+                            label='GST'
+                            name='txtGST'
+                            type='number'
+                            component={TextInput}
+                            value={total.toFixed(2)}
+                            inline
+                            style={{ textAlign: 'right' }}
+                            readOnly
+                        />
+                        <Field
+                            label='Total (in.GST)'
+                            name='txtGrandTotal'
+                            type='number'
+                            component={TextInput}
+                            value={grandTotal.toFixed(2)}
+                            inline
+                            style={{ textAlign: 'right', fontWeight: 'bold' }}
+                            readOnly
+                        />
                     </Grid.Column>
                 </Grid>
                 <div style={{ textAlign: 'right' }}>
                     <Button primary className='action-button'>
                         Print
                     </Button>
-                    <Button basic color='blue' className='action-button'>
+                    <Button basic color='blue' className='action-button' type='submit'>
                         Save
                     </Button>
                     <Button basic color='blue' className='action-button'>
@@ -292,7 +311,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId>> = (props) => {
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <FinalForm onSubmit={() => {}} render={renderInputForm} />
+                    <FinalForm onSubmit={saveInvoice} render={renderInputForm} initialValues={invoiceStore}/>
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
