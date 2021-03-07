@@ -56,7 +56,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.renderDataCell = this.renderDataCell.bind(this);
     }
 
-    static getDataCellsFromProps(props: TableEditorRowProp) {
+    static deriveDataCellsFromProps(props: TableEditorRowProp): TableEditorCell[] {
         const { columns, row } = props;
         const cells: TableEditorCell[] = new Array(columns.length);
         columns.forEach((c, i) => {
@@ -64,17 +64,16 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 cells[i] = {
                     data: row.cells[i],
                     type: c.type ?? 'text',
-                    maxLength: c.maxLength,
-                    isRequired: c.required,
+                    
                 };
             } else {
                 cells[i] = {
                     data: c.default ?? '',
                     type: c.type ?? 'text',
-                    maxLength: c.maxLength,
-                    isRequired: c.required,
                 };
             }
+            cells[i].maxLength = c.maxLength;
+            cells[i].isRequired = c.required;
         });
         return cells;
     }
@@ -82,7 +81,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
     initState() {
         const { isNew, row, columns } = this.props;
         const id = row.id ? row.id : -1 * Date.now();
-        const cells = TableEditorRow.getDataCellsFromProps(this.props);
+        const cells = TableEditorRow.deriveDataCellsFromProps(this.props);
 
         this.setState({
             rowId: id,
@@ -153,7 +152,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return isValid;
     }
 
-    addNewRow(evt: React.MouseEvent | any) {
+    addNewRow(evt?: React.MouseEvent) {
         if(evt) evt.preventDefault();
         const { onRowAdded } = this.props;
         const { rowId, rowState, cells } = this.state;
@@ -167,23 +166,23 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.initState();
     }
 
-    editRow(e: React.MouseEvent) {
-        e.preventDefault();
+    editRow(evt?: React.MouseEvent) {
+        if(evt) evt.preventDefault();
         this.setState({
             ...this.state,
             rowState: RowState.Edit,
         });
     }
 
-    deleteRow(e: React.MouseEvent) {
-        e.preventDefault();
+    deleteRow(evt?: React.MouseEvent) {
+        if(evt) evt.preventDefault();
         const { onRowDeleted } = this.props;
         if (onRowDeleted) {
             onRowDeleted(this.state.rowId);
         }
     }
 
-    saveRow(evt: React.MouseEvent | any) {
+    saveRow(evt?: React.MouseEvent) {
         if(evt) evt.preventDefault();
         const { onRowUpdated } = this.props;
         const { rowId, cells } = this.state;
@@ -208,10 +207,11 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
     }
 
     static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
-        //this.initState();
-        if (state.rowState == RowState.View) {
-            const cells = TableEditorRow.getDataCellsFromProps(props);
+        if (!!props.row.id && props.row.id !== state.rowId) {
+            const cells = TableEditorRow.deriveDataCellsFromProps(props);
             return {
+                rowId: props.row.id,
+                rowState: state.rowState,
                 cells,
             };
         }
