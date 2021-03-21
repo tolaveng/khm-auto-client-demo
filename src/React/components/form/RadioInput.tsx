@@ -1,21 +1,21 @@
 import React from 'react';
-import { FieldRenderProps } from 'react-final-form';
 import { Form, FormFieldProps } from 'semantic-ui-react';
 
-interface RadioInputProps extends FieldRenderProps<any, HTMLElement>, FormFieldProps {
+interface RadioInputProps extends FormFieldProps {
     label: string;
     htmlFor: string;
+    defaultChecked?: boolean
 }
 
 const RadioInput: React.FC<RadioInputProps> = (props) => {
-    const { input, meta, label, htmlFor } = props;
+    const { input, meta, label, htmlFor, ...rest } = props;
     const isError = meta.touched && !!meta.error;
 
     return (
         <Form.Field error={isError} inline>
-            <input type='radio' {...input} id={htmlFor} style={{margin: 8}} />
+            <input type='radio' id={htmlFor} style={{margin: 8}} {...input} {...rest}/>
             <label htmlFor={htmlFor}>{label}</label>
-            {isError && <label style={{ color: 'red', fontSize: 'small' }}>{meta.error}</label>}
+            {isError ? <label style={{ color: 'red', fontSize: 'x-small', display: 'block' }}>{meta.error}</label> : <label style={{fontSize: 'x-small', display: 'block'}}>&nbsp;</label>}
         </Form.Field>
     );
 };

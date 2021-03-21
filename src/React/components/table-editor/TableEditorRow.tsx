@@ -207,7 +207,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
     }
 
     static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
-        if (!!props.row.id && props.row.id !== state.rowId) {
+        if (!!props.row.id && ((props.row.id !== state.rowId ) || state.rowState === RowState.View )) {
             const cells = TableEditorRow.deriveDataCellsFromProps(props);
             return {
                 rowId: props.row.id,
@@ -218,7 +218,9 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return null;
     }
 
-    componentDidUpdate() {}
+    componentDidUpdate() {
+        //console.log(`row ${this.state.rowId} is updated`);
+    }
 
     componentDidMount() {
         this.initState();
@@ -258,7 +260,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const rowId = -1;
 
         return (
-            <Table.Row key={`new_row_${rowId}`}>
+            <Table.Row key={`new_row_${rowId}`} style={{backgroundColor: 'rgba(0,0,0, 0.05)'}}>
                 {cells.map((cell, index) => (
                     <Table.Cell key={`new_cell_${rowId}_${index}`}>
                         {this.renderInputType(rowId, cell, index)}
@@ -266,7 +268,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 ))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button type='button' basic icon='add' onClick={this.addNewRow} title={'Add'}></Button>
+                        <Button type='button' basic icon='save' onClick={this.addNewRow} title={'Save'}></Button>
                         <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Clear'}></Button>
                     </ButtonGroup>
                 </Table.Cell>
@@ -279,7 +281,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const { rowId, cells } = this.state;
 
         return (
-            <Table.Row key={`edit_row_${rowId}`}>
+            <Table.Row key={`edit_row_${rowId}`} style={{backgroundColor: 'rgba(0,0,0, 0.05)'}}>
                 {cells.map((cell, index) => (
                     <Table.Cell key={`edit_${rowId}_${index}`}>{this.renderInputType(rowId, cell, index)}</Table.Cell>
                 ))}

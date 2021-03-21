@@ -1,4 +1,4 @@
-interface PageResponse<T = any>
+export interface PageResponse<T = any>
 {
     data: T[],
     hasNext?: boolean,

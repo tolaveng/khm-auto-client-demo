@@ -6,10 +6,13 @@ import { Link, useHistory } from 'react-router-dom';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Button, Container, Form, Grid, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
-import Loading from '../components/loading';
-import { State } from '../types';
+import {LoaderSpinner} from '../components/LoaderSpinner';
 import { Invoice } from '../types/invoice';
 import { loadInvoices } from './actions';
+import { PageRequest } from '../types/page-request';
+import { PageResponse } from '../types/page-response';
+import { User } from '../components/users/types';
+import { RootState } from '../types/root-state';
 
 
 interface InvoicePageDispatchProps {
@@ -20,15 +23,14 @@ interface InvoicePageDispatchProps {
 
 
 interface InvoicePageStateProps {
-    isLoading: boolean;
+    user: User,
     invoices: PageResponse<Invoice>
 }
 
 type Props = InvoicePageStateProps & InvoicePageDispatchProps;
 
 const InvoicePageComp: React.FC<Props> = (props) => {
-    const {isLoading, invoices} = props;
-    const history = useHistory();
+    const {user, invoices, actions} = props;
 
     const pageRequest: PageRequest = {
         PageNumber: 1,
@@ -36,21 +38,21 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     };
 
     useEffect(() => {
-        props.actions.loadInvoices(pageRequest);
-    }, []);
+        actions.loadInvoices(pageRequest);
+    }, [])
 
-
+    
     const renderInvoices = () => {
         if (!invoices || invoices.data.length === 0) return null;
 
-        var invoiceList = invoices.data.map((inv) => {
+        const invoiceList = invoices.data.map((inv) => {
             return (
                 <Table.Row key={inv.invoiceId}>
                     <Table.Cell>{inv.invoiceNo}</Table.Cell>
                     <Table.Cell>{moment(inv.invoiceDateTime).format('DD/MM/YYYY')}</Table.Cell>
                     <Table.Cell>{inv.car != null ? inv.car.plateNo : ''}</Table.Cell>
-                    <Table.Cell>{inv.customer != null ? inv.customer.fullName : ''}</Table.Cell>
-                    <Table.Cell>{inv.customer != null ? inv.customer.phone : ''}</Table.Cell>
+                    <Table.Cell>{inv.fullName}</Table.Cell>
+                    <Table.Cell>{inv.phone}</Table.Cell>
                     <Table.Cell>
                         <Button basic icon='pencil' as={Link} to={`/invoice/edit/${inv.invoiceId}`} title={'Edit Invoice'} />
                     </Table.Cell>
@@ -101,7 +103,6 @@ const InvoicePageComp: React.FC<Props> = (props) => {
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                    {isLoading && <Loading />}
                     <Table celled selectable striped>
                         <Table.Header>
                             <Table.Row>
@@ -122,10 +123,9 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     );
 };
 
-const mapStateToProps = (state: State): InvoicePageStateProps => {
-    console.log('state', state);
+const mapStateToProps = (state: RootState): InvoicePageStateProps => {
     return {
-        isLoading: !!state.invoiceState.isLoading,
+        user: state.user,
         invoices: state.invoiceState.invoices
     };
 };

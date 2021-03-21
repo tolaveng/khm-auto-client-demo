@@ -1,27 +1,34 @@
-import React from 'react';
-import { FieldRenderProps } from 'react-final-form';
+import React, { CSSProperties } from 'react';
+import { WrappedFieldProps } from 'redux-form';
 import { Form, FormFieldProps, Input} from 'semantic-ui-react';
 
-interface TextInputProps extends FieldRenderProps<any, HTMLElement>, FormFieldProps {
+interface TextInputProps extends FormFieldProps {
     label: string;
     icon?: string;
     inline?: boolean;
     readOnly?: boolean;
-    onIconClick?: () => void;
+    onIconClick?: () => void;    
+    placeholder?: string;
+    type?: string;
+    styles?: CSSProperties;
+    fluid?: boolean;
 }
 
-const TextInput: React.FC<TextInputProps> = (props) => {
-    const { input, meta, type, label, placeholder, width, inline, style, readOnly, icon, onIconClick } = props;
+
+type Props = TextInputProps;
+
+const TextInput: React.FC<Props> = (props) => {
+    const { input, meta, label, type, placeholder, inline, readOnly, icon, onIconClick, fluid, styles, ...rest } = props;
     const isError = meta.touched && !!meta.error;
 
     const inputIcon = icon ? { name: icon, circular: true, link: true, onClick: onIconClick } : undefined;
 
     return (
-        <Form.Field error={isError} type={type} width={width} inline={inline} style={{...style}}>
+        <Form.Field error={isError} inline={inline}>
             <label>{label}</label>
-            {!!inputIcon && <Input type={type} placeholder={placeholder} icon={inputIcon}  {...input} style={{...style}} readOnly={readOnly} />}
-            {!inputIcon && <input type={type} placeholder={placeholder} {...input} style={{...style}} readOnly={readOnly} />}
-            {isError && <label style={{ color: 'red', fontSize: 'small' }}>{meta.error}</label>}
+            {!!inputIcon && <Input type={type} placeholder={placeholder} icon={inputIcon}  {...input} readOnly={readOnly} style={styles} {...rest}/>}
+            {!inputIcon && <input type={type} placeholder={placeholder} {...input} readOnly={readOnly} style={styles} {...rest}/>}
+            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
         </Form.Field>
     );
 };

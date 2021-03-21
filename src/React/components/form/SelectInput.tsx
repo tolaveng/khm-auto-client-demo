@@ -1,8 +1,7 @@
 import React from 'react';
-import { FieldRenderProps } from 'react-final-form';
 import { Form, FormFieldProps, Select } from 'semantic-ui-react';
 
-interface SelectInputProps extends FieldRenderProps<any, HTMLElement>, FormFieldProps {
+interface SelectInputProps extends FormFieldProps {
     label: string;
     inline?: boolean;
     readOnly?: boolean;
@@ -20,7 +19,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
                 placeholder={placeholder}
                 options={options}
             />
-            {isError && <label style={{ color: 'red', fontSize: 'small' }}>{meta.error}</label>}
+            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
         </Form.Field>
     );
 };

@@ -1,24 +1,55 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { InvoicePage } from './invoices/invoice-page';
 import { InvoiceEditPage } from './invoices/invoice-edit';
+import { connect } from 'react-redux';
+import { LoaderSpinner } from './components/LoaderSpinner';
+import { LoginPage } from './components/users/LoginPage';
+import { RootState } from './types/root-state';
+import { AuthRoute } from './AuthRoute';
+import { ToastContainer } from 'react-toastify';
+import ScrollToTop from './components/ScrollToTop';
 
 
-const App: React.FC = () => {
-    
+interface AppProps {
+    isAppLoading: boolean;
+}
+
+
+const App: React.FC<AppProps> = (props) => {
+
     return (
-        <Router>
+        <BrowserRouter>
+            <ScrollToTop />
             <Switch>
-                
-                {/* Invoice */}
-                <Route exact path="/invoice/edit/:id" component={InvoiceEditPage} />
-                <Route path="/invoice/new" component={InvoiceEditPage} />
-                <Route path={"/invoice"} component={InvoicePage} />
-                
-                <Route path="/" component={InvoicePage} />
+                <Route path='/login' component={LoginPage} />
+
+                <AuthRoute exact path='/invoice/edit/:id' component={InvoiceEditPage} />
+                <AuthRoute path='/invoice/new' component={InvoiceEditPage} />
+                <AuthRoute path={'/invoice'} component={InvoicePage} />
+                <AuthRoute path='/' component={InvoicePage} />
             </Switch>
-        </Router>
+
+            <ToastContainer
+                position="bottom-center"
+                autoClose={3000}
+                hideProgressBar={true}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable={false}
+                pauseOnHover={false}
+                limit={1}
+            />
+            {!!props.isAppLoading && <LoaderSpinner />}
+        </BrowserRouter>
     );
 };
 
-export default App;
+const mapStateToProps = (state: RootState): AppProps => ({
+    isAppLoading: state.app.isAppLoading ?? false,
+});
+
+
+export default connect(mapStateToProps)(App);

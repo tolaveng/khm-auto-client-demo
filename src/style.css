@@ -46,6 +46,12 @@ input[type='number'] {
     padding-right: 4px !important;
 } */
 
+
+
+.ui.button:active {
+    transform: translateY(0.25em);
+}
+
 .ui.form .fields {
     margin: 2px !important;
 }
@@ -74,6 +80,6 @@ input[type='number'] {
 
 /* Date picker */
 .react-datepicker-wrapper,
-.react-datepicker__input-container {
-    width: 100%;
+.react-datepicker__input-container > input[type='text'] {
+    width: 100% !important;
 }

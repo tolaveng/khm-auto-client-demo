@@ -1,6 +1,5 @@
 import React from 'react';
 import { Table } from 'semantic-ui-react';
-import { StoreContext } from '../../stores';
 import { TableEditorRow } from '.';
 import { TableEditorDataColumn, TableEditorDataRow } from './type';
 
@@ -14,9 +13,6 @@ export interface TableEditorProp {
 }
 
 export class TableEditor extends React.Component<TableEditorProp> {
-    static contextType = StoreContext;
-    context!: React.ContextType<typeof StoreContext>;
-
     constructor(props: TableEditorProp) {
         super(props);
 
@@ -60,7 +56,7 @@ export class TableEditor extends React.Component<TableEditorProp> {
             return <Table.Row><Table.Cell error>Rows property must be array or empty array.</Table.Cell></Table.Row>
         }
         if (rows.length === 0) return null;
-        return rows.map((row, index) => <TableEditorRow key={index} row={row} columns={columns} onRowUpdated={onRowUpdated} onRowDeleted={onRowDeleted} />);
+        return rows.map((row, index) => <TableEditorRow key={`${index}_${Date.now}`} row={row} columns={columns} onRowUpdated={onRowUpdated} onRowDeleted={onRowDeleted} />);
     }
 
 
