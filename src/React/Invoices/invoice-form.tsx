@@ -71,13 +71,13 @@ export interface InvoiceFormProps {
     paymentMethod: string,
     subTotal: string,
     gstTotal: string,
-    grandTotal: string
+    grandTotal: string,
 }
 
 interface IProps {
     invoice: Invoice,
     onServiceChange: (services: Service[]) => void;
-    onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[]) => Promise<void>;
+    onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
 }
 
 export const INVOICE_FORM = 'INVOICE_FORM';
@@ -87,7 +87,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     useEffect(() => {
-        console.log('set service eeffect');
         setServiceData(invoice.services);
     }, [invoice]);
 
@@ -127,15 +126,16 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     // --- end service ---
 
 
-    const formSubmit = (formData: InvoiceFormProps) => {
+    const formSubmit = (formData: InvoiceFormProps, isPrint: boolean) => {
         if (valid) {
-            return onSaveInvoice(formData, serviceData);
+            return onSaveInvoice(formData, serviceData, isPrint);
         }
     }
 
-    
+
+    //<Form onSubmit={handleSubmit(formSubmit)} autoComplete='none' id='invoiceForm'></Form>
     return (
-        <Form onSubmit={handleSubmit(formSubmit)} autoComplete='none'>
+        <Form autoComplete='none'>
             <fieldset>
                 <Form.Group widths='equal'>
                     <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
@@ -261,10 +261,10 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                 </Grid.Column>
             </Grid>
             <div style={{ textAlign: 'right' }}>
-                <Button primary className='action-button' type='button' disabled={submitting} loading={submitting}>
+                <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting} loading={submitting}>
                     Print
                 </Button>
-                <Button basic color='blue' className='action-button' type='submit' disabled={submitting} loading={submitting}>
+                <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting} loading={submitting}>
                     Save
                 </Button>
                 <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice'>

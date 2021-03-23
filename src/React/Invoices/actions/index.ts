@@ -9,7 +9,8 @@ import { ResponseResult } from 'src/React/types/response-result';
 export const InvoiceActionTypes = {
     LOAD_INVOICES_SUCCESS: 'LOAD_INVOICES_SUCCESS',
     LOAD_INVOICE_SUCCESS: 'LOAD_INVOICE_SUCCESS',
-    MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE'
+    MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE',
+    UPDATE_INVOICE: 'UPDATE_INVOICE',
 }
 
 
@@ -71,11 +72,16 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
     })
     try {
         let result: ResponseResult;
-        if (invoice.invoiceId && invoice.invoiceNo) {
-            result = await Api.invoice.update(invoice)
-           
+        if (invoice.invoiceId && invoice.invoiceId > 0) {
+            result = await Api.invoice.update(invoice);
         } else {
-            result = await Api.invoice.create(invoice)
+            result = await Api.invoice.create(invoice);
+            if (result && result.success && result.data) {
+                dispatch({
+                    type: InvoiceActionTypes.UPDATE_INVOICE,
+                    invoice: result.data
+                })
+            }
         }
 
         if (result && result.success) {
@@ -83,16 +89,16 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
         } else {
             console.log("Cannot save invoice: ", result.debugMessage);
             if (result) {
-                callback({code: result.code, success: false, message: 'Unexpected error'})
+                callback({code: result.code, success: false, message: 'Unexpected error'});
             } else {
-                callback({success: false, message: 'Unexpected error'})
+                callback({success: false, message: 'Unexpected error'});
             }
         }
         dispatch({
             type: UNSET_APP_LOADING_ACTION
         })
     } catch (e) {
-        callback({success: false, message: 'Unexpected error'})
+        callback({success: false, message: 'Unexpected error'});
     }
     dispatch({
         type: UNSET_APP_LOADING_ACTION

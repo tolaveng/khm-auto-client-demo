@@ -52,7 +52,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }, [invoiceId]);
 
     
-    function saveInvoice(formData: InvoiceFormProps, serviceData: Service[]): Promise<void> {
+    function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
+
+        console.log('save form data', formData);
+        console.log('is print', isPrint);
+
         return new Promise(function(resolve, reject){
 
             if(!formData || !formData.plateNo || !serviceData || serviceData.length == 0) {
@@ -66,7 +70,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             actions.saveInvoice(madeInvoice, (result) => {
                 if (result.success) {
                     resolve()
-                    history.push('/invoices');
+                    if (isPrint) {
+                       return;
+                    }else{
+                        history.push('/invoices');
+                    }
                 } else {
                     toast.error(result.message);
                     reject('Unexpected error');

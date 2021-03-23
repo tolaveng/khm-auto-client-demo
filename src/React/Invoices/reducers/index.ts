@@ -5,7 +5,7 @@ import { Car } from '../../types/car';
 import { PaymentMethod } from '../../types/PaymentMethod';
 
 
-const invoice: Invoice = {
+const initInvoice: Invoice = {
     invoiceId: 0,
     invoiceNo: 0,
     invoiceDateTime: new Date(),
@@ -32,7 +32,7 @@ const initState: InvoiceState = {
         pageSize: 50,
         totalCount: 0,
     },
-    invoice: invoice
+    invoice: initInvoice
 };
 
 
@@ -45,7 +45,10 @@ export const invoiceReducer = (state = initState, action: LoadInvoicesAction): I
             return { ...state, invoice: action.invoice };
 
         case InvoiceActionTypes.MAKE_NEW_INVOICE:
-            return { ...state, invoice };
+            return { ...state, invoice: initInvoice };
+
+        case InvoiceActionTypes.UPDATE_INVOICE:
+            return { ...state, invoice: action.invoice };
 
         default:
             return state;
