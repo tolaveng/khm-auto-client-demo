@@ -62,7 +62,7 @@ export interface InvoiceFormProps {
     company: string,
     abn: string,
     address: string,
-    plateNo: string,
+    carNo: string,
     odo: number,
     make: string,
     model: string,
@@ -133,7 +133,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     }
 
 
-    //<Form onSubmit={handleSubmit(formSubmit)} autoComplete='none' id='invoiceForm'></Form>
     return (
         <Form autoComplete='none'>
             <fieldset>
@@ -183,7 +182,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             <fieldset>
                 <legend>Car</legend>
                 <Form.Group widths='equal'>
-                    <Field label='Reg. No' name='plateNo' component={TextInput} type='text' icon='search' fluid={true} />
+                    <Field label='Reg. No' name='carNo' component={TextInput} type='text' icon='search' fluid={true} />
                     <Field label='ODO' name='odo' type='number' component={TextInput} fluid={true} />
                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                 </Form.Group>
@@ -277,7 +276,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
 
 const validate = (values: any) => {
     const errors: any = {}
-    const requiredFields = ['invoiceDate', 'plateNo', 'paymentMethod']
+    const requiredFields = ['invoiceDate', 'carNo', 'paymentMethod']
     requiredFields.forEach(field => {
         if (!values[field]) {
             errors[field] = 'Required'

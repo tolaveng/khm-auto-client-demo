@@ -83,3 +83,144 @@ input[type='number'] {
 .react-datepicker__input-container > input[type='text'] {
     width: 100% !important;
 }
+
+
+/* --- screen --- */
+@media all {
+    .page-break {
+      display: none;
+    }
+  }
+
+/* --- Print Only --- */
+@media print {
+
+    #BrowserPrintDefaults{
+        display:none
+    } 
+
+    @page {
+        size: A4;
+        margin: 0; /* hide footer header */
+    }
+
+    html, body {
+        width: 210mm;
+        /*height: 297mm;*/
+        height: 99% !important;
+        overflow: initial !important;
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
+
+        font-family: Arial, sans-serif;
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    * { box-sizing: border-box }
+
+    .print-container {
+        box-sizing: border-box;
+        display: block;
+        height: 100%;
+        width: 100%;
+        margin: 0 auto;
+        padding: 5mm 10mm 5mm 10mm;
+        position: relative;
+    }
+
+    .page-break {
+        margin-top: 1rem;
+        display: block;
+        page-break-before: auto;
+    }
+
+    /* print conten */
+    .invoice-header {
+        display: block;
+        height: 10mm;
+    }
+
+    .print-col-left {
+        float: left;
+        width: 65%;
+    }
+    .print-col-right {
+        float: right;
+        width: 30%;
+    }
+
+    .print-space {
+        height: 1.5rem;
+        clear: both;
+        page-break-before: auto;
+    }
+
+    .invoice-heading {
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .invoice-content-header {
+        display: block;
+        min-height: 40mm;
+    }
+
+    .invoice-content {
+        min-height: 200mm;
+        margin: 0 auto;
+        padding: 0;
+        page-break-inside: auto;
+    }
+
+    .invoice-service-table {
+        border: 1pt solid #000000;
+        border-collapse: collapse;
+        width: 100%;
+        page-break-after: auto;
+    }
+
+    .invoice-service-table th,
+    .invoice-service-table td {
+        border-left: 1pt solid #000000;
+    }
+
+    .invoice-service-table-header {
+        background-color: #cccccc;
+    }
+
+    .invoice-service-table-header th {
+        padding: 0.5rem;
+        text-align: right;
+    } 
+
+    .invoice-service-table-data td {
+        vertical-align: top;
+        padding: 0.5rem;
+        text-align: right;
+    }
+
+    .invoice-footer {
+        margin-bottom: 10mm;
+        overflow: hidden;
+        break-inside: avoid;
+        break-before: auto;
+    }
+
+    .invoice-footer-total {
+        border: 1pt solid #000000;
+        padding: 0.5rem;
+    }
+
+    .invoice-footer-total table {
+        border-collapse: collapse;
+    }
+    .invoice-footer-total td {
+        padding: 0.5rem;
+    }
+
+    .invoice-footer-total table {
+        float: right;
+    }
+}

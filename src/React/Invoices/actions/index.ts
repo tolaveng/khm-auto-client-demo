@@ -74,6 +74,12 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
         let result: ResponseResult;
         if (invoice.invoiceId && invoice.invoiceId > 0) {
             result = await Api.invoice.update(invoice);
+            if(result && result.success) {
+                dispatch({
+                    type: InvoiceActionTypes.UPDATE_INVOICE,
+                    invoice: invoice
+                })
+            }
         } else {
             result = await Api.invoice.create(invoice);
             if (result && result.success && result.data) {
@@ -83,7 +89,7 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
                 })
             }
         }
-
+        // callback
         if (result && result.success) {
             callback(result);
         } else {

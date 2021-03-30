@@ -5,9 +5,9 @@ export interface Invoice {
     invoiceId: number;
     invoiceNo: number;
     invoiceDateTime: Date;
-    modifiedDateTime?: Date;
+    modifiedDateTime?: string;
     isPaid: boolean;
-    paidDate?: Date;
+    paidDate?: string;
     paymentMethod: number;
     gst: number;
     note: string;

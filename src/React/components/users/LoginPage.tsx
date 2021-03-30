@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
-import { AnyAction, bindActionCreators, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
 import { SubmissionError } from 'redux-form';
 import { ThunkDispatch } from 'redux-thunk';
 import { Container, Grid } from 'semantic-ui-react';

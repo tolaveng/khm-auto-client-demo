@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Container, Grid } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
@@ -16,6 +16,8 @@ import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
 import { PaymentMethod } from '../types/PaymentMethod';
 import moment from 'moment';
+import { InvoicePrint } from './invoice-print';
+import { useReactToPrint } from 'react-to-print';
 
 interface InvoiceEditStateProps {
     userId: number;
@@ -36,6 +38,14 @@ type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
     const { userId, invoice, actions, history } = props;
 
+    const invoicePrintRef = useRef<any>();
+
+    const handlePrint = useReactToPrint({
+        content: () => invoicePrintRef.current,
+        bodyClass: 'print-only',
+        documentTitle: 'Invoice-Report-' + moment(invoice.invoiceDateTime).format('dd-MM-yy')
+    });
+
     if (!userId) {
         history.push('/login');
         return null;
@@ -53,13 +63,9 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
-
-        console.log('save form data', formData);
-        console.log('is print', isPrint);
-
         return new Promise(function(resolve, reject){
 
-            if(!formData || !formData.plateNo || !serviceData || serviceData.length == 0) {
+            if(!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
                 toast.error('Reg No. and a Service are required.');
                 reject('Reg No. and a Service are required.');
                 return;
@@ -71,9 +77,12 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                 if (result.success) {
                     resolve()
                     if (isPrint) {
+                        if(handlePrint)
+                            handlePrint()
                        return;
                     }else{
                         history.push('/invoices');
+                        return;
                     }
                 } else {
                     toast.error(result.message);
@@ -85,8 +94,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     function makeInvoiceFromForm(formData: InvoiceFormProps, serviceData: Service[]): Invoice {
         const car: Car = {
-            carId: 0,
-            plateNo: formData.plateNo,
+            carNo: formData.carNo,
             carModel: formData.model,
             carMake: formData.make,
             carYear: formData.year,
@@ -112,6 +120,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             car: car,
             services: serviceData,
             userId: userId,
+
+            modifiedDateTime: new Date().toISOString(),
         };
     }
 
@@ -152,7 +162,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             company: invoice.company?? '',
             abn: invoice.abn?? '',
             address: invoice.address?? '',
-            plateNo: invoice.car?.plateNo,
+            carNo: invoice.car?.carNo,
             odo: invoice.car?.odo,
             make: invoice.car?.carMake,
             model: invoice.car?.carModel,
@@ -177,8 +187,12 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     return (
         <Container fluid>
-            <HeaderLine label={invoiceId ? 'Edit Invoice' : 'New Invoice'} />
+            <HeaderLine label={invoice.invoiceNo ? 'Edit Invoice' : 'New Invoice'} />
             {renderForm()}
+    
+            <div style={{display: 'none'}}>
+                <InvoicePrint key={moment(invoice.modifiedDateTime).toISOString()} invoice={invoice} ref={invoicePrintRef}/>
+            </div>
         </Container>
     );
 };
