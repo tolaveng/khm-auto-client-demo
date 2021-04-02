@@ -2,6 +2,7 @@ import React from 'react';
 import { Table } from 'semantic-ui-react';
 import { TableEditorRow } from '.';
 import { TableEditorDataColumn, TableEditorDataRow } from './type';
+import './TableEditorStyles.css';
 
 export interface TableEditorProp {
     columns: TableEditorDataColumn[];

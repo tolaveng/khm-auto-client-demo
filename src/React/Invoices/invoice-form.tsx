@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Field, InjectedFormProps, reduxForm } from 'redux-form';
 import { Grid, Button, Form } from 'semantic-ui-react';
@@ -11,9 +10,9 @@ import { TableEditor } from '../components/table-editor/TableEditor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
 import { PaymentMethod } from '../types/PaymentMethod';
 import { Invoice } from '../types/invoice';
-import { RootState } from '../types/root-state';
 import { Service } from '../types/service';
 import normalizePhone from '../utils/normalize-phone';
+import { ServiceIndex } from '../types/service-index';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
@@ -78,13 +77,16 @@ interface IProps {
     invoice: Invoice,
     onServiceChange: (services: Service[]) => void;
     onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
+    serviceIndices: ServiceIndex[];
 }
 
 export const INVOICE_FORM = 'INVOICE_FORM';
 
 const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid } = props;
+    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
+    
+    serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
 
     useEffect(() => {
         setServiceData(invoice.services);

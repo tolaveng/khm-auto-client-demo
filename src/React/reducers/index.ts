@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import { reducer as reduxFormReducer } from 'redux-form';
 import { UserReducer } from '../components/users/reducers';
-import { invoiceReducer } from '../invoices/reducers';
+import { invoiceReducer, serviceIndexReducer } from '../invoices/reducers';
 import appReducer from './appReducer';
 
 export default combineReducers({
@@ -9,4 +9,5 @@ export default combineReducers({
     app: appReducer,
     user: UserReducer,
     invoiceState: invoiceReducer,
+    serviceIndices: serviceIndexReducer,
 });

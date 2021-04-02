@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, ButtonGroup, Input, Table, TextArea } from 'semantic-ui-react';
+import { TableEditorTextArea } from './TableEditorTextArea';
 import { TableEditorDataColumn, TableEditorDataRow } from './type';
 
 interface TableEditorRowProp {
@@ -80,7 +81,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
     initState() {
         const { isNew, row, columns } = this.props;
-        const id = row.id ? row.id : -1 * Date.now();
+        const id = row.id ? row.id : (-1 * Date.now());
         const cells = TableEditorRow.deriveDataCellsFromProps(this.props);
 
         this.setState({
@@ -90,10 +91,13 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         });
     }
 
-    cellInputValueChange(evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cellIndex: number) {
+    cellInputValueChange(evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | undefined, value: string, cellIndex: number) {
+        if (evt) {
+            evt.preventDefault();
+        }
         const { columns } = this.props;
         const { cells } = this.state;
-        const cellValue = evt.currentTarget.value;
+        const cellValue = value;
 
         if (columns[cellIndex].maxLength && cellValue.length > columns[cellIndex].maxLength!) {
             return;
@@ -119,7 +123,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         });
     }
 
-    cellInputKeyPress(evt: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, cellIndex: number) {
+    cellInputKeyPress(evt: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, cellIndex: number): void {
         const { rowState } = this.state;
         if (!evt.shiftKey && evt.key === 'Enter') {
             evt.preventDefault();
@@ -218,13 +222,11 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return null;
     }
 
-    componentDidUpdate() {
-        //console.log(`row ${this.state.rowId} is updated`);
-    }
 
     componentDidMount() {
         this.initState();
     }
+
 
     renderDataRow() {
         const { columns } = this.props;
@@ -298,24 +300,22 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
     renderInputType(rowId: number, cell: TableEditorCell, cellIndex: number) {
         const { columns } = this.props;
         const column = columns[cellIndex];
-
+        const autoCompletData = column.autoCompletData ? column.autoCompletData: [];
         const cellName = `cell_${rowId}_${cellIndex}`;
         const align = column.textAlign && column.textAlign === 'right' ? 'right' : 'left';
 
         switch (column.type) {
             case 'textarea':
                 return (
-                    <TextArea
+                    <TableEditorTextArea
                         value={cell.data}
                         name={cellName}
                         key={cellName}
-                        onChange={(e) => this.cellInputValueChange(e, cellIndex)}
-                        onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
-                            this.cellInputKeyPress(e, cellIndex)
-                        }
+                        onTextChange={(e, val) => this.cellInputValueChange(e, val, cellIndex)}
+                        onKeyPress={(e) => this.cellInputKeyPress(e, cellIndex)}
                         rows={2}
-                        autoComplete='off'
                         className={`table-editor-input ${cell.isInValid ? 'table-editor-input-error' : ''}`}
+                        autoCompleteData = {autoCompletData}
                     />
                 );
             default:
@@ -325,7 +325,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                         name={cellName}
                         key={cellName}
                         value={cell.data}
-                        onChange={(e) => this.cellInputValueChange(e, cellIndex)}
+                        onChange={(e) => this.cellInputValueChange(e, e.target.value, cellIndex)}
                         onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => this.cellInputKeyPress(e, cellIndex)}
                         maxLength={column.maxLength}
                         style={{ padding: 0, textAlign: align }}

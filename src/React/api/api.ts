@@ -4,6 +4,7 @@ import { Invoice } from '../types/invoice';
 import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
 import { ResponseResult } from '../types/response-result';
+import { ServiceIndex } from '../types/service-index';
 
 export const KHM_JWT_TOKEN = 'KHM_JWT_TOKEN';
 
@@ -34,7 +35,8 @@ const invoice = {
     getAllPaged: (pageRequest: PageRequest): Promise<PageResponse<Invoice>> => requests.getWithParams<PageResponse<Invoice>>('/invoice/getall', {params:{...pageRequest}}),
     getInvoice: (invoiceId: number): Promise<Invoice> => requests.get<Invoice>(`/invoice/${invoiceId}`),
     create: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/create', invoice),
-    update: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/update', invoice)
+    update: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/update', invoice),
+    loadServiceIndices: (): Promise<ServiceIndex[]> => requests.get<ServiceIndex[]>('invoice/getserviceindex'),
 };
 
 const user = {

@@ -1,0 +1,55 @@
+/* table editor */
+.table-editor tr td {
+    margin: 2px !important;
+    padding: 4px !important;
+    padding-left: 8px !important;
+    white-space: pre-wrap !important;
+    vertical-align: top;
+}
+
+
+/* table editor Row*/
+
+.table-editor .table-editor-input input,
+.table-editor textarea.table-editor-input
+ {
+    flex: none !important;
+    padding: 6px  8px !important;
+}
+
+.table-editor-input-error {
+    border-color: #ff0000 !important;
+}
+
+/* table editor AutoComplete*/
+
+.table-editor-autocomplete-wrapper {
+    position: relative;
+}
+
+ul.table-editor-autocomplete-data {
+    border: 1px solid #cccccc;
+    background-color: #ededed;
+    display: block;
+    max-height: 200px;
+    width: 100%;
+    list-style: none;
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+    z-index: 1000;
+}
+
+ul.table-editor-autocomplete-data li {
+    border-bottom: 1px solid #cccccc;
+    background-color: #ededed;
+    width: 100%;
+    list-style: none;
+    padding: 6px;
+    cursor: pointer;
+}
+
+ul.table-editor-autocomplete-data li:hover {
+    background-color: #dddddd;
+}

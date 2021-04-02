@@ -11,6 +11,7 @@ export const InvoiceActionTypes = {
     LOAD_INVOICE_SUCCESS: 'LOAD_INVOICE_SUCCESS',
     MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE',
     UPDATE_INVOICE: 'UPDATE_INVOICE',
+    LOAD_SERVICEINDEX_SUCCESS: 'LOAD_SERVICEINDEX_SUCCESS'
 }
 
 
@@ -105,6 +106,23 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
         })
     } catch (e) {
         callback({success: false, message: 'Unexpected error'});
+    }
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+}
+
+
+export const loadServiceIndices = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    const results = await Api.invoice.loadServiceIndices()
+    if (results) {
+        dispatch({
+            type: InvoiceActionTypes.LOAD_SERVICEINDEX_SUCCESS,
+            payload: results
+        })
     }
     dispatch({
         type: UNSET_APP_LOADING_ACTION

@@ -9,6 +9,7 @@ export interface TableEditorDataColumn {
     maxLength?: number;
     readOnly?: boolean;
     default?: any;
+    autoCompletData?: string[];
 }
 
 export interface TableEditorDataRow {

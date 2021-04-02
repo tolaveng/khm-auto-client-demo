@@ -10,7 +10,7 @@ import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { change } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { loadInvoice, makeNewInvoice, saveInvoice } from './actions';
+import { loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -18,10 +18,12 @@ import { PaymentMethod } from '../types/PaymentMethod';
 import moment from 'moment';
 import { InvoicePrint } from './invoice-print';
 import { useReactToPrint } from 'react-to-print';
+import { ServiceIndex } from '../types/service-index';
 
 interface InvoiceEditStateProps {
     userId: number;
     invoice: Invoice;
+    serviceIndices: ServiceIndex[];
 }
 
 interface InvoiceEditDispatchProps {
@@ -30,13 +32,14 @@ interface InvoiceEditDispatchProps {
         saveInvoice: (invoice: Invoice, callback: (result: ResponseResult) => void) => void;
         loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
+        loadServiceIndices: () => void;
     };
 }
 
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history } = props;
+    const { userId, invoice, actions, history, serviceIndices } = props;
 
     const invoicePrintRef = useRef<any>();
 
@@ -60,6 +63,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             actions.makeNewInvoice();
         }
     }, [invoiceId]);
+
+    useEffect(() => {
+        actions.loadServiceIndices();
+    }, []);
 
     
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
@@ -178,7 +185,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <InvoiceForm invoice={invoice} initialValues={invoiceForm} onSaveInvoice={saveInvoice} onServiceChange={serviceChange} />
+                    <InvoiceForm invoice={invoice} initialValues={invoiceForm} onSaveInvoice={saveInvoice} onServiceChange={serviceChange} serviceIndices={serviceIndices} />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
@@ -201,6 +208,7 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
     return {
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
+        serviceIndices: state.serviceIndices,
     };
 };
 
@@ -209,7 +217,8 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         changeTotalFields: bindActionCreators(change, dispatch),
         saveInvoice: bindActionCreators(saveInvoice, dispatch),
         loadInvoice: bindActionCreators(loadInvoice, dispatch),
-        makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch)
+        makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch),
+        loadServiceIndices: bindActionCreators(loadServiceIndices, dispatch)
     },
 });
 
