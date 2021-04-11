@@ -13,7 +13,8 @@ export interface AppState {
 
 export interface InvoiceState {
     invoices: PageResponse<Invoice>;
-    invoice: Invoice
+    invoice: Invoice;
+    isFailed: boolean;
 }
 
 export interface RootState {

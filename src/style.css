@@ -47,6 +47,13 @@ input[type='number'] {
 } */
 
 
+.table-sticky thead tr:first-child > th {
+    background-color: #dddddd !important;
+    position: sticky !important;
+    top: 0;
+    z-index: 2;
+}
+
 
 .ui.button:active {
     transform: translateY(0.25em);

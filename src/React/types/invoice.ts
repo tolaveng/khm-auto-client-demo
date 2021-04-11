@@ -4,7 +4,7 @@ import { Service } from "./service";
 export interface Invoice {
     invoiceId: number;
     invoiceNo: number;
-    invoiceDateTime: Date;
+    invoiceDate: string;
     modifiedDateTime?: string;
     isPaid: boolean;
     paidDate?: string;

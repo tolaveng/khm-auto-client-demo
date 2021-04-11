@@ -24,6 +24,7 @@ interface InvoiceEditStateProps {
     userId: number;
     invoice: Invoice;
     serviceIndices: ServiceIndex[];
+    isFailed: boolean;
 }
 
 interface InvoiceEditDispatchProps {
@@ -39,14 +40,14 @@ interface InvoiceEditDispatchProps {
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices } = props;
+    const { userId, invoice, actions, history, serviceIndices, isFailed } = props;
 
     const invoicePrintRef = useRef<any>();
 
     const handlePrint = useReactToPrint({
         content: () => invoicePrintRef.current,
         bodyClass: 'print-only',
-        documentTitle: 'Invoice-Report-' + moment(invoice.invoiceDateTime).format('dd-MM-yy')
+        documentTitle: 'Invoice-Report-' + moment(invoice.invoiceDate).format('dd-MM-yy')
     });
 
     if (!userId) {
@@ -107,11 +108,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             carYear: formData.year,
             odo: formData.odo
         };
-
+        
         return {
             invoiceId: invoice.invoiceId,
             invoiceNo: invoice.invoiceNo,
-            invoiceDateTime: moment.utc(formData.invoiceDate, 'DD/MM/YYYY').toDate(),
+            invoiceDate: moment(formData.invoiceDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             isPaid: formData.paymentMethod !== PaymentMethod.Unpaid.toString(),
             paymentMethod: Number(formData.paymentMethod),
             gst: invoice.gst,
@@ -160,9 +161,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     function renderForm() {
         const total = calculateTotal(invoice.services);
-
         const invoiceForm: InvoiceFormProps = {
-            invoiceDate: moment.utc(invoice.invoiceDateTime, 'YYYY-MM-DD').toDate(),
+            invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
             fullName: invoice.fullName,
             phoneNumber: invoice.phone,
             email: invoice.email?? '',
@@ -185,7 +185,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <InvoiceForm invoice={invoice} initialValues={invoiceForm} onSaveInvoice={saveInvoice} onServiceChange={serviceChange} serviceIndices={serviceIndices} />
+                    <InvoiceForm invoice={invoice} initialValues={invoiceForm} onSaveInvoice={saveInvoice} onServiceChange={serviceChange} serviceIndices={serviceIndices} isLoadFailed={isFailed} />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
@@ -198,7 +198,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             {renderForm()}
     
             <div style={{display: 'none'}}>
-                <InvoicePrint key={moment(invoice.modifiedDateTime).toISOString()} invoice={invoice} ref={invoicePrintRef}/>
+                <InvoicePrint key={moment(invoice.modifiedDateTime, 'YYYY-MM-DD').unix()} invoice={invoice} ref={invoicePrintRef}/>
             </div>
         </Container>
     );
@@ -209,6 +209,7 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
         serviceIndices: state.serviceIndices,
+        isFailed: state.invoiceState.isFailed
     };
 };
 

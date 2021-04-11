@@ -5,10 +5,13 @@ import { SET_APP_LOADING_ACTION, UNSET_APP_LOADING_ACTION } from '../../actions'
 import { PageRequest } from 'src/React/types/page-request';
 import { PageResponse } from 'src/React/types/page-response';
 import { ResponseResult } from 'src/React/types/response-result';
+import { InvoiceFilter } from 'src/React/types/invoice-filter';
 
 export const InvoiceActionTypes = {
     LOAD_INVOICES_SUCCESS: 'LOAD_INVOICES_SUCCESS',
     LOAD_INVOICE_SUCCESS: 'LOAD_INVOICE_SUCCESS',
+    LOAD_INVOICES_FAILED: 'LOAD_INVOICES_FAILED',
+    LOAD_INVOICE_FAILED: 'LOAD_INVOICE_FAILED',
     MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE',
     UPDATE_INVOICE: 'UPDATE_INVOICE',
     LOAD_SERVICEINDEX_SUCCESS: 'LOAD_SERVICEINDEX_SUCCESS'
@@ -22,18 +25,21 @@ export type LoadInvoicesAction = Action & {
 }
 
 
-export const loadInvoices = (pageRequest: PageRequest) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+export const loadInvoices = (pageRequest: PageRequest, filter?: InvoiceFilter) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
         type: SET_APP_LOADING_ACTION
     })
     try {
-        const invoices = await Api.invoice.getAllPaged(pageRequest)
+        const invoices = await Api.invoice.getAllPaged(pageRequest, filter)
         dispatch({
             type: InvoiceActionTypes.LOAD_INVOICES_SUCCESS,
             invoices: invoices
         })
     } catch (ex) {
         console.log('Cannot load invoices', ex);
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICES_FAILED,
+        })
     }
     dispatch({
         type: UNSET_APP_LOADING_ACTION
@@ -53,6 +59,9 @@ export const loadInvoice = (invoiceId: number) => async (dispatch: Dispatch<AnyA
         })
     } catch (ex) {
         console.log('Cannot load invoice', ex);
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICE_FAILED,
+        })
     }
     dispatch({
         type: UNSET_APP_LOADING_ACTION
@@ -71,6 +80,7 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
     dispatch({
         type: SET_APP_LOADING_ACTION
     })
+    
     try {
         let result: ResponseResult;
         if (invoice.invoiceId && invoice.invoiceId > 0) {

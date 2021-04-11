@@ -54,7 +54,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                             <table>
                                 <tbody>
                                     <tr><td>Invoice No:</td><td>{pad6(invoice.invoiceNo)}</td></tr>
-                                    <tr><td>Date:</td><td>{moment(invoice.invoiceDateTime).format('DD/MM/yyyy')}</td></tr>
+                                    <tr><td>Date:</td><td>{moment(invoice.invoiceDate).format('DD/MM/yyyy')}</td></tr>
                                     <tr><td>Reg No:</td><td>{invoice.car.carNo}</td></tr>
 
                                     {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
@@ -153,12 +153,12 @@ class InvoicePrintComp extends React.Component<IProps> {
 
                 <div className='print-space'></div>
 
-                <div style={{ fontSize: '0.8rem' }}>
-                    <div>Direct deposit to: Commonwealth Bank</div>
-                    <div>Account Name: KHM MOTOR SPORTS</div>
-                    <div>BSB: 063 171</div>
-                    <div>Account No: 011127384</div>
-                </div>
+                <p style={{ fontSize: '0.8rem' }}>
+                    Direct deposit to: Commonwealth Bank <br/>
+                    Account Name: KHM MOTOR SPORTS <br/>
+                    BSB: 063 171 <br/>
+                    Account No: 011127384 <br/>
+                </p>
             </div>
         );
     }
