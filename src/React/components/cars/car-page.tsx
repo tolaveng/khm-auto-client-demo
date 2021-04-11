@@ -39,7 +39,7 @@ const CarPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
         }
     }
 
-    const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 5, });
+    const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 50, });
 
     const handlePaginationChange = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>, { activePage }: PaginationProps) => {
         setFilter({ ...filter, shouldUpdate: true });
@@ -77,7 +77,7 @@ const CarPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                     <Table.Cell>{car.carYear}</Table.Cell>
                     <Table.Cell>{car.odo}</Table.Cell>
                     <Table.Cell>
-                        <Button basic icon='search' as={Link} to={`/invoice/?car=${car.carNo}`} title={'Find Invoices'} />
+                        <Button basic icon='search' as={Link} to={`/invoice/?carNo=${car.carNo}`} title={'Find Invoices'} />
                     </Table.Cell>
                 </Table.Row>
             );

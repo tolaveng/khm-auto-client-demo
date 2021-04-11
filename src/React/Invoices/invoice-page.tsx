@@ -2,7 +2,7 @@ import moment from 'moment';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
@@ -29,14 +29,24 @@ interface InvoicePageStateProps {
 
 type Props = InvoicePageStateProps & InvoicePageDispatchProps;
 
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
+
 const InvoicePageComp: React.FC<Props> = (props) => {
     const { user, invoices, actions } = props;
+
+    const query = useQuery();
+    let queryCarNo = '';
+    if (query && query.get('carNo')) {
+        queryCarNo = query.get('carNo');
+    }
 
     const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 5,});
 
     const initFilter: InvoiceFilter = {
         InvoiceNo: '',
-        CarNo: '',
+        CarNo: queryCarNo,
         Customer: '',
         InvoiceDate: '',
         SortBy: '',
