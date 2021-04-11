@@ -9,6 +9,7 @@ import { RootState } from './types/root-state';
 import { AuthRoute } from './AuthRoute';
 import { ToastContainer } from 'react-toastify';
 import ScrollToTop from './components/ScrollToTop';
+import { CarPage } from './components/cars/car-page';
 
 
 interface AppProps {
@@ -27,6 +28,9 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute exact path='/invoice/edit/:id' component={InvoiceEditPage} />
                 <AuthRoute path='/invoice/new' component={InvoiceEditPage} />
                 <AuthRoute path={'/invoice'} component={InvoicePage} />
+
+                <AuthRoute path={'/car'} component={CarPage} />
+
                 <AuthRoute path='/' component={InvoicePage} />
             </Switch>
 

@@ -32,7 +32,7 @@ type Props = InvoicePageStateProps & InvoicePageDispatchProps;
 const InvoicePageComp: React.FC<Props> = (props) => {
     const { user, invoices, actions } = props;
 
-    const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 50,});
+    const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 5,});
 
     const initFilter: InvoiceFilter = {
         InvoiceNo: '',
@@ -143,7 +143,8 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                         onChange={(date) => setInvoiceDate(date as Date)}
                     />
                 </Form.Field>
-                <Button type='submit' basic color='blue'>
+                <Button type='submit' basic color='blue' icon labelPosition='left'>
+                    <Icon name='filter' />
                     Filter
                 </Button>
             </Form>
@@ -181,7 +182,7 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                     <Pagination
                         activePage={pageRequest.PageNumber}
                         onPageChange={handlePaginationChange}
-                        totalPages={Math.ceil(invoices.totalCount/invoices.pageSize)}
+                        totalPages={invoices.totalCount > 0 ? Math.ceil(invoices.totalCount/invoices.pageSize) : 1}
                         ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
                         firstItem={{ content: <Icon name='angle double left' />, icon: true }}
                         lastItem={{ content: <Icon name='angle double right' />, icon: true }}

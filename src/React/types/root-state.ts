@@ -1,5 +1,6 @@
 import { FormReducer } from "redux-form";
 import { User } from "../components/users/types";
+import { Car } from "./car";
 import { Invoice } from "./invoice";
 import { PageResponse } from "./page-response";
 import { ServiceIndex } from "./service-index";
@@ -21,6 +22,7 @@ export interface RootState {
     form: FormReducer,
     app: AppState,
     user: User,
+    carState: PageResponse<Car>;
     invoiceState: InvoiceState;
     serviceIndices: ServiceIndex[];
 }

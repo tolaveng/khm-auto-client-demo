@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
 import { User } from '../components/users/types';
+import { Car } from '../types/car';
 import { Invoice } from '../types/invoice';
 import { InvoiceFilter } from '../types/invoice-filter';
 import { PageRequest } from '../types/page-request';
@@ -76,10 +77,14 @@ const user = {
     current: (): Promise<User> => requests.get<User>('/user/currentuser')
 }
 
+const car = {
+    getAllPaged: (pageRequest: PageRequest, filter?: any): Promise<PageResponse<Car>> => requests.getWithParams<PageResponse<Car>>('/car/getall', {...pageRequest, ...filter}),
+}
 
 const Api = {
     invoice,
     user,
+    car,
 };
 
 export default Api;

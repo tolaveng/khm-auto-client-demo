@@ -30,7 +30,7 @@ const initState: InvoiceState = {
     invoices: {
         data: [],
         hasNext: false,
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: 50,
         totalCount: 0,
     },

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Field, InjectedFormProps, reduxForm } from 'redux-form';
-import { Grid, Button, Form } from 'semantic-ui-react';
+import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
 import RadioInput from '../components/form/RadioInput';
 import TextAreaInput from '../components/form/TextAreaInput';
@@ -86,7 +86,7 @@ export const INVOICE_FORM = 'INVOICE_FORM';
 const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
     const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
-    
+
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
 
     useEffect(() => {
@@ -143,7 +143,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                     <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
                     <Form.Field />
                     {invoice.invoiceNo
-                        ? <Form.Field><label>Invoice No</label><label style={{padding: 4, border: '1px solid #cccccc', borderRadius: 2}}>{invoice.invoiceNo}</label></Form.Field>
+                        ? <Form.Field><label>Invoice No</label><label style={{ padding: 4, border: '1px solid #cccccc', borderRadius: 2 }}>{invoice.invoiceNo}</label></Form.Field>
                         : <Form.Field />
                     }
 
@@ -263,13 +263,16 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                 </Grid.Column>
             </Grid>
             <div style={{ textAlign: 'right' }}>
-                <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting}>
+                <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                    <Icon name='print' />
                     Print
                 </Button>
-                <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting || isLoadFailed} loading={submitting}>
+                <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                    <Icon name='save' />
                     Save
                 </Button>
-                <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice'>
+                <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
+                    <Icon name='cancel' />
                     Close
                 </Button>
             </div>
