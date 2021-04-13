@@ -1,7 +1,7 @@
 import { AnyAction, Dispatch } from "redux";
-import { PageRequest } from "../../../types/page-request";
-import { SET_APP_LOADING_ACTION, UNSET_APP_LOADING_ACTION } from "../../../actions";
-import Api from "../../../api/api";
+import { PageRequest } from "../../types/page-request";
+import { SET_APP_LOADING_ACTION, UNSET_APP_LOADING_ACTION } from "../../actions";
+import Api from "../../api/api";
 
 export const CarActionType = {
     LOAD_CARS_SUCCESS: 'LOAD_CARS_SUCCESS',

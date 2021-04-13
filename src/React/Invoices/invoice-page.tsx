@@ -42,7 +42,7 @@ const InvoicePageComp: React.FC<Props> = (props) => {
         queryCarNo = query.get('carNo');
     }
 
-    const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 5,});
+    const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 50,});
 
     const initFilter: InvoiceFilter = {
         InvoiceNo: '',

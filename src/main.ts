@@ -15,14 +15,22 @@ const createWindow = (): void => {
         webPreferences: {
             nodeIntegration: true,
         },
+        icon: __dirname + '../React/assets/icon.png'
     });
 
     console.log(`Running in development: ${isDev}`);
     //const mainUrl = 'http://localhost:9000';
-    const mainUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}/index.html`;
+    const baseUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}`;
+    const urls = {
+        baseUrl: baseUrl,
+        indexUrl: baseUrl + '/invoice',
+        newInvoice: baseUrl + '/invoice/new',
+        car: baseUrl + '/car',
+        report: baseUrl + '/report',
+    };
 
     mainWindow.maximize();
-    mainWindow.loadURL(mainUrl);
+    mainWindow.loadURL(urls.indexUrl);
 
     // Main menu
     const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
@@ -30,32 +38,48 @@ const createWindow = (): void => {
             label: 'KHM Auto',
             submenu: [isMac ? { role: 'close' } : { role: 'quit' }],
         },
-        {
-            label: 'Edit',
-            submenu: [
-                { role: 'undo' },
-                { role: 'redo' },
-                { type: 'separator' },
-                { role: 'cut' },
-                { role: 'copy' },
-                { role: 'paste' },
-                { type: 'separator' },
-                { role: 'selectAll' },
-                { role: 'delete' },
-            ],
-        },
+        // {
+        //     label: 'Edit',
+        //     submenu: [
+        //         { role: 'undo' },
+        //         { role: 'redo' },
+        //         { type: 'separator' },
+        //         { role: 'cut' },
+        //         { role: 'copy' },
+        //         { role: 'paste' },
+        //         { type: 'separator' },
+        //         { role: 'selectAll' },
+        //         { role: 'delete' },
+        //     ],
+        // },
         {
             label: 'Invoices',
             submenu: [
                 {
-                    label: 'Create new invoice',
-                    click() {},
+                    label: 'Listall invoices',
+                    click() {
+                        mainWindow?.loadURL(urls.indexUrl)
+                    },
                 },
                 {
-                    label: 'View all invoices',
-                    click() {},
+                    label: 'Create new invoice',
+                    click() {
+                        mainWindow?.loadURL(urls.newInvoice)
+                    },
                 },
             ],
+        },
+        {
+            label: 'Cars',
+            click() {
+                mainWindow?.loadURL(urls.car)
+            },
+        },
+        {
+            label: 'Report',
+            click() {
+                mainWindow?.loadURL(urls.report)
+            },
         },
     ];
 
@@ -74,19 +98,19 @@ const createWindow = (): void => {
         mainWindow = null;
     });
 
-    mainWindow.on('close', function(e) {
+    mainWindow.on('close', function (e) {
         const choice = require('electron').dialog.showMessageBoxSync(mainWindow!,
-          {
-            type: 'question',
-            buttons: ['Yes', 'No'],
-            defaultId: 1,
-            title: 'Confirm Close',
-            message: 'Are you sure you want to close?'
-          });
+            {
+                type: 'question',
+                buttons: ['Yes', 'No'],
+                defaultId: 1,
+                title: 'Confirm Close',
+                message: 'Are you sure you want to close?'
+            });
         if (choice === 1) {
-          e.preventDefault();
+            e.preventDefault();
         }
-      });
+    });
 
 }; // end create main window
 

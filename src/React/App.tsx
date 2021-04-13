@@ -9,7 +9,7 @@ import { RootState } from './types/root-state';
 import { AuthRoute } from './AuthRoute';
 import { ToastContainer } from 'react-toastify';
 import ScrollToTop from './components/ScrollToTop';
-import { CarPage } from './components/cars/car-page';
+import { CarPage } from './cars/car-page';
 
 
 interface AppProps {

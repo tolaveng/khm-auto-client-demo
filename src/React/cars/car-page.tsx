@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Table } from 'semantic-ui-react';
-import { PageResponse } from '../../types/page-response';
-import { Car } from '../../types/car';
-import { PageRequest } from '../../types/page-request';
-import { HeaderLine } from '../HeaderLine';
+import { PageResponse } from '../types/page-response';
+import { Car } from '../types/car';
+import { PageRequest } from '../types/page-request';
+import { HeaderLine } from '../components/HeaderLine';
 import { RootState } from 'src/React/types/root-state';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { loadCars } from './actions';
