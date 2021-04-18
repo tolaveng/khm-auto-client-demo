@@ -29,8 +29,8 @@ export type LoadInvoicesAction = Action & {
     type: typeof InvoiceActionTypes,
     invoices: PageResponse<Invoice>
     invoice: Invoice,
-    carMake: string[],
-    carModel: string[],
+    carMakes: string[],
+    carModels: string[],
     carFoundResults: Car[]
 }
 
@@ -169,4 +169,28 @@ export const findCars = (carNo: string, callback: (car: Car[]) => void) => async
     dispatch({
         type: UNSET_APP_LOADING_ACTION
     })
+}
+
+export const loadCarMakes = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    try {
+        const response = await Api.car.loadCarMakes()
+        dispatch({
+            type: InvoiceActionTypes.CAR_MAKE,
+            carMakes: response
+        })
+    } catch {
+       // ignored
+    }
+}
+
+export const loadCarModels = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    try {
+        const response = await Api.car.loadCarModels()
+        dispatch({
+            type: InvoiceActionTypes.CAR_MODEL,
+            carModels: response
+        })
+    } catch {
+       // ignored
+    }
 }

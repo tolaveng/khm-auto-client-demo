@@ -17,8 +17,8 @@ export interface InvoiceState {
     invoices: PageResponse<Invoice>;
     invoice: Invoice;
     isFailed: boolean;
-    carMake: string[];
-    carModel: string[];
+    carMakes: string[];
+    carModels: string[];
     carFoundResults: Car[];
 }
 

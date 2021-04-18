@@ -93,6 +93,8 @@ const car = {
         }
         return requests.getWithParams<PageResponse<Car>>('/car/getall', {...pageRequest, ...filter})
     },
+    loadCarMakes: (): Promise<string[]> => requests.get<string[]>('/car/getmakes'),
+    loadCarModels: (): Promise<string[]> => requests.get<string[]>('/car/getmodels'),
 }
 
 const Api = {

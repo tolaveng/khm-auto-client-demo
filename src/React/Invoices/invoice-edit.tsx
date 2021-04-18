@@ -10,7 +10,7 @@ import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { change } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { findCars, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
+import { findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -27,6 +27,8 @@ interface InvoiceEditStateProps {
     serviceIndices: ServiceIndex[];
     isFailed: boolean;
     carFoundResults: Car[]
+    carMakes: string[],
+    carModels: string[]
 }
 
 interface InvoiceEditDispatchProps {
@@ -37,13 +39,15 @@ interface InvoiceEditDispatchProps {
         makeNewInvoice: () => void;
         loadServiceIndices: () => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
+        loadCarMakes: () => void;
+        loadCarModels: () => void;
     };
 }
 
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults } = props;
+    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
 
     const invoicePrintRef = useRef<any>();
 
@@ -70,6 +74,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     useEffect(() => {
         actions.loadServiceIndices();
+        actions.loadCarMakes();
+        actions.loadCarModels();
     }, []);
 
     const [openModal, setOpenModal] = React.useState(false);
@@ -209,7 +215,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                         onSaveInvoice={saveInvoice} onServiceChange={serviceChange}
                         serviceIndices={serviceIndices}
                         isLoadFailed={isFailed}
-                        carSearchHandler={carSearchHandler} />
+                        carSearchHandler={carSearchHandler}
+                        carMakes = {carMakes}
+                        carModels = {carModels}
+                        />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
@@ -279,6 +288,8 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
         serviceIndices: state.serviceIndices,
         isFailed: state.invoiceState.isFailed,
         carFoundResults: state.invoiceState.carFoundResults,
+        carMakes: state.invoiceState.carMakes,
+        carModels: state.invoiceState.carModels,
     };
 };
 
@@ -290,6 +301,8 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch),
         loadServiceIndices: bindActionCreators(loadServiceIndices, dispatch),
         findCars: bindActionCreators(findCars, dispatch),
+        loadCarMakes: bindActionCreators(loadCarMakes, dispatch),
+        loadCarModels: bindActionCreators(loadCarModels, dispatch),
     },
 });
 

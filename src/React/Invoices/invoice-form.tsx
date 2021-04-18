@@ -13,6 +13,7 @@ import { Invoice } from '../types/invoice';
 import { Service } from '../types/service';
 import normalizePhone from '../utils/normalize-phone';
 import { ServiceIndex } from '../types/service-index';
+import AutoSuggestInput from '../components/form/AutoSuggestInput';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
@@ -80,12 +81,14 @@ interface IProps {
     serviceIndices: ServiceIndex[];
     isLoadFailed?: boolean;
     carSearchHandler?: (value: string) => void;
+    carMakes: string[];
+    carModels: string[];
 }
 
 export const INVOICE_FORM = 'INVOICE_FORM';
 
 const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler } = props;
+    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -129,7 +132,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     };
     // --- end service ---
 
-
     const formSubmit = (formData: InvoiceFormProps, isPrint: boolean) => {
         if (valid) {
             return onSaveInvoice(formData, serviceData, isPrint);
@@ -137,7 +139,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     }
 
     return (
-        <Form autoComplete='none'>
+        <Form autoComplete='off'>
             <fieldset>
                 <Form.Group widths='equal'>
                     <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
@@ -190,8 +192,8 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                    <Field label='Make' name='make' component={TextInput} type='text' fluid={true} />
-                    <Field label='Model' name='model' component={TextInput} type='text' fluid={true} />
+                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes}/>
+                    <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
                 </Form.Group>
             </fieldset>
             <fieldset style={{ minHeight: 200 }}>
