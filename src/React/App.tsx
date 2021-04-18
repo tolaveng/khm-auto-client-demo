@@ -10,6 +10,7 @@ import { AuthRoute } from './AuthRoute';
 import { ToastContainer } from 'react-toastify';
 import ScrollToTop from './components/ScrollToTop';
 import { CarPage } from './cars/car-page';
+import { ReportPage } from './reports/report-page';
 
 
 interface AppProps {
@@ -30,6 +31,7 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute path={'/invoice'} component={InvoicePage} />
 
                 <AuthRoute path={'/car'} component={CarPage} />
+                <AuthRoute path={'/report'} component={ReportPage} />
 
                 <AuthRoute path='/' component={InvoicePage} />
             </Switch>

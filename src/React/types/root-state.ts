@@ -3,6 +3,7 @@ import { User } from "../components/users/types";
 import { Car } from "./car";
 import { Invoice } from "./invoice";
 import { PageResponse } from "./page-response";
+import { SummaryReport } from "./summary-report";
 import { ServiceIndex } from "./service-index";
 
 export interface AppState {
@@ -19,10 +20,11 @@ export interface InvoiceState {
 }
 
 export interface RootState {
-    form: FormReducer,
+    form: any,
     app: AppState,
     user: User,
     carState: PageResponse<Car>;
     invoiceState: InvoiceState;
     serviceIndices: ServiceIndex[];
+    summaryReports: PageResponse<SummaryReport>;
 }

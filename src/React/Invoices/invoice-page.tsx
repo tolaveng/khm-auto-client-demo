@@ -42,34 +42,34 @@ const InvoicePageComp: React.FC<Props> = (props) => {
         queryCarNo = query.get('carNo');
     }
 
-    const [pageRequest, setPageRequest] = useState<PageRequest>({PageNumber: 1, PageSize: 50,});
+    const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 50, });
 
     const initFilter: InvoiceFilter = {
         InvoiceNo: '',
         CarNo: queryCarNo,
         Customer: '',
         InvoiceDate: '',
-        SortBy: '',
-        SortDir: '',
+        SortBy: 'InvoiceNo',
+        SortDir: 'DESC',
     }
     const [filter, setFilter] = useState<InvoiceFilter>(initFilter);
     const [shouldUpdate, setShouldUpdate] = useState(true);
-   
+
     useEffect(() => {
         if (shouldUpdate) {
             actions.loadInvoices(pageRequest, filter);
         }
     }, [pageRequest, filter, shouldUpdate]);
-    
-    const handlePaginationChange = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>, {activePage}: PaginationProps) => {
+
+    const handlePaginationChange = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>, { activePage }: PaginationProps) => {
         setShouldUpdate(true);
-        setPageRequest({...pageRequest, PageNumber: Number(activePage)})
+        setPageRequest({ ...pageRequest, PageNumber: Number(activePage) })
     }
 
     const filterHandler = (evt: React.FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
         setShouldUpdate(true);
-        setPageRequest({...pageRequest, PageNumber: 1})
+        setPageRequest({ ...pageRequest, PageNumber: 1 })
     };
 
     const setInvoiceDate = (date: Date) => {
@@ -132,67 +132,70 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     const renderFilterForm = () => {
 
         return (
-            <Form onSubmit={filterHandler} autoComplete='false'>
-                <Form.Field>
-                    <label>Invoice No</label>
-                    <input name='txtInvoiceNo' value={filter.InvoiceNo} onChange={setFilterValue} />
-                </Form.Field>
-                <Form.Field>
-                    <label>Plate No</label>
-                    <input name='txtCarNo' value={filter.CarNo} onChange={setFilterValue} />
-                </Form.Field>
-                <Form.Field>
-                    <label>Customer</label>
-                    <input name='txtCustomer' value={filter.Customer} onChange={setFilterValue} />
-                </Form.Field>
-                <Form.Field>
-                    <label>Date</label>
-                    <ReactDatePicker
-                        dateFormat='dd/MM/yyyy'
-                        selected={filter.InvoiceDate ? moment(filter.InvoiceDate, 'YYYY-MM-DD').toDate() : null}
-                        onChange={(date) => setInvoiceDate(date as Date)}
-                    />
-                </Form.Field>
-                <Button type='submit' basic color='blue' icon labelPosition='left'>
-                    <Icon name='filter' />
+            <Segment>
+                <Form onSubmit={filterHandler} autoComplete='false'>
+                    <Form.Field>
+                        <label>Invoice No</label>
+                        <input name='txtInvoiceNo' value={filter.InvoiceNo} onChange={setFilterValue} />
+                    </Form.Field>
+                    <Form.Field>
+                        <label>Plate No</label>
+                        <input name='txtCarNo' value={filter.CarNo} onChange={setFilterValue} />
+                    </Form.Field>
+                    <Form.Field>
+                        <label>Customer</label>
+                        <input name='txtCustomer' value={filter.Customer} onChange={setFilterValue} />
+                    </Form.Field>
+                    <Form.Field>
+                        <label>Date</label>
+                        <ReactDatePicker
+                            dateFormat='dd/MM/yyyy'
+                            selected={filter.InvoiceDate ? moment(filter.InvoiceDate, 'YYYY-MM-DD').toDate() : null}
+                            onChange={(date) => setInvoiceDate(date as Date)}
+                        />
+                    </Form.Field>
+                    <Button type='submit' basic color='blue' icon labelPosition='left'>
+                        <Icon name='search' />
                     Filter
                 </Button>
-            </Form>
+                </Form>
+            </Segment>
         );
     };
 
     return (
         <Container fluid>
             <HeaderLine label='Invoices'>
-                <Button type='button' primary as={Link} to='/invoice/new'>
-                    Create Invoice
+                <Button type='button' primary as={Link} to='/invoice/new' icon labelPosition='left'>
+                    <Icon name='add' />
+                    <span>Create Invoice</span>
                 </Button>
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
                 <Grid.Column width={12}>
-                        <Table color='grey' sortable celled selectable striped className='table-sticky'>
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell collapsing
-                                        sorted={filter.SortBy === 'InvoiceNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
-                                        onClick={() => sortBy('InvoiceNo')}>No</Table.HeaderCell>
-                                    <Table.HeaderCell collapsing
-                                        sorted={filter.SortBy === 'InvoiceDate' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
-                                        onClick={() => sortBy('InvoiceDate')}>Date</Table.HeaderCell>
-                                    <Table.HeaderCell
+                    <Table color='grey' sortable celled selectable striped className='table-sticky'>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell collapsing
+                                    sorted={filter.SortBy === 'InvoiceNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    onClick={() => sortBy('InvoiceNo')}>No</Table.HeaderCell>
+                                <Table.HeaderCell collapsing
+                                    sorted={filter.SortBy === 'InvoiceDate' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    onClick={() => sortBy('InvoiceDate')}>Date</Table.HeaderCell>
+                                <Table.HeaderCell
                                     sorted={filter.SortBy === 'CarNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => sortBy('CarNo')}>Plate No</Table.HeaderCell>
-                                    <Table.HeaderCell>Customer</Table.HeaderCell>
-                                    <Table.HeaderCell>Phone</Table.HeaderCell>
-                                    <Table.HeaderCell collapsing></Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>{invoices != null && renderInvoices()}</Table.Body>
-                        </Table>
+                                <Table.HeaderCell>Customer</Table.HeaderCell>
+                                <Table.HeaderCell>Phone</Table.HeaderCell>
+                                <Table.HeaderCell collapsing></Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>{invoices != null && renderInvoices()}</Table.Body>
+                    </Table>
                     <Pagination
                         activePage={pageRequest.PageNumber}
                         onPageChange={handlePaginationChange}
-                        totalPages={invoices.totalCount > 0 ? Math.ceil(invoices.totalCount/invoices.pageSize) : 1}
+                        totalPages={invoices.totalCount > 0 ? Math.ceil(invoices.totalCount / invoices.pageSize) : 1}
                         ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
                         firstItem={{ content: <Icon name='angle double left' />, icon: true }}
                         lastItem={{ content: <Icon name='angle double right' />, icon: true }}

@@ -4,5 +4,7 @@ export interface PageResponse<T = any>
     hasNext?: boolean,
     pageNumber: number,
     pageSize: number,
-    totalCount: number
+    totalCount: number,
+    error?: string,
+    isDownloading?: boolean
 }

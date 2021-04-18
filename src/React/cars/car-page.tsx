@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Table } from 'semantic-ui-react';
+import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
 import { PageResponse } from '../types/page-response';
 import { Car } from '../types/car';
 import { PageRequest } from '../types/page-request';
@@ -89,16 +89,18 @@ const CarPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
 
     const renderFilterForm = () => {
         return (
-            <Form onSubmit={filterHandler} autoComplete='false'>
-                <Form.Field>
-                    <label>Reg.No</label>
-                    <input name='txtCarNo' value={filter.carNo} onChange={setFilterValue} />
-                </Form.Field>
-                <Button type='submit' basic color='blue' icon labelPosition='left'>
-                    <Icon name='filter' />
-                    Filter
-                </Button>
-            </Form>
+            <Segment>
+                <Form onSubmit={filterHandler} autoComplete='false'>
+                    <Form.Field>
+                        <label>Reg.No</label>
+                        <input name='txtCarNo' value={filter.carNo} onChange={setFilterValue} />
+                    </Form.Field>
+                    <Button type='submit' basic color='blue' icon labelPosition='left'>
+                        <Icon name='search' />
+                        <span>Filter</span>
+                    </Button>
+                </Form>
+            </Segment>
         );
     }
 

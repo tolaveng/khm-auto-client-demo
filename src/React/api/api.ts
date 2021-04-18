@@ -8,6 +8,8 @@ import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
 import { ResponseResult } from '../types/response-result';
 import { ServiceIndex } from '../types/service-index';
+import { SummaryReport } from '../types/summary-report';
+import { SummaryReportFilter } from '../types/summary-report-filter';
 
 export const KHM_JWT_TOKEN = 'KHM_JWT_TOKEN';
 
@@ -58,6 +60,7 @@ const responseData = <T>(response: AxiosResponse<T>) => response.data;
 const requests = {
     get: <T>(url: string, ) => axios.get<T>(url).then(responseData),
     getWithParams: <T>(url: string, params: any) => axios.get<T>(url, {params: {...params}}).then(responseData),
+    getBlobWithParams: <T>(url: string, params: any) => axios.get<T>(url, {params: {...params}, responseType: 'blob'}),
     post: <T>(url: string, body: any) => axios.post<T>(url, body).then(responseData),
     put: <T>(url: string, body: any) => axios.put<T>(url, body).then(responseData),
     delete: <T>(url: string) => axios.delete<T>(url).then(responseData),
@@ -70,6 +73,8 @@ const invoice = {
     create: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/create', invoice),
     update: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/update', invoice),
     loadServiceIndices: (): Promise<ServiceIndex[]> => requests.get<ServiceIndex[]>('invoice/getserviceindex'),
+    getSummaryReport: (pageRequest: PageRequest, filter: SummaryReportFilter): Promise<PageResponse<SummaryReport>> => requests.getWithParams<PageResponse<SummaryReport>>('/invoice/getSummaryReport', {...pageRequest, ...filter}),
+    downloadSummaryReport: (filter: SummaryReportFilter): Promise<AxiosResponse<Blob>> => requests.getBlobWithParams<Blob>('/invoice/downloadSummaryReport', {...filter}),
 };
 
 const user = {

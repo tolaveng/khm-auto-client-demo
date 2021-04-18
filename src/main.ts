@@ -56,7 +56,7 @@ const createWindow = (): void => {
             label: 'Invoices',
             submenu: [
                 {
-                    label: 'Listall invoices',
+                    label: 'All invoices',
                     click() {
                         mainWindow?.loadURL(urls.indexUrl)
                     },
