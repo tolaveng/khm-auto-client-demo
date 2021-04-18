@@ -16,7 +16,7 @@ const initState: PageResponse<Car> = {
 export const CarReducer = (state = initState, action: AnyAction) => {
     switch (action.type) {
         case CarActionType.LOAD_CARS_SUCCESS:
-            return { ...action.playload }
+            return { ...action.payload }
 
 
         default:

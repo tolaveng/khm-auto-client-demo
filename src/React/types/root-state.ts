@@ -17,6 +17,9 @@ export interface InvoiceState {
     invoices: PageResponse<Invoice>;
     invoice: Invoice;
     isFailed: boolean;
+    carMake: string[];
+    carModel: string[];
+    carFoundResults: Car[];
 }
 
 export interface RootState {

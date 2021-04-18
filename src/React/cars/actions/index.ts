@@ -17,7 +17,7 @@ export const loadCars = (pageRequest: PageRequest, filter?: any) => async (dispa
         const response = await Api.car.getAllPaged(pageRequest, filter)
         dispatch({
             type: CarActionType.LOAD_CARS_SUCCESS,
-            playload: response
+            payload: response
         })
     } catch (ex) {
         dispatch({

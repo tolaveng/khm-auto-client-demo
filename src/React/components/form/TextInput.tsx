@@ -7,7 +7,7 @@ interface TextInputProps extends FormFieldProps {
     icon?: string;
     inline?: boolean;
     readOnly?: boolean;
-    onIconClick?: () => void;    
+    onIconClick?: (value: string) => void;    
     placeholder?: string;
     type?: string;
     styles?: CSSProperties;
@@ -21,7 +21,9 @@ const TextInput: React.FC<Props> = (props) => {
     const { input, meta, label, type, placeholder, inline, readOnly, icon, onIconClick, fluid, styles, ...rest } = props;
     const isError = meta.touched && !!meta.error;
 
-    const inputIcon = icon ? { name: icon, circular: true, link: true, onClick: onIconClick } : undefined;
+    const inputIcon = icon ? { name: icon, circular: true, link: true, onClick: () => {
+        if (onIconClick) onIconClick(input.value)
+     }} : undefined;
 
     return (
         <Form.Field error={isError} inline={inline}>

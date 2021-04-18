@@ -79,12 +79,13 @@ interface IProps {
     onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
     serviceIndices: ServiceIndex[];
     isLoadFailed?: boolean;
+    carSearchHandler?: (value: string) => void;
 }
 
 export const INVOICE_FORM = 'INVOICE_FORM';
 
 const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed } = props;
+    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -135,7 +136,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
         }
     }
 
-
     return (
         <Form autoComplete='none'>
             <fieldset>
@@ -185,7 +185,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             <fieldset>
                 <legend>Car</legend>
                 <Form.Group widths='equal'>
-                    <Field label='Reg. No' name='carNo' component={TextInput} type='text' icon='search' fluid={true} />
+                    <Field label='Reg. No' name='carNo' component={TextInput} type='text' icon='search' fluid={true} onIconClick={carSearchHandler} />
                     <Field label='ODO' name='odo' type='number' component={TextInput} fluid={true} />
                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                 </Form.Group>

@@ -84,6 +84,15 @@ const user = {
 
 const car = {
     getAllPaged: (pageRequest: PageRequest, filter?: any): Promise<PageResponse<Car>> => requests.getWithParams<PageResponse<Car>>('/car/getall', {...pageRequest, ...filter}),
+    findCars: (carNo: string): Promise<PageResponse<Car>> => {
+        const pageRequest: PageRequest = {
+            PageNumber: 1, PageSize: 100
+        };
+        const filter = {
+            CarNo: carNo
+        }
+        return requests.getWithParams<PageResponse<Car>>('/car/getall', {...pageRequest, ...filter})
+    },
 }
 
 const Api = {

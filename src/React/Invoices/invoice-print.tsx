@@ -56,7 +56,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                                     <tr><td>Invoice No:</td><td>{pad6(invoice.invoiceNo)}</td></tr>
                                     <tr><td>Date:</td><td>{moment(invoice.invoiceDate).format('DD/MM/yyyy')}</td></tr>
                                     <tr><td>Reg No:</td><td>{invoice.car.carNo}</td></tr>
-
+                                    {!!invoice.car.odo && <tr><td>ODO:</td><td>{invoice.car.odo}</td></tr>}
                                     {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
                                     {!!invoice.car.carModel && <tr><td>Model:</td><td>{invoice.car.carModel}</td></tr>}
                                     {!!invoice.car.carYear && <tr><td>Year:</td><td>{invoice.car.carYear}</td></tr>}

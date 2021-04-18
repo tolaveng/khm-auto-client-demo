@@ -6,6 +6,7 @@ import { PageRequest } from 'src/React/types/page-request';
 import { PageResponse } from 'src/React/types/page-response';
 import { ResponseResult } from 'src/React/types/response-result';
 import { InvoiceFilter } from 'src/React/types/invoice-filter';
+import { Car } from 'src/React/types/car';
 
 export const InvoiceActionTypes = {
     LOAD_INVOICES_SUCCESS: 'LOAD_INVOICES_SUCCESS',
@@ -14,14 +15,23 @@ export const InvoiceActionTypes = {
     LOAD_INVOICE_FAILED: 'LOAD_INVOICE_FAILED',
     MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE',
     UPDATE_INVOICE: 'UPDATE_INVOICE',
-    LOAD_SERVICEINDEX_SUCCESS: 'LOAD_SERVICEINDEX_SUCCESS'
+    LOAD_SERVICEINDEX_SUCCESS: 'LOAD_SERVICEINDEX_SUCCESS',
+
+    FIND_CAR_REQUEST: 'FIND_CAR_REQUEST',
+    FIND_CAR_SUCCESS: 'FIND_CAR_SUCCESS',
+    FIND_CAR_FAILED: 'FIND_CAR_FAILED',
+    CAR_MAKE: 'CAR_MAKE',
+    CAR_MODEL: 'CAR_MODEL'
 }
 
 
 export type LoadInvoicesAction = Action & {
     type: typeof InvoiceActionTypes,
     invoices: PageResponse<Invoice>
-    invoice: Invoice
+    invoice: Invoice,
+    carMake: string[],
+    carModel: string[],
+    carFoundResults: Car[]
 }
 
 
@@ -132,6 +142,28 @@ export const loadServiceIndices = () => async (dispatch: Dispatch<AnyAction>): P
         dispatch({
             type: InvoiceActionTypes.LOAD_SERVICEINDEX_SUCCESS,
             payload: results
+        })
+    }
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+}
+
+export const findCars = (carNo: string, callback: (car: Car[]) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    
+    try {
+        const response = await Api.car.findCars(carNo)
+        dispatch({
+            type: InvoiceActionTypes.FIND_CAR_SUCCESS,
+            carFoundResults: response.data
+        })
+        if (callback) callback(response.data);
+    } catch (ex) {
+        dispatch({
+            type: InvoiceActionTypes.FIND_CAR_FAILED,
         })
     }
     dispatch({

@@ -35,7 +35,10 @@ const initState: InvoiceState = {
         totalCount: 0,
     },
     invoice: initInvoice,
-    isFailed: false
+    isFailed: false,
+    carMake: [],
+    carModel: [],
+    carFoundResults: []
 };
 
 
@@ -57,6 +60,20 @@ export const invoiceReducer = (state = initState, action: LoadInvoicesAction): I
         case InvoiceActionTypes.UPDATE_INVOICE:
             return { ...state, invoice: action.invoice, isFailed: false };
 
+            case InvoiceActionTypes.FIND_CAR_REQUEST:
+                return { ...state};
+
+                case InvoiceActionTypes.FIND_CAR_SUCCESS:
+                return { ...state, carFoundResults: action.carFoundResults};
+
+                case InvoiceActionTypes.FIND_CAR_FAILED:
+                return { ...state};
+
+                case InvoiceActionTypes.CAR_MAKE:
+                return { ...state, carMake: action.carMake};
+
+                case InvoiceActionTypes.CAR_MODEL:
+                return { ...state, carModel: action.carModel};
         default:
             return state;
     }

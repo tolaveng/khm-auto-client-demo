@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Container, Grid } from 'semantic-ui-react';
+import { Button, Container, Grid, Modal, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
 import { connect } from 'react-redux';
 import { RootState } from '../types/root-state';
@@ -10,7 +10,7 @@ import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { change } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
+import { findCars, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -19,28 +19,31 @@ import moment from 'moment';
 import { InvoicePrint } from './invoice-print';
 import { useReactToPrint } from 'react-to-print';
 import { ServiceIndex } from '../types/service-index';
+import { loadCars } from '../cars/actions';
 
 interface InvoiceEditStateProps {
     userId: number;
     invoice: Invoice;
     serviceIndices: ServiceIndex[];
     isFailed: boolean;
+    carFoundResults: Car[]
 }
 
 interface InvoiceEditDispatchProps {
     actions: {
-        changeTotalFields: (form: string, field: string, value: any) => void;
+        changeField: (form: string, field: string, value: any) => void;
         saveInvoice: (invoice: Invoice, callback: (result: ResponseResult) => void) => void;
         loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
         loadServiceIndices: () => void;
+        findCars: (carNo: string, callback: (car: Car[]) => void) => void
     };
 }
 
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices, isFailed } = props;
+    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults } = props;
 
     const invoicePrintRef = useRef<any>();
 
@@ -56,7 +59,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }
 
     const invoiceId = Number(props.match.params.id) ?? 0;
-    
+
     useEffect(() => {
         if (invoiceId) {
             actions.loadInvoice(invoiceId);
@@ -69,26 +72,28 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         actions.loadServiceIndices();
     }, []);
 
-    
-    function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
-        return new Promise(function(resolve, reject){
+    const [openModal, setOpenModal] = React.useState(false);
 
-            if(!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
+
+    function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
+        return new Promise(function (resolve, reject) {
+
+            if (!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
                 toast.error('Reg No. and a Service are required.');
                 reject('Reg No. and a Service are required.');
                 return;
             }
-    
+
             const madeInvoice = makeInvoiceFromForm(formData, serviceData);
-            
+
             actions.saveInvoice(madeInvoice, (result) => {
                 if (result.success) {
                     resolve()
                     if (isPrint) {
-                        if(handlePrint)
+                        if (handlePrint)
                             handlePrint()
-                       return;
-                    }else{
+                        return;
+                    } else {
                         history.push('/invoices');
                         return;
                     }
@@ -108,7 +113,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             carYear: formData.year,
             odo: formData.odo
         };
-        
+
         return {
             invoiceId: invoice.invoiceId,
             invoiceNo: invoice.invoiceNo,
@@ -124,7 +129,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             company: formData.company,
             abn: formData.abn,
             address: formData.address,
-            
+
             car: car,
             services: serviceData,
             userId: userId,
@@ -136,10 +141,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     function serviceChange(services: Service[]) {
         const total = calculateTotal(services);
-        
-        actions.changeTotalFields(INVOICE_FORM, 'subTotal', total.subTotal.toFixed(2));
-        actions.changeTotalFields(INVOICE_FORM, 'gstTotal', total.gstTotal.toFixed(2));
-        actions.changeTotalFields(INVOICE_FORM, 'grandTotal', total.grandTotal.toFixed(2));
+
+        actions.changeField(INVOICE_FORM, 'subTotal', total.subTotal.toFixed(2));
+        actions.changeField(INVOICE_FORM, 'gstTotal', total.gstTotal.toFixed(2));
+        actions.changeField(INVOICE_FORM, 'grandTotal', total.grandTotal.toFixed(2));
     }
 
 
@@ -159,16 +164,31 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }
 
 
+    function carSearchHandler(value: string) {
+        actions.findCars(value, function (cars: Car[]) {
+            setOpenModal(true);
+        });
+    }
+
+    function carSelectHandler(car: Car) {
+        actions.changeField(INVOICE_FORM, 'carNo', car.carNo);
+        actions.changeField(INVOICE_FORM, 'odo', car.odo);
+        actions.changeField(INVOICE_FORM, 'year', car.carYear);
+        actions.changeField(INVOICE_FORM, 'make', car.carMake);
+        actions.changeField(INVOICE_FORM, 'model', car.carModel);
+        setOpenModal(false);
+    }
+
     function renderForm() {
         const total = calculateTotal(invoice.services);
         const invoiceForm: InvoiceFormProps = {
             invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
             fullName: invoice.fullName,
             phoneNumber: invoice.phone,
-            email: invoice.email?? '',
-            company: invoice.company?? '',
-            abn: invoice.abn?? '',
-            address: invoice.address?? '',
+            email: invoice.email ?? '',
+            company: invoice.company ?? '',
+            abn: invoice.abn ?? '',
+            address: invoice.address ?? '',
             carNo: invoice.car?.carNo,
             odo: invoice.car?.odo,
             make: invoice.car?.carMake,
@@ -185,20 +205,68 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <InvoiceForm invoice={invoice} initialValues={invoiceForm} onSaveInvoice={saveInvoice} onServiceChange={serviceChange} serviceIndices={serviceIndices} isLoadFailed={isFailed} />
+                    <InvoiceForm invoice={invoice} initialValues={invoiceForm}
+                        onSaveInvoice={saveInvoice} onServiceChange={serviceChange}
+                        serviceIndices={serviceIndices}
+                        isLoadFailed={isFailed}
+                        carSearchHandler={carSearchHandler} />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
             </Grid>
         );
     }
 
+    function renderModal() {
+        return (<Modal
+            onClose={() => setOpenModal(false)}
+            onOpen={() => setOpenModal(true)}
+            open={true}
+        >
+            <Modal.Header>Select a car</Modal.Header>
+            <Modal.Content>
+                <Modal.Description style={{overflow:'auto', maxHeight: '320px'}}>
+                    <Table selectable striped>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell>Reg. No</Table.HeaderCell>
+                                <Table.HeaderCell>ODO</Table.HeaderCell>
+                                <Table.HeaderCell>Year</Table.HeaderCell>
+                                <Table.HeaderCell>Make</Table.HeaderCell>
+                                <Table.HeaderCell>Model</Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {
+                                carFoundResults.map((car) =>
+                                    <Table.Row key={car.carNo} onClick={() => carSelectHandler(car)} style={{ cursor: 'pointer' }}>
+                                        <Table.Cell>{car.carNo}</Table.Cell>
+                                        <Table.Cell>{car.odo}</Table.Cell>
+                                        <Table.Cell>{car.carYear}</Table.Cell>
+                                        <Table.Cell>{car.carMake}</Table.Cell>
+                                        <Table.Cell>{car.carModel}</Table.Cell>
+                                    </Table.Row>
+                                )
+                            }
+                        </Table.Body>
+                    </Table>
+                </Modal.Description>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button onClick={() => setOpenModal(false)}>Close</Button>
+            </Modal.Actions>
+        </Modal>);
+    }
+
     return (
         <Container fluid>
             <HeaderLine label={invoice.invoiceNo ? 'Edit Invoice' : 'New Invoice'} />
             {renderForm()}
-    
-            <div style={{display: 'none'}}>
-                <InvoicePrint key={moment(invoice.modifiedDateTime, 'YYYY-MM-DD').unix()} invoice={invoice} ref={invoicePrintRef}/>
+
+            {openModal && renderModal()}
+
+
+            <div style={{ display: 'none' }}>
+                <InvoicePrint key={moment(invoice.modifiedDateTime, 'YYYY-MM-DD').unix()} invoice={invoice} ref={invoicePrintRef} />
             </div>
         </Container>
     );
@@ -209,17 +277,19 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
         serviceIndices: state.serviceIndices,
-        isFailed: state.invoiceState.isFailed
+        isFailed: state.invoiceState.isFailed,
+        carFoundResults: state.invoiceState.carFoundResults,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchProps => ({
     actions: {
-        changeTotalFields: bindActionCreators(change, dispatch),
+        changeField: bindActionCreators(change, dispatch),
         saveInvoice: bindActionCreators(saveInvoice, dispatch),
         loadInvoice: bindActionCreators(loadInvoice, dispatch),
         makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch),
-        loadServiceIndices: bindActionCreators(loadServiceIndices, dispatch)
+        loadServiceIndices: bindActionCreators(loadServiceIndices, dispatch),
+        findCars: bindActionCreators(findCars, dispatch),
     },
 });
 
