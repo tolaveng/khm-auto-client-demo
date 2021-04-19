@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, ButtonGroup, Input, Table, TextArea } from 'semantic-ui-react';
+import React, { createRef } from 'react';
+import { Button, ButtonGroup, Input, Ref, Table } from 'semantic-ui-react';
 import { TableEditorTextArea } from './TableEditorTextArea';
 import { TableEditorDataColumn, TableEditorDataRow } from './type';
 
@@ -7,9 +7,9 @@ interface TableEditorRowProp {
     columns: TableEditorDataColumn[];
     row: TableEditorDataRow;
     isNew?: boolean;
-    onRowAdded?: (row: TableEditorDataRow) => void;
     onRowUpdated?: (row: TableEditorDataRow) => void;
     onRowDeleted?: (rowId: number) => void;
+    onChange?: (rowId: number, columnId: number, value: any) => void;
 }
 
 interface TableEditorCell {
@@ -25,16 +25,22 @@ interface TableEditorRowState {
     rowId: number;
     rowState: number;
     cells: TableEditorCell[];
+    isNew: boolean;
+    isChanged: boolean;
 }
 
-const RowState = { New: 1, Edit: 2, View: 3 };
+const RowState = { Edit: 1, View: 2 };
 const InitState: TableEditorRowState = {
     rowId: 0,
     rowState: RowState.View,
     cells: [],
+    isNew: true,
+    isChanged: false
 };
 
 export class TableEditorRow extends React.PureComponent<TableEditorRowProp, TableEditorRowState> {
+    private tableRowRef = createRef<HTMLElement>();
+
     constructor(props: TableEditorRowProp) {
         super(props);
         this.state = InitState;
@@ -43,18 +49,18 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.cellInputValueChange = this.cellInputValueChange.bind(this);
         this.cellInputKeyPress = this.cellInputKeyPress.bind(this);
         this.validateRequiredCells = this.validateRequiredCells.bind(this);
-        this.addNewRow = this.addNewRow.bind(this);
         this.editRow = this.editRow.bind(this);
         this.resetRow = this.resetRow.bind(this);
         this.saveRow = this.saveRow.bind(this);
         this.deleteRow = this.deleteRow.bind(this);
 
         this.renderRow = this.renderRow.bind(this);
-        this.renderNewRow = this.renderNewRow.bind(this);
         this.renderEditRow = this.renderEditRow.bind(this);
         this.renderInputType = this.renderInputType.bind(this);
         this.renderDataRow = this.renderDataRow.bind(this);
         this.renderDataCell = this.renderDataCell.bind(this);
+
+        this.clickOutsideHandler = this.clickOutsideHandler.bind(this);
     }
 
     static deriveDataCellsFromProps(props: TableEditorRowProp): TableEditorCell[] {
@@ -65,7 +71,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 cells[i] = {
                     data: row.cells[i],
                     type: c.type ?? 'text',
-                    
+
                 };
             } else {
                 cells[i] = {
@@ -86,7 +92,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
         this.setState({
             rowId: id,
-            rowState: isNew ? RowState.New : RowState.View,
+            isNew: isNew ? isNew : false,
+            rowState: isNew ? RowState.Edit : RowState.View,
             cells: cells,
         });
     }
@@ -95,7 +102,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         if (evt) {
             evt.preventDefault();
         }
-        const { columns } = this.props;
+        const { columns, row, onChange } = this.props;
         const { cells } = this.state;
         const cellValue = value;
 
@@ -120,6 +127,12 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.setState({
             ...this.state,
             cells: updateCells,
+            rowState: RowState.Edit,
+            isChanged: true,
+        }, function () {
+            if (onChange) {
+                onChange(row.id ? row.id : -1, cellIndex, cellValue)
+            }
         });
     }
 
@@ -127,7 +140,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const { rowState } = this.state;
         if (!evt.shiftKey && evt.key === 'Enter') {
             evt.preventDefault();
-            rowState == RowState.New ? this.addNewRow() : this.saveRow();
+            if (rowState == RowState.Edit) this.saveRow();
         }
     }
 
@@ -156,52 +169,36 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         return isValid;
     }
 
-    addNewRow(evt?: React.MouseEvent) {
-        if(evt) evt.preventDefault();
-        const { onRowAdded } = this.props;
-        const { rowId, rowState, cells } = this.state;
-        if (!this.validateRequiredCells()) {
-            return;
-        }
-        if (onRowAdded) {
-            const cellData = cells.map((c) => (c.type === 'number' ? Number(c.data) : c.data));
-            onRowAdded({ id: rowId, cells: cellData });
-        }
-        this.initState();
-    }
 
-    editRow(evt?: React.MouseEvent) {
-        if(evt) evt.preventDefault();
-        this.setState({
-            ...this.state,
-            rowState: RowState.Edit,
-        });
-    }
 
     deleteRow(evt?: React.MouseEvent) {
-        if(evt) evt.preventDefault();
+        if (evt) evt.preventDefault();
+        
         const { onRowDeleted } = this.props;
         if (onRowDeleted) {
             onRowDeleted(this.state.rowId);
         }
     }
 
-    saveRow(evt?: React.MouseEvent) {
-        if(evt) evt.preventDefault();
+    saveRow() {
         const { onRowUpdated } = this.props;
-        const { rowId, cells } = this.state;
-        if (!this.validateRequiredCells()) {
-            return;
-        }
+        const { rowId, cells, rowState, isNew, isChanged } = this.state;
+
+        if (rowState != RowState.Edit) return;
+        if (!isChanged) return;
+        if (!this.validateRequiredCells()) return;
 
         this.setState({
             ...this.state,
             rowState: RowState.View,
+            isNew: false,
+            isChanged: false
         });
+
 
         if (onRowUpdated) {
             const cellData = cells.map((c) => (c.type === 'number' ? Number(c.data) : c.data));
-            onRowUpdated({ id: rowId, cells: cellData });
+            onRowUpdated({ id: rowId, isNew: isNew, cells: cellData });
         }
     }
 
@@ -210,14 +207,42 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         this.initState();
     }
 
+    editRow() {
+        if (this.state.rowState == RowState.Edit) return;
+        this.setState({
+            ...this.state,
+            rowState: RowState.Edit,
+            isChanged: true
+            //isRowFocus: true
+        });
+    }
+
     static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
-        if (!!props.row.id && ((props.row.id !== state.rowId ) || state.rowState === RowState.View )) {
+        if (props.isNew != state.isNew) {
             const cells = TableEditorRow.deriveDataCellsFromProps(props);
             return {
-                rowId: props.row.id,
-                rowState: state.rowState,
+                rowId: props.row.id ? props.row.id : (-1 * Date.now()),
+                rowState: props.isNew ? RowState.Edit : state.rowState,
                 cells,
+                isNew: props.isNew
             };
+        }
+
+        // should update data in view state
+        if (!state.isNew && props.row.id === state.rowId && state.rowState == RowState.View) {
+            const cells = TableEditorRow.deriveDataCellsFromProps(props);
+            let shouldUpdate = false;
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i] !== state.cells[i]) {
+                    shouldUpdate = true;
+                    break;
+                }
+            }
+            if (shouldUpdate) {
+                return {
+                    cells
+                };
+            }
         }
         return null;
     }
@@ -225,19 +250,31 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
     componentDidMount() {
         this.initState();
+        document.addEventListener('click', this.clickOutsideHandler, true);
     }
 
+    componentWillUnmount() {
+        document.removeEventListener('click', this.clickOutsideHandler, true);
+    }
+
+    clickOutsideHandler(evt) {
+        if (!evt) return;
+
+        const node = this.tableRowRef.current;
+        if (node && !node.contains(evt.target)) {
+            this.saveRow();
+        }
+    }
 
     renderDataRow() {
         const { columns } = this.props;
         const { rowId, cells } = this.state;
         return (
-            <Table.Row key={`row_${rowId}`} onDoubleClick={this.editRow}>
+            <Table.Row key={`row_${rowId}`}>
                 {cells.map((cell, index) => this.renderDataCell(rowId, cell, index))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button type='button' basic icon='pencil' onClick={this.editRow} title={'Edit'}></Button>
-                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title={'Delete'}></Button>
+                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title={rowId}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -250,57 +287,37 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
         const align = column.textAlign ? column.textAlign! : 'left';
 
         return (
-            <Table.Cell key={`${rowId}_${cellIndex}`} style={{ textAlign: align }}>
+            <Table.Cell key={`${rowId}_${cellIndex}`} style={{ textAlign: align }} onClick={this.editRow}>
                 {cell.data}
             </Table.Cell>
         );
     }
 
-    renderNewRow() {
-        const { columns } = this.props;
-        const { cells } = this.state;
-        const rowId = -1;
-
-        return (
-            <Table.Row key={`new_row_${rowId}`} style={{backgroundColor: 'rgba(0,0,0, 0.05)'}}>
-                {cells.map((cell, index) => (
-                    <Table.Cell key={`new_cell_${rowId}_${index}`}>
-                        {this.renderInputType(rowId, cell, index)}
-                    </Table.Cell>
-                ))}
-                <Table.Cell key={`${rowId}_${columns.length}`}>
-                    <ButtonGroup>
-                        <Button type='button' basic icon='save' onClick={this.addNewRow} title={'Save'}></Button>
-                        <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Clear'}></Button>
-                    </ButtonGroup>
-                </Table.Cell>
-            </Table.Row>
-        );
-    }
 
     renderEditRow() {
         const { row, columns } = this.props;
         const { rowId, cells } = this.state;
-
+        const key = rowId ? rowId : -1;
         return (
-            <Table.Row key={`edit_row_${rowId}`} style={{backgroundColor: 'rgba(0,0,0, 0.05)'}}>
-                {cells.map((cell, index) => (
-                    <Table.Cell key={`edit_${rowId}_${index}`}>{this.renderInputType(rowId, cell, index)}</Table.Cell>
-                ))}
-                <Table.Cell key={rowId + columns.length}>
-                    <ButtonGroup>
-                        <Button type='button' basic icon='save' onClick={this.saveRow} title={'Save'}></Button>
-                        <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
-                    </ButtonGroup>
-                </Table.Cell>
-            </Table.Row>
+            <Ref innerRef={this.tableRowRef}>
+                <Table.Row key={`edit_row_${rowId}`}>
+                    {cells.map((cell, index) => (
+                        <Table.Cell key={`edit_${rowId}_${index}`} className='table-editor-cell-edit'>{this.renderInputType(rowId, cell, index)}</Table.Cell>
+                    ))}
+                    <Table.Cell key={rowId + columns.length}>
+                        <ButtonGroup>
+                            <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
+                        </ButtonGroup>
+                    </Table.Cell>
+                </Table.Row>
+            </Ref>
         );
     }
 
     renderInputType(rowId: number, cell: TableEditorCell, cellIndex: number) {
         const { columns } = this.props;
         const column = columns[cellIndex];
-        const autoCompletData = column.autoCompletData ? column.autoCompletData: [];
+        const autoCompletData = column.autoCompletData ? column.autoCompletData : [];
         const cellName = `cell_${rowId}_${cellIndex}`;
         const align = column.textAlign && column.textAlign === 'right' ? 'right' : 'left';
 
@@ -315,7 +332,8 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                         onKeyPress={(e) => this.cellInputKeyPress(e, cellIndex)}
                         rows={2}
                         className={`table-editor-input ${cell.isInValid ? 'table-editor-input-error' : ''}`}
-                        autoCompleteData = {autoCompletData}
+                        autoCompleteData={autoCompletData}
+                    
                     />
                 );
             default:
@@ -333,6 +351,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                         autoComplete='off'
                         readOnly={column.readOnly}
                         className='table-editor-input'
+                    
                     />
                 );
         }
@@ -340,9 +359,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
     renderRow() {
         const { rowState } = this.state;
-        if (rowState === RowState.New) {
-            return this.renderNewRow();
-        } else if (rowState === RowState.Edit) {
+        if (rowState === RowState.Edit) {
             return this.renderEditRow();
         } else {
             return this.renderDataRow();

@@ -21,39 +21,12 @@ axios.interceptors.request.use((config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }
-    // config.transformRequest = [function (data, headers) {
-    //     Date.prototype.toJSON = function() {
-    //         //return moment('2020-02-01').format('YYYY-MM-DD');
-    //         return '2020-02-02'
-    //     }
-    //     return JSON.stringify(data);
-    //   }];
-    // config.paramsSerializer = function (params) {
-    //     console.log('param', params);
-    //     return JSON.stringify(params);
-    // };
     return config;
 }, error => {
     return Promise.reject(error);
 });
 
-// const token = window.localStorage.getItem(KHM_JWT_TOKEN);
-// const axiosClient = axios.create({
-//     //withCredentials: true,
 
-//     headers: {
-//         'Content-Type': 'application/json',
-//         Authorization: `Bearer ${token}`
-//     },
-//     transformRequest: [function (data) {
-//         Date.prototype.toJSON = function () {
-//             return moment(this, 'yyyy-MM-dd').format('YYYY-MM-DD');
-//           }
-//           data = JSON.stringify(data)
-//           console.log('date', data)
-//           return data
-//     }]
-// });
 
 const responseData = <T>(response: AxiosResponse<T>) => response.data;
 

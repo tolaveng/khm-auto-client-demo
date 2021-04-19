@@ -48,7 +48,7 @@ input[type='number'] {
 
 
 .table-sticky thead tr:first-child > th {
-    background-color: #dddddd !important;
+    background-color: #ededed !important;
     position: sticky !important;
     top: 0;
     z-index: 2;

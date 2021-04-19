@@ -15,4 +15,5 @@ export interface TableEditorDataColumn {
 export interface TableEditorDataRow {
     id?: number;
     cells: any[] | null;
+    isNew?: boolean;
 }

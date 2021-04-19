@@ -3,7 +3,7 @@ const normalizePhone = (value: any, previousValue:any) => {
       return value
     }
     const onlyNums = value.replace(/[^\d]/g, '')
-    console.log(onlyNums.length);
+    
     if (!previousValue || value.length > previousValue.length) {
       // typing forward
       if (onlyNums.length === 4) {

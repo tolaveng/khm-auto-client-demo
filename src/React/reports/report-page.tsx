@@ -202,7 +202,6 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
 }
 
 const mapStateToProps = (state: RootState): IStateProps => {
-    console.log('isdownloding', state.summaryReports.isDownloading);
     return {
         summaryReports: state.summaryReports
     };

@@ -1,4 +1,12 @@
 /* table editor */
+.table-editor {
+    background-color: #f7f7f7 !important;
+}
+
+.table-editor thead th {
+    background-color: #ededed !important;
+}
+
 .table-editor tr td {
     margin: 2px !important;
     padding: 4px !important;
@@ -7,6 +15,9 @@
     vertical-align: top;
 }
 
+.table-editor .table-editor-cell-edit {
+    padding: 0 !important;
+}
 
 /* table editor Row*/
 
@@ -15,6 +26,10 @@
  {
     flex: none !important;
     padding: 6px  8px !important;
+}
+
+.table-editor .table-editor-input input:read-only {
+    border: none;
 }
 
 .table-editor-input-error {

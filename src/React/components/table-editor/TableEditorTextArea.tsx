@@ -9,6 +9,7 @@ interface IProps {
     onKeyPress?: (evt:  React.KeyboardEvent<HTMLTextAreaElement>) => void;
     rows: number;
     className?: string;
+    onFocus?: () => void;
 }
 
 interface IState {
@@ -34,6 +35,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         this.onInputChange = this.onInputChange.bind(this);
         this.onInputKeyPress = this.onInputKeyPress.bind(this);
         this.onInputBlur = this.onInputBlur.bind(this);
+        this.onInputFocus = this.onInputFocus.bind(this);
         this.onItemSelected = this.onItemSelected.bind(this);
         this.renderAutoCompleteData = this.renderAutoCompleteData.bind(this);
     }
@@ -84,6 +86,12 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         }
     }
 
+    onInputFocus() : void {
+        const {onFocus} = this.props;
+        if (onFocus) {
+            onFocus();
+        }
+    }
 
     onInputBlur(evt: React.FocusEvent<HTMLTextAreaElement>): void {
         setTimeout(() =>{
@@ -120,6 +128,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
                 rows={rows}
                 value={value}
                 ref={this.inputRef}
+                onFocus={this.onInputFocus}
             />
         );
     }

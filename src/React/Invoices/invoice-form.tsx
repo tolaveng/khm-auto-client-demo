@@ -101,29 +101,30 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
         onServiceChange(serviceData);
     }, [serviceData])
 
-    // --- Service ---
-    const addService = (row: TableEditorDataRow) => {
-        setServiceData([
-            ...serviceData,
-            {
-                serviceId: row.id ?? 0,
-                serviceName: row.cells![0],
-                servicePrice: row.cells![1],
-                serviceQty: row.cells![2],
-                invoiceId: invoice ? invoice.invoiceId : 0,
-            },
-        ]);
-    };
 
     const updateService = (row: TableEditorDataRow) => {
-        const newServices = [...serviceData];
-        const updateService = newServices.find((sv) => sv.serviceId == row.id);
-        if (updateService) {
-            updateService.serviceName = row.cells![0];
-            updateService.servicePrice = row.cells![1];
-            updateService.serviceQty = row.cells![2];
+        
+        if (row.isNew) {
+            setServiceData([
+                ...serviceData,
+                {
+                    serviceId: row.id ?? 0,
+                    serviceName: row.cells![0],
+                    servicePrice: row.cells![1],
+                    serviceQty: row.cells![2],
+                    invoiceId: invoice ? invoice.invoiceId : 0,
+                },
+            ]);
+        } else {
+            const newServices = [...serviceData];
+            const updateService = newServices.find((sv) => sv.serviceId == row.id);
+            if (updateService) {
+                updateService.serviceName = row.cells![0];
+                updateService.servicePrice = row.cells![1];
+                updateService.serviceQty = row.cells![2];
+            }
+            setServiceData(newServices);
         }
-        setServiceData(newServices);
     };
 
     const deleteService = (rowId: number) => {
@@ -192,7 +193,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes}/>
+                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
                     <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
                 </Form.Group>
             </fieldset>
@@ -201,7 +202,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                 <TableEditor
                     columns={serviceTableColumns}
                     rows={mapServiceToTableEditorDataRow(serviceData)}
-                    onRowAdded={addService}
+                    //onRowAdded={addService}
                     onRowUpdated={updateService}
                     onRowDeleted={deleteService}
                 />

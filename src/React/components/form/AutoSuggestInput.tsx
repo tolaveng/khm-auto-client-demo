@@ -73,7 +73,7 @@ const dropdownULStyles: CSSProperties = {
     listStyle: 'none',
     border: '1px solid #cccccc',
     borderRadius: '5px',
-    background: '#ffffff',
+    background: '#eeeeee',
     margin: 0,
     padding: 0,
     position: 'absolute',

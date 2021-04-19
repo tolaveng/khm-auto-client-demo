@@ -26,7 +26,7 @@ export const loadSummaryReport = (pageRequest: PageRequest, filter: SummaryRepor
             payload: response
         })
     } catch (ex) {
-        console.log('load report error', ex);
+        console.log('Load report error', ex);
         dispatch({
             type: SummaryReportActionType.LOAD_REPORT_FAILED,
         })
@@ -67,7 +67,7 @@ export const downloadSummaryReport = (filter: SummaryReportFilter) => async (dis
             type: SummaryReportActionType.DOWNLOAD_REPORT_SUCCESS
         })
     } catch (ex) {
-        console.log('download report error', ex);
+        console.log('Download report error', ex);
         dispatch({
             type: SummaryReportActionType.DOWNLOAD_REPORT_FAILED,
         })
