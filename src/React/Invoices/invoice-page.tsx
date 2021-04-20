@@ -39,7 +39,8 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     const query = useQuery();
     let queryCarNo = '';
     if (query && query.get('carNo')) {
-        queryCarNo = query.get('carNo');
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        queryCarNo = query.get('carNo')!;
     }
 
     const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 50, });

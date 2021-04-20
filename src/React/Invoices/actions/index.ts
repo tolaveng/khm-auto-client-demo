@@ -7,6 +7,7 @@ import { PageResponse } from 'src/React/types/page-response';
 import { ResponseResult } from 'src/React/types/response-result';
 import { InvoiceFilter } from 'src/React/types/invoice-filter';
 import { Car } from 'src/React/types/car';
+import { toast } from 'react-toastify';
 
 export const InvoiceActionTypes = {
     LOAD_INVOICES_SUCCESS: 'LOAD_INVOICES_SUCCESS',
@@ -193,4 +194,18 @@ export const loadCarModels = () => async (dispatch: Dispatch<AnyAction>): Promis
     } catch {
        // ignored
     }
+}
+
+export const deleteInvoice = (invoiceId: number) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    try {
+        await Api.invoice.deleteInvoice(invoiceId);
+    } catch {
+        toast.error("Cannot delete the invoice")
+    }
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
 }

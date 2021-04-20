@@ -83,12 +83,13 @@ interface IProps {
     carSearchHandler?: (value: string) => void;
     carMakes: string[];
     carModels: string[];
+    onDeleteInvoice: (invoiceId: number) => void;
 }
 
 export const INVOICE_FORM = 'INVOICE_FORM';
 
 const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels } = props;
+    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteInvoice } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -103,7 +104,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
 
 
     const updateService = (row: TableEditorDataRow) => {
-        
+
         if (row.isNew) {
             setServiceData([
                 ...serviceData,
@@ -136,6 +137,12 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     const formSubmit = (formData: InvoiceFormProps, isPrint: boolean) => {
         if (valid) {
             return onSaveInvoice(formData, serviceData, isPrint);
+        }
+    }
+
+    const handleDelete = () => {
+        if (invoice && invoice.invoiceId) {
+            onDeleteInvoice(invoice.invoiceId);
         }
     }
 
@@ -265,19 +272,30 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                     />
                 </Grid.Column>
             </Grid>
-            <div style={{ textAlign: 'right' }}>
-                <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
-                    <Icon name='print' />
-                    Print
-                </Button>
-                <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
-                    <Icon name='save' />
-                    Save
-                </Button>
-                <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
-                    <Icon name='cancel' />
-                    Close
-                </Button>
+            <div>
+                <div style={{ textAlign: 'left', float: 'left' }}>
+                    {
+                        !!invoice && !!invoice.invoiceNo &&
+                        <Button basic color='red' className='action-button' type='button' onClick={handleDelete} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                            <Icon name='trash' />
+                            <span>DELETE</span>
+                        </Button>
+                    }
+                </div>
+                <div style={{ textAlign: 'right', float: 'right' }}>
+                    <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                        <Icon name='print' />
+                        <span>Print</span>
+                    </Button>
+                    <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                        <Icon name='save' />
+                        <span>Save</span>
+                    </Button>
+                    <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
+                        <Icon name='cancel' />
+                        <span>Close</span>
+                    </Button>
+                </div>
             </div>
         </Form>
     );

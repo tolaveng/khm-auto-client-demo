@@ -10,7 +10,7 @@ import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { change } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
+import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -41,6 +41,7 @@ interface InvoiceEditDispatchProps {
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
         loadCarModels: () => void;
+        deleteInvoice: (invoiceId: number) => void;
     };
 }
 
@@ -79,7 +80,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }, []);
 
     const [openModal, setOpenModal] = React.useState(false);
-
+    const [confirmDeleteModal, setConfirmDeleteModal] = React.useState(false);
 
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
@@ -185,6 +186,18 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         setOpenModal(false);
     }
 
+    const onDeleteInvoice = (invoiceId: number) => {
+        setConfirmDeleteModal(true);
+    }
+
+    const handleDeleteInvoice = async () => {
+        setConfirmDeleteModal(false);
+        if (invoice && invoice.invoiceId) {
+            await actions.deleteInvoice(invoice.invoiceId);
+            history.push('/invoice');
+        }
+    }
+
     function renderForm() {
         const total = calculateTotal(invoice.services);
         const invoiceForm: InvoiceFormProps = {
@@ -218,6 +231,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                         carSearchHandler={carSearchHandler}
                         carMakes = {carMakes}
                         carModels = {carModels}
+                        onDeleteInvoice = {onDeleteInvoice}
                         />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
@@ -228,7 +242,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     function renderModal() {
         return (<Modal
             onClose={() => setOpenModal(false)}
-            onOpen={() => setOpenModal(true)}
+            //onOpen={() => setOpenModal(true)}
             open={true}
         >
             <Modal.Header>Select a car</Modal.Header>
@@ -266,12 +280,32 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         </Modal>);
     }
 
+    function renderDeleteModal() {
+        return (<Modal
+            onClose={() => setConfirmDeleteModal(false)}
+            //onOpen={() => setConfirmDeleteModal(true)}
+            open={confirmDeleteModal}
+        >
+            <Modal.Header>Delete Invoice</Modal.Header>
+            <Modal.Content>
+                <Modal.Description style={{overflow:'auto', maxHeight: '320px'}}>
+                    <span>Are you sure to delete this invoice?</span>
+                </Modal.Description>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button onClick={() => handleDeleteInvoice()} negative color='red'>DELETE</Button>
+                <Button onClick={() => setConfirmDeleteModal(false)}>No</Button>
+            </Modal.Actions>
+        </Modal>);
+    }
+
     return (
         <Container fluid>
             <HeaderLine label={invoice.invoiceNo ? 'Edit Invoice' : 'New Invoice'} />
             {renderForm()}
 
             {openModal && renderModal()}
+            {confirmDeleteModal && renderDeleteModal()}
 
 
             <div style={{ display: 'none' }}>
@@ -303,6 +337,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         findCars: bindActionCreators(findCars, dispatch),
         loadCarMakes: bindActionCreators(loadCarMakes, dispatch),
         loadCarModels: bindActionCreators(loadCarModels, dispatch),
+        deleteInvoice: bindActionCreators(deleteInvoice, dispatch),
     },
 });
 

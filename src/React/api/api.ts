@@ -43,6 +43,7 @@ const invoice = {
     getAll: (): Promise<PageResponse<Invoice>> => requests.get<PageResponse<Invoice>>('/invoice/getall'),
     getAllPaged: (pageRequest: PageRequest, filter?: InvoiceFilter): Promise<PageResponse<Invoice>> => requests.getWithParams<PageResponse<Invoice>>('/invoice/getall', {...pageRequest, ...filter}),
     getInvoice: (invoiceId: number): Promise<Invoice> => requests.get<Invoice>(`/invoice/${invoiceId}`),
+    deleteInvoice: (invoiceId: number): Promise<void> => requests.delete(`/invoice/${invoiceId}`),
     create: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/create', invoice),
     update: (invoice: Invoice): Promise<ResponseResult> => requests.post<ResponseResult>('/invoice/update', invoice),
     loadServiceIndices: (): Promise<ServiceIndex[]> => requests.get<ServiceIndex[]>('invoice/getserviceindex'),
