@@ -1,4 +1,5 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron';
+
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDev = process.env.NODE_ENV === 'development';
@@ -27,6 +28,7 @@ const createWindow = (): void => {
         newInvoice: baseUrl + '/invoice/new',
         car: baseUrl + '/car',
         report: baseUrl + '/report',
+        backup: baseUrl + '/backup',
     };
 
     mainWindow.maximize();
@@ -81,11 +83,22 @@ const createWindow = (): void => {
                 mainWindow?.loadURL(urls.report)
             },
         },
+        {
+            label: 'Tools',
+            submenu: [
+                {
+                    label: 'Backup Database',
+                    click() {
+                        mainWindow?.loadURL(urls.backup)
+                    }
+                }
+            ]
+        }
     ];
 
     if (isDev) {
         mainMenuTemplate.push({
-            label: 'Tools',
+            label: 'Devs',
             submenu: [{ role: 'forceReload' }, { role: 'toggleDevTools' }],
         });
         mainWindow.webContents.openDevTools();
@@ -115,3 +128,9 @@ const createWindow = (): void => {
 }; // end create main window
 
 app.on('ready', createWindow);
+
+// open file in explorer
+ipcMain.on('open-file-in-folder', (event, filePath) => {
+    shell.showItemInFolder(filePath);
+});
+

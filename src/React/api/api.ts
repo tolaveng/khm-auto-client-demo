@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-import moment from 'moment';
 import { User } from '../components/users/types';
 import { Car } from '../types/car';
 import { Invoice } from '../types/invoice';
@@ -71,10 +70,15 @@ const car = {
     loadCarModels: (): Promise<string[]> => requests.get<string[]>('/car/getmodels'),
 }
 
+const backup = {
+
+}
+
 const Api = {
     invoice,
     user,
     car,
+    backup
 };
 
 export default Api;

@@ -53,6 +53,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "@microsoft/signalr": "^5.0.5",
     "axios": "^0.21.1",
     "file-saver": "^2.0.5",
     "moment": "^2.29.1",
