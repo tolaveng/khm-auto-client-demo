@@ -15,7 +15,11 @@ declare global {
     }
   }
   
-const { ipcRenderer } = window.require('electron');
+let ipcRenderer : IpcRenderer;
+if (window.require) {
+    const electron = window.require('electron');
+    ipcRenderer  = electron.ipcRenderer;
+}
 
 interface IProps extends RouteComponentProps {
     token: string
@@ -46,7 +50,7 @@ class BackUpComp extends React.PureComponent<IProps, IStates> {
             filePath: '',
         };
 
-        this.token = window.localStorage.getItem(KHM_JWT_TOKEN);
+        this.token = window.sessionStorage.getItem(KHM_JWT_TOKEN);
         this.jobId = Date.now().toString(),
 
             this.updateBackupJob = this.updateBackupJob.bind(this);
@@ -142,7 +146,9 @@ class BackUpComp extends React.PureComponent<IProps, IStates> {
 
     downloadHandler(): void {
         const { filePath } = this.state;
-        ipcRenderer.send('open-file-in-folder', filePath);
+        if (ipcRenderer) {
+            ipcRenderer.send('open-file-in-folder', filePath);
+        }
     }
 
     render() {

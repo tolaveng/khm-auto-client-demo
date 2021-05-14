@@ -16,7 +16,7 @@ axios.defaults.baseURL = 'https://localhost:5001/api';
 axios.defaults.timeout = 0; //no timeout
 
 axios.interceptors.request.use((config) => {
-    const token = window.localStorage.getItem(KHM_JWT_TOKEN);
+    const token = window.sessionStorage.getItem(KHM_JWT_TOKEN);
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }
@@ -52,7 +52,13 @@ const invoice = {
 
 const user = {
     login: (username: string, password: string): Promise<ResponseResult<User>> => requests.post<ResponseResult<User>>('/user/login', {username, password}),
-    current: (): Promise<User> => requests.get<User>('/user/currentuser')
+    current: (): Promise<User> => {
+        const token = window.sessionStorage.getItem(KHM_JWT_TOKEN);
+        if (!token) {
+            return Promise.reject('Token is not found');
+        }
+        return requests.get<User>('/user/currentuser')
+    }
 }
 
 const car = {

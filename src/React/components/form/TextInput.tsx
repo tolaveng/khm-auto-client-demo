@@ -1,5 +1,4 @@
 import React, { CSSProperties } from 'react';
-import { WrappedFieldProps } from 'redux-form';
 import { Form, FormFieldProps, Input} from 'semantic-ui-react';
 
 interface TextInputProps extends FormFieldProps {
@@ -12,6 +11,7 @@ interface TextInputProps extends FormFieldProps {
     type?: string;
     styles?: CSSProperties;
     fluid?: boolean;
+    onChange?: React.FormEvent<HTMLInputElement>
 }
 
 
@@ -30,7 +30,7 @@ const TextInput: React.FC<Props> = (props) => {
             <label>{label}</label>
             {!!inputIcon && <Input type={type} placeholder={placeholder} icon={inputIcon}  {...input} readOnly={readOnly} style={styles} {...rest}/>}
             {!inputIcon && <input type={type} placeholder={placeholder} {...input} readOnly={readOnly} style={styles} {...rest}/>}
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
+            {isError ? <div><label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label></div> : <div><label style={{fontSize: 'x-small'}}>&nbsp;</label></div>}
         </Form.Field>
     );
 };

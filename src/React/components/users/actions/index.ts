@@ -38,9 +38,22 @@ export const userLogin = (username: string, password: string): ThunkAction<Promi
 
         try {
             const result = await Api.user.login(username, password);
-            if (result.success) {
-                window.localStorage.setItem(KHM_JWT_TOKEN, result.data.jwtToken);
-                return onSuccess(result.data);
+            if (result.success && result.data) {
+                //window.localStorage.setItem(KHM_JWT_TOKEN, result.data.jwtToken);
+                window.sessionStorage.setItem(KHM_JWT_TOKEN, result.data.jwtToken);
+                const loggedInUser: User = {
+                    userId: result.data.userId,
+                    username: result.data.username,
+                    email: result.data.email,
+                    password: '',
+                    fullName: result.data.fullName,
+                    jwtToken: result.data.jwtToken,
+                    isAdmin: result.data.isAdmin,
+                    refreshToken: result.data.refreshToken,
+                };
+                
+                return onSuccess(loggedInUser);
+                
             } else {
                 console.log('User login error ', result.debugMessage);
                 return onError();
@@ -53,7 +66,7 @@ export const userLogin = (username: string, password: string): ThunkAction<Promi
 
     export const userLogout = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
         dispatch({ type: SET_APP_LOADING_ACTION })
-        window.localStorage.removeItem(KHM_JWT_TOKEN);
+        window.sessionStorage.removeItem(KHM_JWT_TOKEN);
         dispatch({ type: UNSET_APP_LOADING_ACTION })
     }
 

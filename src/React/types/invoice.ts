@@ -6,7 +6,6 @@ export interface Invoice {
     invoiceNo: number;
     invoiceDate: string;
     modifiedDateTime?: string;
-    isPaid: boolean;
     paidDate?: string;
     paymentMethod: number;
     gst: number;
@@ -21,5 +20,6 @@ export interface Invoice {
     abn?: string;
     services: Service[];
     userId: number;
+    discount: number;
     archived?: boolean;
 }

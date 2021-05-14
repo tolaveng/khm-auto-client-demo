@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Button, Container, Grid, Modal, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
@@ -7,7 +7,7 @@ import { RootState } from '../types/root-state';
 import { Invoice } from '../types/invoice';
 import { InvoiceForm, InvoiceFormProps, INVOICE_FORM } from './invoice-form';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import { change } from 'redux-form';
+import { change, formValueSelector } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
 import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
@@ -19,7 +19,6 @@ import moment from 'moment';
 import { InvoicePrint } from './invoice-print';
 import { useReactToPrint } from 'react-to-print';
 import { ServiceIndex } from '../types/service-index';
-import { loadCars } from '../cars/actions';
 
 interface InvoiceEditStateProps {
     userId: number;
@@ -28,14 +27,15 @@ interface InvoiceEditStateProps {
     isFailed: boolean;
     carFoundResults: Car[]
     carMakes: string[],
-    carModels: string[]
+    carModels: string[],
+    invoiceDiscount: number,
 }
 
 interface InvoiceEditDispatchProps {
     actions: {
         changeField: (form: string, field: string, value: any) => void;
         saveInvoice: (invoice: Invoice, callback: (result: ResponseResult) => void) => void;
-        loadInvoice: (invoiceId: number) => void;
+        loadInvoice: (invoiceId: number, callback: (invoice: Invoice) => void) => void;
         makeNewInvoice: () => void;
         loadServiceIndices: () => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
@@ -47,10 +47,16 @@ interface InvoiceEditDispatchProps {
 
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
+
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
+    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels, invoiceDiscount } = props;
 
     const invoicePrintRef = useRef<any>();
+
+    const [initialValue, setInitialValue] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+    const [services, setServices] = useState(invoice.services);
 
     const handlePrint = useReactToPrint({
         content: () => invoicePrintRef.current,
@@ -67,9 +73,13 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     useEffect(() => {
         if (invoiceId) {
-            actions.loadInvoice(invoiceId);
+            actions.loadInvoice(invoiceId, inv => {
+                setServices(inv.services);
+                setInitialValue(true);
+            });
         } else {
             actions.makeNewInvoice();
+            setInitialValue(true);
         }
     }, [invoiceId]);
 
@@ -79,8 +89,32 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         actions.loadCarModels();
     }, []);
 
-    const [openModal, setOpenModal] = React.useState(false);
-    const [confirmDeleteModal, setConfirmDeleteModal] = React.useState(false);
+    useEffect(() => {
+        const total = calculateTotal(services);
+        actions.changeField(INVOICE_FORM, 'subTotal', total.subTotal.toFixed(2));
+        actions.changeField(INVOICE_FORM, 'gstTotal', total.gstTotal.toFixed(2));
+        actions.changeField(INVOICE_FORM, 'amountTotal', total.amountTotal.toFixed(2));
+    }, [services, invoiceDiscount]);
+
+
+    function calculateTotal(services: Service[]) {
+        let subTotal = 0;
+        let gstTotal = 0;
+        let amountTotal = 0;
+
+        services.forEach((service) => {
+            subTotal += Number(service.servicePrice) * Number(service.serviceQty);
+        });
+
+        amountTotal = subTotal - invoiceDiscount;
+
+        gstTotal = RoundToTwo(amountTotal / (1 + invoice.gst));
+        
+        return {
+            subTotal, gstTotal, amountTotal
+        }
+    }
+
 
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
@@ -125,7 +159,6 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             invoiceId: invoice.invoiceId,
             invoiceNo: invoice.invoiceNo,
             invoiceDate: moment(formData.invoiceDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
-            isPaid: formData.paymentMethod !== PaymentMethod.Unpaid.toString(),
             paymentMethod: Number(formData.paymentMethod),
             gst: invoice.gst,
             note: formData.note,
@@ -140,6 +173,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             car: car,
             services: serviceData,
             userId: userId,
+            discount: Number(invoiceDiscount) ? Number(invoiceDiscount) : 0,
 
             modifiedDateTime: new Date().toISOString(),
         };
@@ -147,27 +181,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
 
     function serviceChange(services: Service[]) {
-        const total = calculateTotal(services);
-
-        actions.changeField(INVOICE_FORM, 'subTotal', total.subTotal.toFixed(2));
-        actions.changeField(INVOICE_FORM, 'gstTotal', total.gstTotal.toFixed(2));
-        actions.changeField(INVOICE_FORM, 'grandTotal', total.grandTotal.toFixed(2));
-    }
-
-
-    function calculateTotal(services: Service[]) {
-        let subTotal = 0;
-        let gstTotal = 0;
-        let grandTotal = 0;
-        services.forEach((service) => {
-            grandTotal += Number(service.servicePrice) * Number(service.serviceQty);
-        });
-
-        gstTotal = RoundToTwo(grandTotal / (1 + invoice.gst));
-        subTotal = grandTotal - gstTotal;
-        return {
-            subTotal, gstTotal, grandTotal
-        }
+        setServices(services);
     }
 
 
@@ -200,6 +214,9 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     function renderForm() {
         const total = calculateTotal(invoice.services);
+        
+        const discountForm = initialValue ? invoiceDiscount : invoice.discount;
+
         const invoiceForm: InvoiceFormProps = {
             invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
             fullName: invoice.fullName,
@@ -216,8 +233,9 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             note: invoice.note,
             paymentMethod: invoice.paymentMethod.toString(),
             subTotal: total.subTotal.toFixed(2),
+            discount: Number(discountForm) ? Number(discountForm).toString() : '',
             gstTotal: total.gstTotal.toFixed(2),
-            grandTotal: total.grandTotal.toFixed(2),
+            amountTotal: total.amountTotal.toFixed(2),
         };
 
         return (
@@ -315,7 +333,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     );
 };
 
+const selector = formValueSelector(INVOICE_FORM);
+
 const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
+    const invoiceDiscount = selector(state, 'discount');
     return {
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
@@ -324,6 +345,7 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
         carFoundResults: state.invoiceState.carFoundResults,
         carMakes: state.invoiceState.carMakes,
         carModels: state.invoiceState.carModels,
+        invoiceDiscount: invoiceDiscount,
     };
 };
 

@@ -1,3 +1,8 @@
+export interface RefreshToken {
+    token: string,
+    expires: string
+}
+
 export interface User {
     userId: number;
     username: string,
@@ -6,5 +11,6 @@ export interface User {
     fullName: string,
     jwtToken: string,
     isAdmin: boolean,
-    isCheckingUserSingIn?: boolean
+    isCheckingUserSingIn?: boolean,
+    refreshToken?: RefreshToken
 }

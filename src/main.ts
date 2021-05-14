@@ -120,6 +120,7 @@ const createWindow = (): void => {
                 title: 'Confirm Close',
                 message: 'Are you sure you want to close?'
             });
+            
         if (choice === 1) {
             e.preventDefault();
         }

@@ -23,15 +23,15 @@ class InvoicePrintComp extends React.Component<IProps> {
 
         let subTotal = 0;
         let gstTotal = 0;
-        let grandTotal = 0;
+        let amountTotal = 0;
         services.forEach((service) => {
-            grandTotal += Number(service.servicePrice) * Number(service.serviceQty);
+            subTotal += Number(service.servicePrice) * Number(service.serviceQty);
         });
+        amountTotal = subTotal - invoice.discount;
+        gstTotal = RoundToTwo(amountTotal / (1 + invoice.gst));
 
-        gstTotal = RoundToTwo(grandTotal / (1 + invoice.gst));
-        subTotal = grandTotal - gstTotal;
         return {
-            subTotal, gstTotal, grandTotal
+            subTotal, amountTotal, gstTotal
         }
     }
 
@@ -43,25 +43,25 @@ class InvoicePrintComp extends React.Component<IProps> {
                 <div className='invoice-content-header'>
                     <div className='print-col-left'>
                         <p>
-                            <span className='invoice-heading'>KHM Motor Sports</span> <br/>
-                            ABN:96802833899 <br/>
-                            15 Lightwood Rd Springvale, VIC 3171 <br/>
+                            <span className='invoice-heading'>KHM Motor Sports</span> <br />
+                            ABN:96802833899 <br />
+                            15 Lightwood Rd Springvale, VIC 3171 <br />
                             Phone 0435 805 533
                         </p>
                     </div>
                     <div className='print-col-right'>
-                            <span className='invoice-heading'>Tax Invoice</span> <br/>
-                            <table>
-                                <tbody>
-                                    <tr><td>Invoice No:</td><td>{pad6(invoice.invoiceNo)}</td></tr>
-                                    <tr><td>Date:</td><td>{moment(invoice.invoiceDate).format('DD/MM/yyyy')}</td></tr>
-                                    <tr><td>Reg No:</td><td>{invoice.car.carNo}</td></tr>
-                                    {!!invoice.car.odo && <tr><td>ODO:</td><td>{invoice.car.odo}</td></tr>}
-                                    {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
-                                    {!!invoice.car.carModel && <tr><td>Model:</td><td>{invoice.car.carModel}</td></tr>}
-                                    {!!invoice.car.carYear && <tr><td>Year:</td><td>{invoice.car.carYear}</td></tr>}
-                                </tbody>
-                            </table>
+                        <span className='invoice-heading'>Tax Invoice</span> <br />
+                        <table>
+                            <tbody>
+                                <tr><td>Invoice No:</td><td>{pad6(invoice.invoiceNo)}</td></tr>
+                                <tr><td>Date:</td><td>{moment(invoice.invoiceDate).format('DD/MM/yyyy')}</td></tr>
+                                <tr><td>Reg No:</td><td>{invoice.car.carNo}</td></tr>
+                                {!!invoice.car.odo && <tr><td>ODO:</td><td>{invoice.car.odo}</td></tr>}
+                                {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
+                                {!!invoice.car.carModel && <tr><td>Model:</td><td>{invoice.car.carModel}</td></tr>}
+                                {!!invoice.car.carYear && <tr><td>Year:</td><td>{invoice.car.carYear}</td></tr>}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -134,16 +134,23 @@ class InvoicePrintComp extends React.Component<IProps> {
                     <table>
                         <tbody>
                             <tr>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Subtotal</td>
+                                <td style={{ textAlign: 'right' }}>Subtotal</td>
                                 <td style={{ textAlign: 'right' }}>{calTotal.subTotal.toFixed(2)}</td>
                             </tr>
+                            {
+                                (invoice.discount && Number(invoice.discount)) > 0 &&
+                                <tr>
+                                    <td style={{ textAlign: 'right' }}>Discount</td>
+                                    <td style={{ textAlign: 'right' }}>{Number(invoice.discount).toFixed(2)}</td>
+                                </tr>
+                            }
                             <tr>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>GST</td>
+                                <td style={{ textAlign: 'right' }}>GST</td>
                                 <td style={{ textAlign: 'right' }}>{calTotal.gstTotal.toFixed(2)}</td>
                             </tr>
                             <tr style={{ backgroundColor: '#cccccc' }}>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (incl. GST)</td>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{calTotal.grandTotal.toFixed(2)}</td>
+                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in.gst)</td>
+                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{calTotal.amountTotal.toFixed(2)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -154,10 +161,10 @@ class InvoicePrintComp extends React.Component<IProps> {
                 <div className='print-space'></div>
 
                 <p style={{ fontSize: '0.8rem' }}>
-                    Direct deposit to: Commonwealth Bank <br/>
-                    Account Name: KHM MOTOR SPORTS <br/>
-                    BSB: 063 171 <br/>
-                    Account No: 011127384 <br/>
+                    Direct deposit to: Commonwealth Bank <br />
+                    Account Name: KHM MOTOR SPORTS <br />
+                    BSB: 063 171 <br />
+                    Account No: 011127384 <br />
                 </p>
             </div>
         );

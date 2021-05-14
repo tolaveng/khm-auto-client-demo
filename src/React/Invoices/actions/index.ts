@@ -58,7 +58,7 @@ export const loadInvoices = (pageRequest: PageRequest, filter?: InvoiceFilter) =
 };
 
 
-export const loadInvoice = (invoiceId: number) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+export const loadInvoice = (invoiceId: number, callback: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
         type: SET_APP_LOADING_ACTION
     })
@@ -67,7 +67,8 @@ export const loadInvoice = (invoiceId: number) => async (dispatch: Dispatch<AnyA
         dispatch({
             type: InvoiceActionTypes.LOAD_INVOICE_SUCCESS,
             invoice
-        })
+        });
+        if (callback) callback(invoice);
     } catch (ex) {
         console.log('Cannot load invoice', ex);
         dispatch({

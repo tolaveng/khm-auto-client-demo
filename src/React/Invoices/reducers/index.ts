@@ -12,7 +12,6 @@ const initInvoice: Invoice = {
     invoiceNo: 0,
     invoiceDate: new Date().toISOString(),
     modifiedDateTime: new Date().toISOString(),
-    isPaid: false,
     paidDate: new Date().toISOString(),
     paymentMethod: PaymentMethod.Cash,
     gst: 10,
@@ -23,6 +22,7 @@ const initInvoice: Invoice = {
     car: {} as Car,
     userId: 0,
     services: [],
+    discount: 0
 };
 
 

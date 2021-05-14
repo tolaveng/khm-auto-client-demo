@@ -70,8 +70,9 @@ export interface InvoiceFormProps {
     note: string,
     paymentMethod: string,
     subTotal: string,
+    discount: string,
     gstTotal: string,
-    grandTotal: string,
+    amountTotal: string,
 }
 
 interface IProps {
@@ -139,6 +140,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             return onSaveInvoice(formData, serviceData, isPrint);
         }
     }
+
 
     const handleDelete = () => {
         if (invoice && invoice.invoiceId) {
@@ -252,18 +254,26 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                 </Grid.Column>
                 <Grid.Column textAlign='right'>
                     <Field
-                        label='Total (ex.GST)'
+                        label='SubTotal'
                         name='subTotal'
                         type='text'
                         component={TextInput}
                         inline
                         readOnly
+                        styles={{ textAlign: 'right', fontWeight: 'bold' }}
+                    />
+                    <Field
+                        label='Discount'
+                        name='discount'
+                        type='text'
+                        component={TextInput}
+                        inline
                         styles={{ textAlign: 'right' }}
                     />
                     <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
                     <Field
-                        label='Total (in.GST)'
-                        name='grandTotal'
+                        label='Total (in.gst)'
+                        name='amountTotal'
                         type='text'
                         component={TextInput}
                         inline
@@ -319,6 +329,10 @@ const validate = (values: any) => {
     //     errors.phoneNumber = 'Customer name or phone number is required';
     // }
 
+    if (isNaN(Number(values.discount))) {
+        errors.discount = 'Number Only'
+    }
+
     return errors
 }
 
@@ -358,6 +372,6 @@ const validate = (values: any) => {
 export const InvoiceForm = reduxForm<InvoiceFormProps, IProps>({
     validate,
     form: INVOICE_FORM,
-    enableReinitialize: true,
+    enableReinitialize: true, //update when the initial value update
 })(InvoiceFormComp);
 
