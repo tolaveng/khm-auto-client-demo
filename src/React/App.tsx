@@ -30,6 +30,7 @@ const App: React.FC<AppProps> = (props) => {
                 <Route path='/login' component={LoginPage} />
 
                 <AuthRoute exact path='/invoice/edit/:id' component={InvoiceEditPage} />
+                <AuthRoute exact path='/invoice/fromquote/:quoteId' component={InvoiceEditPage} />
                 <AuthRoute path='/invoice/new' component={InvoiceEditPage} />
                 <AuthRoute path={'/invoice'} component={InvoicePage} />
                 <AuthRoute path={'/invoices'} component={InvoicePage} />

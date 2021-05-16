@@ -196,6 +196,10 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
         setConfirmDeleteModal(true);
     }
 
+    const makeInvoiceFromQuote = (quoteId: number) => {
+        history.push(`/invoice/fromquote/${quoteId}`)
+    }
+
     const handleDeleteQuote = async () => {
         setConfirmDeleteModal(false);
         if (quote && quote.quoteId) {
@@ -240,6 +244,7 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
                         carMakes = {carMakes}
                         carModels = {carModels}
                         onDeleteQuote = {onDeleteQuote}
+                        makeInvoiceFromQuote = {makeInvoiceFromQuote}
                         />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>

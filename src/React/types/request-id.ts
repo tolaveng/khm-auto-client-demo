@@ -1,3 +1,4 @@
 interface RequestId {
-    id: string | undefined
+    id?: string | undefined
+    quoteId?: string | undefined
 }

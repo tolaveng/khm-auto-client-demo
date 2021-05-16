@@ -49,6 +49,7 @@ const invoice = {
     loadServiceIndices: (): Promise<ServiceIndex[]> => requests.get<ServiceIndex[]>('invoice/getserviceindex'),
     getSummaryReport: (pageRequest: PageRequest, filter: SummaryReportFilter): Promise<PageResponse<SummaryReport>> => requests.getWithParams<PageResponse<SummaryReport>>('/invoice/getSummaryReport', {...pageRequest, ...filter}),
     downloadSummaryReport: (filter: SummaryReportFilter): Promise<AxiosResponse<Blob>> => requests.getBlobWithParams<Blob>('/invoice/downloadSummaryReport', {...filter}),
+    fromQuote: (quoteId: number): Promise<Invoice> => requests.get<Invoice>(`/invoice/fromquote/${quoteId}`),
 };
 
 

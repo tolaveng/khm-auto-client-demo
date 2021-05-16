@@ -10,11 +10,10 @@ import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { change, formValueSelector } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeNewInvoice, saveInvoice } from './actions';
+import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
-import { PaymentMethod } from '../types/PaymentMethod';
 import moment from 'moment';
 import { InvoicePrint } from './invoice-print';
 import { useReactToPrint } from 'react-to-print';
@@ -37,6 +36,7 @@ interface InvoiceEditDispatchProps {
         saveInvoice: (invoice: Invoice, callback: (result: ResponseResult) => void) => void;
         loadInvoice: (invoiceId: number, callback: (invoice: Invoice) => void) => void;
         makeNewInvoice: () => void;
+        makeInvoiceFromQuote: (quoteId: number, callback: (invoice: Invoice) => void) => void;
         loadServiceIndices: () => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
@@ -70,11 +70,16 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }
 
     const invoiceId = Number(props.match.params.id) ?? 0;
+    const quoteId = Number(props.match.params.quoteId) ?? 0;
 
     useEffect(() => {
         if (invoiceId) {
             actions.loadInvoice(invoiceId, inv => {
                 setServices(inv.services);
+                setInitialValue(true);
+            });
+        } else if (quoteId) {
+            actions.makeInvoiceFromQuote(quoteId, () => {
                 setInitialValue(true);
             });
         } else {
@@ -219,8 +224,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
         const invoiceForm: InvoiceFormProps = {
             invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
-            fullName: invoice.fullName,
-            phoneNumber: invoice.phone,
+            fullName: invoice.fullName? invoice.fullName : '' ,
+            phoneNumber: invoice.phone ? invoice.phone : '',
             email: invoice.email ?? '',
             company: invoice.company ?? '',
             abn: invoice.abn ?? '',
@@ -360,6 +365,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         loadCarMakes: bindActionCreators(loadCarMakes, dispatch),
         loadCarModels: bindActionCreators(loadCarModels, dispatch),
         deleteInvoice: bindActionCreators(deleteInvoice, dispatch),
+        makeInvoiceFromQuote: bindActionCreators(makeInvoiceFromQuote, dispatch),
     },
 });
 

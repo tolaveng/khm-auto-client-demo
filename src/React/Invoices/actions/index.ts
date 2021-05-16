@@ -210,3 +210,28 @@ export const deleteInvoice = (invoiceId: number) => async (dispatch: Dispatch<An
         type: UNSET_APP_LOADING_ACTION
     })
 }
+
+
+export const makeInvoiceFromQuote = (quoteId: number, callback : (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+
+    try {
+        const invoice = await Api.invoice.fromQuote(quoteId);
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICE_SUCCESS,
+            invoice
+        });
+        if (callback) callback(invoice);
+    } catch (ex) {
+        toast.error("Cannot make new invoice from quote")
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICE_FAILED,
+        })
+    }
+
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+}

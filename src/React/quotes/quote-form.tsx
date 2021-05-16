@@ -83,12 +83,14 @@ interface IProps {
     carMakes: string[];
     carModels: string[];
     onDeleteQuote: (quoteId: number) => void;
+    makeInvoiceFromQuote: (quoteId: number) => void;
 }
 
 export const QUOTE_FORM = 'QUOTE_FORM';
 
 const QuoteFormComp: React.FC<InjectedFormProps<QuoteFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, quote, onSaveQuote, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteQuote } = props;
+    const { handleSubmit, pristine, submitting, onServiceChange, quote, onSaveQuote, valid, serviceIndices, isLoadFailed,
+         carSearchHandler, carMakes, carModels, onDeleteQuote, makeInvoiceFromQuote } = props;
     const [serviceData, setServiceData] = useState(quote.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -148,7 +150,7 @@ const QuoteFormComp: React.FC<InjectedFormProps<QuoteFormProps, IProps> & IProps
 
     const handleMakeInvoiceFromQuote = () => {
         if (quote && quote.quoteId) {
-            console.log('make new invoice from quote')
+            makeInvoiceFromQuote(quote.quoteId);
         }
     }
 
