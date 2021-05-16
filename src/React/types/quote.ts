@@ -1,18 +1,14 @@
 import { Car } from "./car";
 import { Service } from "./service";
 
-export interface Invoice {
-    invoiceId: number;
-    invoiceNo: number;
-    invoiceDate: string;
+export interface Quote {
+    quoteId: number;
+    quoteDate: string;
     modifiedDateTime?: string;
-    paidDate?: string;
-    paymentMethod: number;
-    gst: number;
     note: string;
     odo: number;
     car: Car;
-    fullName?: string;
+    fullName: string;
     company?: string;
     phone?: string;
     email?: string;
@@ -21,5 +17,4 @@ export interface Invoice {
     services: Service[];
     userId: number;
     discount: number;
-    archived?: boolean;
 }

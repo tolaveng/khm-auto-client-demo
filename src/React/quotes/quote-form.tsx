@@ -9,11 +9,11 @@ import TextInput from '../components/form/TextInput';
 import { TableEditor } from '../components/table-editor/TableEditor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
 import { PaymentMethod } from '../types/PaymentMethod';
-import { Invoice } from '../types/invoice';
 import { Service } from '../types/service';
 import normalizePhone from '../utils/normalize-phone';
 import { ServiceIndex } from '../types/service-index';
 import AutoSuggestInput from '../components/form/AutoSuggestInput';
+import { Quote } from '../types/quote';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
@@ -54,8 +54,8 @@ const mapServiceToTableEditorDataRow = (services: Service[]): TableEditorDataRow
     }));
 };
 
-export interface InvoiceFormProps {
-    invoiceDate: string,
+export interface QuoteFormProps {
+    quoteDate: string,
     fullName: string,
     phoneNumber: string,
     email: string,
@@ -68,36 +68,34 @@ export interface InvoiceFormProps {
     model: string,
     year: number,
     note: string,
-    paymentMethod: string,
     subTotal: string,
     discount: string,
-    gstTotal: string,
     amountTotal: string,
 }
 
 interface IProps {
-    invoice: Invoice,
+    quote: Quote,
     onServiceChange: (services: Service[]) => void;
-    onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
+    onSaveQuote: (formData: QuoteFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
     serviceIndices: ServiceIndex[];
     isLoadFailed?: boolean;
     carSearchHandler?: (value: string) => void;
     carMakes: string[];
     carModels: string[];
-    onDeleteInvoice: (invoiceId: number) => void;
+    onDeleteQuote: (quoteId: number) => void;
 }
 
-export const INVOICE_FORM = 'INVOICE_FORM';
+export const QUOTE_FORM = 'QUOTE_FORM';
 
-const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteInvoice } = props;
-    const [serviceData, setServiceData] = useState(invoice.services ?? []);
+const QuoteFormComp: React.FC<InjectedFormProps<QuoteFormProps, IProps> & IProps> = (props) => {
+    const { handleSubmit, pristine, submitting, onServiceChange, quote, onSaveQuote, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteQuote } = props;
+    const [serviceData, setServiceData] = useState(quote.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
 
     useEffect(() => {
-        setServiceData(invoice.services);
-    }, [invoice]);
+        setServiceData(quote.services);
+    }, [quote]);
 
     useEffect(() => {
         onServiceChange(serviceData);
@@ -111,10 +109,10 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                 ...serviceData,
                 {
                     serviceId: row.id ?? 0,
-                    serviceName: row.cells![0],
-                    servicePrice: row.cells![1],
-                    serviceQty: row.cells![2],
-                    invoiceId: invoice ? invoice.invoiceId : 0,
+                    serviceName: row.cells?.[0],
+                    servicePrice: row.cells?.[1],
+                    serviceQty: row.cells?.[2],
+                    invoiceId: quote ? quote.quoteId : 0,
                 },
             ]);
         } else {
@@ -135,16 +133,22 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     };
     // --- end service ---
 
-    const formSubmit = (formData: InvoiceFormProps, isPrint: boolean) => {
+    const formSubmit = (formData: QuoteFormProps, isPrint: boolean) => {
         if (valid) {
-            return onSaveInvoice(formData, serviceData, isPrint);
+            return onSaveQuote(formData, serviceData, isPrint);
         }
     }
 
 
     const handleDelete = () => {
-        if (invoice && invoice.invoiceId) {
-            onDeleteInvoice(invoice.invoiceId);
+        if (quote && quote.quoteId) {
+            onDeleteQuote(quote.quoteId);
+        }
+    }
+
+    const handleMakeInvoiceFromQuote = () => {
+        if (quote && quote.quoteId) {
+            console.log('make new invoice from quote')
         }
     }
 
@@ -152,10 +156,10 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
         <Form autoComplete='off'>
             <fieldset>
                 <Form.Group widths='equal'>
-                    <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
+                    <Field label='Quote Date' name='quoteDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
                     <Form.Field />
-                    {invoice.invoiceNo
-                        ? <Form.Field><label>Invoice No</label><label style={{ padding: 4, border: '1px solid #cccccc', borderRadius: 2 }}>{invoice.invoiceNo}</label></Form.Field>
+                    {(quote.quoteId && quote.quoteId > 0)
+                        ? <Form.Field><label>Quote No</label><label style={{ padding: 4, border: '1px solid #cccccc', borderRadius: 2 }}>{quote.quoteId}</label></Form.Field>
                         : <Form.Field />
                     }
 
@@ -220,37 +224,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             <Grid columns='2'>
                 <Grid.Column>
                     <Field label='Note' name='note' type='text' component={TextAreaInput} rows='3' />
-                    <fieldset>
-                        <legend>Payment</legend>
-                        <Form.Group inline>
-                            <Field
-                                label='Cash'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='cash'
-                                value={PaymentMethod.Cash.toString()}
-                            />
-                            <span>&nbsp; &nbsp; &nbsp;</span>
-                            <Field
-                                label='Card'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='card'
-                                value={PaymentMethod.Card.toString()}
-                            />
-                            <span>&nbsp; &nbsp; &nbsp;</span>
-                            <Field
-                                label='UnPaid'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='unpaid'
-                                value={PaymentMethod.Unpaid.toString()}
-                            />
-                        </Form.Group>
-                    </fieldset>
                 </Grid.Column>
                 <Grid.Column textAlign='right'>
                     <Field
@@ -270,7 +243,6 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                         inline
                         styles={{ textAlign: 'right' }}
                     />
-                    <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
                     <Field
                         label='Total (in.gst)'
                         name='amountTotal'
@@ -285,7 +257,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             <div>
                 <div style={{ textAlign: 'left', float: 'left' }}>
                     {
-                        !!invoice && !!invoice.invoiceNo &&
+                        (!!quote && !!quote.quoteId && quote.quoteId > 0) &&
                         <Button basic color='red' className='action-button' type='button' onClick={handleDelete} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
                             <Icon name='trash' />
                             <span>DELETE</span>
@@ -293,6 +265,13 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                     }
                 </div>
                 <div style={{ textAlign: 'right', float: 'right' }}>
+                    {
+                        (!!quote && !!quote.quoteId && quote.quoteId > 0) &&
+                        <Button color='green' className='action-button' type='button' onClick={handleMakeInvoiceFromQuote} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
+                            <Icon name='file alternate outline' />
+                            <span>Create New Invoice</span>
+                        </Button>
+                    }
                     <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
                         <Icon name='print' />
                         <span>Print</span>
@@ -301,7 +280,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
                         <Icon name='save' />
                         <span>Save</span>
                     </Button>
-                    <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
+                    <Button basic color='blue' className='action-button' type='button' as={Link} to='/quote' icon labelPosition='left'>
                         <Icon name='cancel' />
                         <span>Close</span>
                     </Button>
@@ -313,7 +292,7 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
 
 const validate = (values: any) => {
     const errors: any = {}
-    const requiredFields = ['invoiceDate', 'carNo', 'paymentMethod']
+    const requiredFields = ['quoteDate', 'carNo', 'paymentMethod']
     requiredFields.forEach(field => {
         if (!values[field]) {
             errors[field] = 'Required'
@@ -337,42 +316,42 @@ const validate = (values: any) => {
 }
 
 // const mapStateToProps = (state: RootState) => {
-//     const { invoice } = state.invoiceState;
+//     const { quote } = state.quoteState;
 //     return {
 //         initialValues: {
-//             invoiceDate: invoice.invoiceDateTime,
-//             fullName: invoice.fullName,
-//             phoneNumber: invoice.phone,
-//             email: invoice.email,
-//             company: invoice.company,
-//             abn: invoice.abn,
-//             address: invoice.address,
-//             plateNo: invoice.car?.plateNo,
-//             odo: invoice.car?.odo,
-//             make: invoice.car?.carMake,
-//             model: invoice.car?.carModel,
-//             year: invoice.car?.carYear,
-//             note: invoice.note,
-//             paymentMethod: invoice.paymentMethod.toString(),
+//             quoteDate: quote.quoteDateTime,
+//             fullName: quote.fullName,
+//             phoneNumber: quote.phone,
+//             email: quote.email,
+//             company: quote.company,
+//             abn: quote.abn,
+//             address: quote.address,
+//             plateNo: quote.car?.plateNo,
+//             odo: quote.car?.odo,
+//             make: quote.car?.carMake,
+//             model: quote.car?.carModel,
+//             year: quote.car?.carYear,
+//             note: quote.note,
+//             paymentMethod: quote.paymentMethod.toString(),
 //         },
-//         services: invoice.services
+//         services: quote.services
 //     }
 // }
 
 
-// const InvoiceFormFx = reduxForm<InvoiceForm, IProps>({
+// const QuoteFormFx = reduxForm<QuoteForm, IProps>({
 //     validate,
-//     form: INVOICE_FORM,
+//     form: QUOTE_FORM,
 //     enableReinitialize: false,
-// })(InvoiceFormComp);
+// })(QuoteFormComp);
 
-// export const InvoiceForm = connect(mapStateToProps)(InvoiceFormFx);
+// export const QuoteForm = connect(mapStateToProps)(QuoteFormFx);
 
 
-export const InvoiceForm = reduxForm<InvoiceFormProps, IProps>({
+export const QuoteForm = reduxForm<QuoteFormProps, IProps>({
     validate,
-    form: INVOICE_FORM,
+    form: QUOTE_FORM,
     enableReinitialize: true, //update when the initial value update
     keepDirtyOnReinitialize: true    // reinit the value, it keeps edited value
-})(InvoiceFormComp);
+})(QuoteFormComp);
 

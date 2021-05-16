@@ -77,7 +77,7 @@ const CarPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                     <Table.Cell>{car.carYear}</Table.Cell>
                     <Table.Cell>{car.odo}</Table.Cell>
                     <Table.Cell>
-                        <Button basic icon='search' as={Link} to={`/invoice/?carNo=${car.carNo}`} title={'Find Invoices'} />
+                        <Button basic icon='file alternate outline' as={Link} to={`/invoice/?carNo=${car.carNo}`} title={'Find Invoices'} />
                     </Table.Cell>
                 </Table.Row>
             );
@@ -97,7 +97,7 @@ const CarPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                     </Form.Field>
                     <Button type='submit' basic color='blue' icon labelPosition='left'>
                         <Icon name='search' />
-                        <span>Filter</span>
+                        <span>Find</span>
                     </Button>
                 </Form>
             </Segment>

@@ -6,35 +6,35 @@ import { Link, useLocation } from 'react-router-dom';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
-import { Invoice } from '../types/invoice';
-import { loadInvoices } from './actions';
+import { Quote } from '../types/quote';
+import { loadQuotes } from './actions';
 import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
 import { User } from '../components/users/types';
 import { RootState } from '../types/root-state';
-import { InvoiceFilter } from '../types/invoice-filter';
+import { QuoteFilter } from '../types/quote-filter';
 
 
-interface InvoicePageDispatchProps {
+interface QuotePageDispatchProps {
     actions: {
-        loadInvoices: (pageRequest: PageRequest, filter?: InvoiceFilter) => void
+        loadQuotes: (pageRequest: PageRequest, filter?: QuoteFilter) => void
     };
 }
 
 
-interface InvoicePageStateProps {
+interface QuotePageStateProps {
     user: User,
-    invoices: PageResponse<Invoice>
+    quotes: PageResponse<Quote>
 }
 
-type Props = InvoicePageStateProps & InvoicePageDispatchProps;
+type Props = QuotePageStateProps & QuotePageDispatchProps;
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
 
-const InvoicePageComp: React.FC<Props> = (props) => {
-    const { user, invoices, actions } = props;
+const QuotePageComp: React.FC<Props> = (props) => {
+    const { user, quotes, actions } = props;
 
     const query = useQuery();
     let queryCarNo = '';
@@ -45,20 +45,20 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 
     const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 50, });
 
-    const initFilter: InvoiceFilter = {
-        InvoiceNo: '',
+    const initFilter: QuoteFilter = {
+        QuoteId: '',
         CarNo: queryCarNo,
         Customer: '',
-        InvoiceDate: '',
-        SortBy: 'InvoiceNo',
+        QuoteDate: '',
+        SortBy: 'QuoteId',
         SortDir: 'DESC',
     }
-    const [filter, setFilter] = useState<InvoiceFilter>(initFilter);
+    const [filter, setFilter] = useState<QuoteFilter>(initFilter);
     const [shouldUpdate, setShouldUpdate] = useState(true);
 
     useEffect(() => {
         if (shouldUpdate) {
-            actions.loadInvoices(pageRequest, filter);
+            actions.loadQuotes(pageRequest, filter);
         }
     }, [pageRequest, filter, shouldUpdate]);
 
@@ -73,12 +73,12 @@ const InvoicePageComp: React.FC<Props> = (props) => {
         setPageRequest({ ...pageRequest, PageNumber: 1 })
     };
 
-    const setInvoiceDate = (date: Date) => {
+    const setQuoteDate = (date: Date) => {
         setShouldUpdate(false);
         if (date) {
-            setFilter({ ...filter, InvoiceDate: moment(date).format('YYYY-MM-DD') });
+            setFilter({ ...filter, QuoteDate: moment(date).format('YYYY-MM-DD') });
         } else {
-            setFilter({ ...filter, InvoiceDate: '' });
+            setFilter({ ...filter, QuoteDate: '' });
         }
     }
 
@@ -86,8 +86,8 @@ const InvoicePageComp: React.FC<Props> = (props) => {
         const val = evt.target.value;
         setShouldUpdate(false);
         switch (evt.target.name) {
-            case 'txtInvoiceNo':
-                setFilter({ ...filter, InvoiceNo: val });
+            case 'txtQuoteId':
+                setFilter({ ...filter, QuoteId: val });
                 break;
 
             case 'txtCarNo':
@@ -109,25 +109,25 @@ const InvoicePageComp: React.FC<Props> = (props) => {
         }
     }
 
-    const renderInvoices = () => {
-        if (!invoices || invoices.data.length === 0) return null;
+    const renderQuotes = () => {
+        if (!quotes || quotes.data.length === 0) return null;
 
-        const invoiceList = invoices.data.map((inv) => {
+        const quoteList = quotes.data.map((inv) => {
             return (
-                <Table.Row key={inv.invoiceId}>
-                    <Table.Cell>{inv.invoiceNo}</Table.Cell>
-                    <Table.Cell>{moment(inv.invoiceDate).format('DD/MM/YYYY')}</Table.Cell>
+                <Table.Row key={inv.quoteId}>
+                    <Table.Cell>{inv.quoteId}</Table.Cell>
+                    <Table.Cell>{moment(inv.quoteDate).format('DD/MM/YYYY')}</Table.Cell>
                     <Table.Cell>{inv.car != null ? inv.car.carNo : ''}</Table.Cell>
                     <Table.Cell>{inv.fullName}</Table.Cell>
                     <Table.Cell>{inv.phone}</Table.Cell>
                     <Table.Cell>
-                        <Button basic icon='pencil' as={Link} to={`/invoice/edit/${inv.invoiceId}`} title={'Edit Invoice'} />
+                        <Button basic icon='pencil' as={Link} to={`/quote/edit/${inv.quoteId}`} title={'Edit Quote'} />
                     </Table.Cell>
                 </Table.Row>
             );
         });
 
-        return invoiceList;
+        return quoteList;
     };
 
     const renderFilterForm = () => {
@@ -136,8 +136,8 @@ const InvoicePageComp: React.FC<Props> = (props) => {
             <Segment>
                 <Form onSubmit={filterHandler} autoComplete='false'>
                     <Form.Field>
-                        <label>Invoice No</label>
-                        <input name='txtInvoiceNo' value={filter.InvoiceNo} onChange={setFilterValue} />
+                        <label>Quote No</label>
+                        <input name='txtQuoteId' value={filter.QuoteId} onChange={setFilterValue} />
                     </Form.Field>
                     <Form.Field>
                         <label>Plate No</label>
@@ -151,8 +151,8 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                         <label>Date</label>
                         <ReactDatePicker
                             dateFormat='dd/MM/yyyy'
-                            selected={filter.InvoiceDate ? moment(filter.InvoiceDate, 'YYYY-MM-DD').toDate() : null}
-                            onChange={(date) => setInvoiceDate(date as Date)}
+                            selected={filter.QuoteDate ? moment(filter.QuoteDate, 'YYYY-MM-DD').toDate() : null}
+                            onChange={(date) => setQuoteDate(date as Date)}
                         />
                     </Form.Field>
                     <Button type='submit' basic color='blue' icon labelPosition='left'>
@@ -166,10 +166,10 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 
     return (
         <Container fluid>
-            <HeaderLine label='Invoices'>
-                <Button type='button' primary as={Link} to='/invoice/new' icon labelPosition='left'>
+            <HeaderLine label='Quotes'>
+                <Button type='button' primary as={Link} to='/quote/new' icon labelPosition='left'>
                     <Icon name='add' />
-                    <span>Create Invoice</span>
+                    <span>Create Quote</span>
                 </Button>
             </HeaderLine>
             <Grid columns={2} relaxed='very'>
@@ -178,11 +178,11 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                         <Table.Header>
                             <Table.Row>
                                 <Table.HeaderCell collapsing
-                                    sorted={filter.SortBy === 'InvoiceNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
-                                    onClick={() => sortBy('InvoiceNo')}>No</Table.HeaderCell>
+                                    sorted={filter.SortBy === 'QuoteId' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    onClick={() => sortBy('QuoteId')}>No</Table.HeaderCell>
                                 <Table.HeaderCell collapsing
-                                    sorted={filter.SortBy === 'InvoiceDate' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
-                                    onClick={() => sortBy('InvoiceDate')}>Date</Table.HeaderCell>
+                                    sorted={filter.SortBy === 'QuoteDate' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    onClick={() => sortBy('QuoteDate')}>Date</Table.HeaderCell>
                                 <Table.HeaderCell
                                     sorted={filter.SortBy === 'CarNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => sortBy('CarNo')}>Plate No</Table.HeaderCell>
@@ -191,12 +191,12 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                                 <Table.HeaderCell collapsing></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <Table.Body>{invoices != null && renderInvoices()}</Table.Body>
+                        <Table.Body>{quotes != null && renderQuotes()}</Table.Body>
                     </Table>
                     <Pagination
                         activePage={pageRequest.PageNumber}
                         onPageChange={handlePaginationChange}
-                        totalPages={invoices.totalCount > 0 ? Math.ceil(invoices.totalCount / invoices.pageSize) : 1}
+                        totalPages={quotes.totalCount > 0 ? Math.ceil(quotes.totalCount / quotes.pageSize) : 1}
                         ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
                         firstItem={{ content: <Icon name='angle double left' />, icon: true }}
                         lastItem={{ content: <Icon name='angle double right' />, icon: true }}
@@ -210,17 +210,17 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     );
 };
 
-const mapStateToProps = (state: RootState): InvoicePageStateProps => {
+const mapStateToProps = (state: RootState): QuotePageStateProps => {
     return {
         user: state.user,
-        invoices: state.invoiceState.invoices
+        quotes: state.quoteState.quotes
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoicePageDispatchProps => ({
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): QuotePageDispatchProps => ({
     actions: {
-        loadInvoices: bindActionCreators(loadInvoices, dispatch)
+        loadQuotes: bindActionCreators(loadQuotes, dispatch)
     }
 });
 
-export const InvoicePage = connect(mapStateToProps, mapDispatchToProps)(InvoicePageComp);
+export const QuotePage = connect(mapStateToProps, mapDispatchToProps)(QuotePageComp);

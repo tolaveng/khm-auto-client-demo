@@ -29,6 +29,8 @@ const createWindow = (): void => {
         car: baseUrl + '/car',
         report: baseUrl + '/report',
         backup: baseUrl + '/backup',
+        quote: baseUrl + '/quote',
+        newQuote: baseUrl + '/quote/new',
     };
 
     mainWindow.maximize();
@@ -67,6 +69,23 @@ const createWindow = (): void => {
                     label: 'Create new invoice',
                     click() {
                         mainWindow?.loadURL(urls.newInvoice)
+                    },
+                },
+            ],
+        },
+        {
+            label: 'Quotes',
+            submenu: [
+                {
+                    label: 'All Quotes',
+                    click() {
+                        mainWindow?.loadURL(urls.quote)
+                    },
+                },
+                {
+                    label: 'Create new quote',
+                    click() {
+                        mainWindow?.loadURL(urls.newQuote)
                     },
                 },
             ],

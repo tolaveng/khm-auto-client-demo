@@ -5,6 +5,7 @@ import { Invoice } from '../types/invoice';
 import { InvoiceFilter } from '../types/invoice-filter';
 import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
+import { Quote } from '../types/quote';
 import { ResponseResult } from '../types/response-result';
 import { ServiceIndex } from '../types/service-index';
 import { SummaryReport } from '../types/summary-report';
@@ -50,6 +51,18 @@ const invoice = {
     downloadSummaryReport: (filter: SummaryReportFilter): Promise<AxiosResponse<Blob>> => requests.getBlobWithParams<Blob>('/invoice/downloadSummaryReport', {...filter}),
 };
 
+
+const quote = {
+    getAll: (): Promise<PageResponse<Quote>> => requests.get<PageResponse<Quote>>('/quote/getall'),
+    getAllPaged: (pageRequest: PageRequest, filter?: InvoiceFilter): Promise<PageResponse<Quote>> => requests.getWithParams<PageResponse<Quote>>('/quote/getall', {...pageRequest, ...filter}),
+    getQuote: (quoteId: number): Promise<Quote> => requests.get<Quote>(`/quote/${quoteId}`),
+    deleteQuote: (quoteId: number): Promise<void> => requests.delete(`/quote/${quoteId}`),
+    create: (quote: Quote): Promise<ResponseResult> => requests.post<ResponseResult>('/quote/create', quote),
+    update: (quote: Quote): Promise<ResponseResult> => requests.post<ResponseResult>('/quote/update', quote),
+    loadServiceIndices: (): Promise<ServiceIndex[]> => requests.get<ServiceIndex[]>('invoice/getserviceindex'),
+};
+
+
 const user = {
     login: (username: string, password: string): Promise<ResponseResult<User>> => requests.post<ResponseResult<User>>('/user/login', {username, password}),
     current: (): Promise<User> => {
@@ -76,15 +89,11 @@ const car = {
     loadCarModels: (): Promise<string[]> => requests.get<string[]>('/car/getmodels'),
 }
 
-const backup = {
-
-}
-
 const Api = {
     invoice,
+    quote,
     user,
     car,
-    backup
 };
 
 export default Api;

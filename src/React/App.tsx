@@ -12,6 +12,8 @@ import ScrollToTop from './components/ScrollToTop';
 import { CarPage } from './cars/car-page';
 import { ReportPage } from './reports/report-page';
 import { BackupPage } from './backup/backup-page';
+import { QuotePage } from './quotes/quote-page';
+import { QuoteEditPage } from './quotes/quote-edit';
 
 
 interface AppProps {
@@ -30,7 +32,13 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute exact path='/invoice/edit/:id' component={InvoiceEditPage} />
                 <AuthRoute path='/invoice/new' component={InvoiceEditPage} />
                 <AuthRoute path={'/invoice'} component={InvoicePage} />
+                <AuthRoute path={'/invoices'} component={InvoicePage} />
 
+                <AuthRoute exact path='/quote/edit/:id' component={QuoteEditPage} />
+                <AuthRoute path='/quote/new' component={QuoteEditPage} />
+                <AuthRoute exact path={'/quote'} component={QuotePage} />
+                <AuthRoute exact path={'/quotes'} component={QuotePage} />
+                
                 <AuthRoute path={'/car'} component={CarPage} />
                 <AuthRoute path={'/report'} component={ReportPage} />
 

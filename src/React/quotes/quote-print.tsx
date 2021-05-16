@@ -1,14 +1,14 @@
 import moment from 'moment';
 import React from 'react';
-import { Invoice } from '../types/invoice';
+import { Quote } from '../types/quote';
 import { Service } from '../types/service';
-import { pad6, RoundToTwo } from '../utils/helper';
+import { pad6 } from '../utils/helper';
 
 interface IProps {
-    invoice: Invoice
+    quote: Quote
 }
 
-class InvoicePrintComp extends React.Component<IProps> {
+class QuotePrintComp extends React.Component<IProps> {
     constructor(props: IProps) {
         super(props);
 
@@ -19,24 +19,22 @@ class InvoicePrintComp extends React.Component<IProps> {
 
 
     calculateTotal(services: Service[]) {
-        const { invoice } = this.props;
+        const { quote } = this.props;
 
         let subTotal = 0;
-        let gstTotal = 0;
         let amountTotal = 0;
         services.forEach((service) => {
             subTotal += Number(service.servicePrice) * Number(service.serviceQty);
         });
-        amountTotal = subTotal - invoice.discount;
-        gstTotal = RoundToTwo(amountTotal / (1 + invoice.gst));
-
+        amountTotal = subTotal - quote.discount;
+        
         return {
-            subTotal, amountTotal, gstTotal
+            subTotal, amountTotal
         }
     }
 
     renderContent() {
-        const { invoice } = this.props;
+        const { quote } = this.props;
 
         return (
             <div className='invoice-content'>
@@ -50,16 +48,16 @@ class InvoicePrintComp extends React.Component<IProps> {
                         </p>
                     </div>
                     <div className='print-col-right'>
-                        <span className='invoice-heading'>Tax Invoice</span> <br />
+                        <span className='invoice-heading'>Quote</span> <br />
                         <table>
                             <tbody>
-                                <tr><td>Invoice No:</td><td>{pad6(invoice.invoiceNo)}</td></tr>
-                                <tr><td>Date:</td><td>{moment(invoice.invoiceDate).format('DD/MM/yyyy')}</td></tr>
-                                <tr><td>Reg No:</td><td>{invoice.car.carNo}</td></tr>
-                                {!!invoice.car.odo && <tr><td>ODO:</td><td>{invoice.car.odo}</td></tr>}
-                                {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
-                                {!!invoice.car.carModel && <tr><td>Model:</td><td>{invoice.car.carModel}</td></tr>}
-                                {!!invoice.car.carYear && <tr><td>Year:</td><td>{invoice.car.carYear}</td></tr>}
+                                <tr><td>Quote No:</td><td>{pad6(quote.quoteId)}</td></tr>
+                                <tr><td>Date:</td><td>{moment(quote.quoteDate).format('DD/MM/yyyy')}</td></tr>
+                                <tr><td>Reg No:</td><td>{quote.car.carNo}</td></tr>
+                                {!!quote.car.odo && <tr><td>ODO:</td><td>{quote.car.odo}</td></tr>}
+                                {!!quote.car.carMake && <tr><td>Make:</td><td>{quote.car.carMake}</td></tr>}
+                                {!!quote.car.carModel && <tr><td>Model:</td><td>{quote.car.carModel}</td></tr>}
+                                {!!quote.car.carYear && <tr><td>Year:</td><td>{quote.car.carYear}</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -68,14 +66,14 @@ class InvoicePrintComp extends React.Component<IProps> {
                 <div className='print-space'></div>
 
                 <div>
-                    <div>To:{!!invoice.fullName && invoice.fullName}</div>
-                    {!!invoice.company && <div>{invoice.company}</div>}
-                    {!!invoice.abn && <div>ABN: {invoice.abn}</div>}
-                    {!!invoice.address && <div>{invoice.address}</div>}
+                    <div>To:{!!quote.fullName && quote.fullName}</div>
+                    {!!quote.company && <div>{quote.company}</div>}
+                    {!!quote.abn && <div>ABN: {quote.abn}</div>}
+                    {!!quote.address && <div>{quote.address}</div>}
                     <div>
-                        {!!invoice.phone && <span>{invoice.phone}</span>}
-                        {invoice.phone && invoice.email && <span>, </span>}
-                        {!!invoice.email && <span>{invoice.email}</span>}
+                        {!!quote.phone && <span>{quote.phone}</span>}
+                        {quote.phone && quote.email && <span>, </span>}
+                        {!!quote.email && <span>{quote.email}</span>}
                     </div>
                 </div>
 
@@ -92,7 +90,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                     </thead>
                     <tbody>
                         {
-                            invoice.services.map((ser) => {
+                            quote.services.map((ser) => {
                                 return (
                                     <tr className='invoice-service-table-data' key={ser.serviceId}>
                                         <td style={{ textAlign: 'left' }}>
@@ -112,9 +110,9 @@ class InvoicePrintComp extends React.Component<IProps> {
 
                 <div className='print-space'></div>
                 {
-                    invoice.note && <div style={{ fontSize: '0.8rem' }}>
+                    quote.note && <div style={{ fontSize: '0.8rem' }}>
                         <span><b>Note: </b></span>
-                        {invoice.note.split('\n').map((item, key) => {
+                        {quote.note.split('\n').map((item, key) => {
                             return <span key={key}>{item}<br /></span>
                         })}
                     </div>
@@ -125,8 +123,8 @@ class InvoicePrintComp extends React.Component<IProps> {
 
 
     renderFooter() {
-        const { invoice } = this.props;
-        const calTotal = this.calculateTotal(invoice.services);
+        const { quote } = this.props;
+        const calTotal = this.calculateTotal(quote.services);
 
         return (
             <div className='invoice-footer'>
@@ -138,18 +136,14 @@ class InvoicePrintComp extends React.Component<IProps> {
                                 <td style={{ textAlign: 'right' }}>{calTotal.subTotal.toFixed(2)}</td>
                             </tr>
                             {
-                                (invoice.discount && Number(invoice.discount)) > 0 &&
+                                (quote.discount && Number(quote.discount)) > 0 &&
                                 <tr>
                                     <td style={{ textAlign: 'right' }}>Discount</td>
-                                    <td style={{ textAlign: 'right' }}>{Number(invoice.discount).toFixed(2)}</td>
+                                    <td style={{ textAlign: 'right' }}>{Number(quote.discount).toFixed(2)}</td>
                                 </tr>
                             }
-                            <tr>
-                                <td style={{ textAlign: 'right' }}>GST</td>
-                                <td style={{ textAlign: 'right' }}>{calTotal.gstTotal.toFixed(2)}</td>
-                            </tr>
                             <tr style={{ backgroundColor: '#cccccc' }}>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in.gst)</td>
+                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Total</td>
                                 <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{calTotal.amountTotal.toFixed(2)}</td>
                             </tr>
                         </tbody>
@@ -199,4 +193,4 @@ class InvoicePrintComp extends React.Component<IProps> {
 
 }
 
-export const InvoicePrint = InvoicePrintComp;
+export const QuotePrint = QuotePrintComp;
