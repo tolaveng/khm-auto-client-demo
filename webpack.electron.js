@@ -2,14 +2,15 @@ const path = require('path');
 
 module.exports = {
   // Build Mode
-  mode: 'development',
+  //mode: 'development',
   // Electron Entrypoint
   entry: './src/main.ts',
   target: 'electron-main',
+  //target: 'electron-renderer',
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  devtool: 'source-map',
+  devtool: 'source-map', //'inline-source-map',
   module: {
     rules: [{
         test: /\.(js|ts|tsx)$/,
@@ -19,7 +20,7 @@ module.exports = {
     }]
   },
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: path.resolve(__dirname, './build'),
     filename: '[name].js',
   }
 }

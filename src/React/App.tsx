@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, HashRouter } from 'react-router-dom';
 import { InvoicePage } from './invoices/invoice-page';
 import { InvoiceEditPage } from './invoices/invoice-edit';
 import { connect } from 'react-redux';
@@ -24,7 +24,7 @@ interface AppProps {
 const App: React.FC<AppProps> = (props) => {
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <ScrollToTop />
             <Switch>
                 <Route path='/login' component={LoginPage} />
@@ -61,7 +61,7 @@ const App: React.FC<AppProps> = (props) => {
                 limit={1}
             />
             {!!props.isAppLoading && <LoaderSpinner />}
-        </BrowserRouter>
+        </HashRouter>
     );
 };
 

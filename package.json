@@ -1,12 +1,30 @@
 {
-  "name": "khm-client",
+  "name": "khm-auto",
   "version": "1.0.0",
-  "description": "KHM Auto",
-  "main": "index.js",
+  "description": "KHM Auto Client App",
+  "main": "./build/main.js",
+  "build": {
+    "appId": "app.tola.khm-client",
+    "productName": "KHM Auto",
+    "files": [
+      "build/**/*"
+    ],
+    "directories":{
+      "buildResources": "/src/React/assets"
+    },
+    "win": {
+      "icon": "/src/React/assets/icon.png"
+    }
+  },
+  "homepage": "./",
   "scripts": {
-    "build": "webpack",
-    "start": "npm run build && electron dist/main.js",
-    "react-dev": "webpack && webpack serve --mode=development",
+    "webpack-build": "webpack --mode=production",
+    "electron-build": "electron-builder",
+    "build": "yarn webpack-build && yarn electron-build",
+    "release": "yarn webpack-build && electron-builder --publish=always",
+    "run-start": "npm run webpack-build && electron build/main.js",
+
+    "react-dev": "webpack --mode=development && webpack serve --mode=development",
     "electron-dev": "nodemon",
     "dev": "cross-env NODE_ENV=development concurrently --kill-others \"npm run react-dev\" \"npm run electron-dev\"",
     "lint": "eslint src/**/*.{ts,tsx}"
@@ -33,7 +51,9 @@
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.2",
+    "dotenv": "^10.0.0",
     "electron": "^11.2.3",
+    "electron-builder": "^22.10.5",
     "eslint": "^7.20.0",
     "eslint-plugin-react": "^7.22.0",
     "file-loader": "^6.2.0",

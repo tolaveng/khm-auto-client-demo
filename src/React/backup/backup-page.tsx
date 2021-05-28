@@ -34,7 +34,7 @@ interface IStates {
 }
 
 class BackUpComp extends React.PureComponent<IProps, IStates> {
-    private hubUrl = 'https://localhost:5001/backuphub';
+    private hubUrl = process.env.REACT_APP_BAKUPHUB_URL ? process.env.REACT_APP_BAKUPHUB_URL : 'https://localhost:5001/backuphub';
     private token: string | null;
     private jobId: string;
     private hubConnection: HubConnection | null = null;

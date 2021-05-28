@@ -13,7 +13,7 @@ import { SummaryReportFilter } from '../types/summary-report-filter';
 
 export const KHM_JWT_TOKEN = 'KHM_JWT_TOKEN';
 
-axios.defaults.baseURL = 'https://localhost:5001/api';
+axios.defaults.baseURL = process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL : 'https://localhost:5001/api';
 axios.defaults.timeout = 0; //no timeout
 
 axios.interceptors.request.use((config) => {

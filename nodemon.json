@@ -3,6 +3,6 @@
       "src/main.ts", 
       "src/React/*"
     ],
-    "exec": "webpack --config ./webpack.electron.js && electron ./dist/main.js",
+    "exec": "webpack --config ./webpack.electron.js && electron ./build/main.js",
     "ext": "ts"
   }

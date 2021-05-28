@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron';
-
+import path from 'path';
+import url from 'url';
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDev = process.env.NODE_ENV === 'development';
@@ -21,10 +22,10 @@ const createWindow = (): void => {
 
     console.log(`Running in development: ${isDev}`);
     //const mainUrl = 'http://localhost:9000';
-    const baseUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}`;
+    const baseUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}/index.html#`; // using HashRouter instead of BrowserRouter
     const urls = {
         baseUrl: baseUrl,
-        indexUrl: baseUrl + '/invoice',
+        indexUrl: baseUrl + '/',
         newInvoice: baseUrl + '/invoice/new',
         car: baseUrl + '/car',
         report: baseUrl + '/report',
@@ -34,8 +35,8 @@ const createWindow = (): void => {
     };
 
     mainWindow.maximize();
-    mainWindow.loadURL(urls.indexUrl);
-
+    //mainWindow.loadURL(urls.indexUrl);
+    mainWindow.loadFile(path.resolve(path.join(__dirname, 'index.html')));
     // Main menu
     const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
         {
@@ -115,13 +116,13 @@ const createWindow = (): void => {
         }
     ];
 
-    if (isDev) {
+    //if (isDev) {
         mainMenuTemplate.push({
             label: 'Devs',
             submenu: [{ role: 'forceReload' }, { role: 'toggleDevTools' }],
         });
         mainWindow.webContents.openDevTools();
-    }
+    //}
     const menu = Menu.buildFromTemplate(mainMenuTemplate);
     Menu.setApplicationMenu(menu);
     // End main menu
