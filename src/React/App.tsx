@@ -14,7 +14,7 @@ import { ReportPage } from './reports/report-page';
 import { BackupPage } from './backup/backup-page';
 import { QuotePage } from './quotes/quote-page';
 import { QuoteEditPage } from './quotes/quote-edit';
-
+import { ElectronRouter } from './ElectronRoute';
 
 interface AppProps {
     isAppLoading: boolean;
@@ -26,6 +26,7 @@ const App: React.FC<AppProps> = (props) => {
     return (
         <HashRouter>
             <ScrollToTop />
+            <ElectronRouter />
             <Switch>
                 <Route path='/login' component={LoginPage} />
 
@@ -39,7 +40,7 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute path='/quote/new' component={QuoteEditPage} />
                 <AuthRoute exact path={'/quote'} component={QuotePage} />
                 <AuthRoute exact path={'/quotes'} component={QuotePage} />
-                
+
                 <AuthRoute path={'/car'} component={CarPage} />
                 <AuthRoute path={'/report'} component={ReportPage} />
 

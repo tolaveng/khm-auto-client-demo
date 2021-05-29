@@ -1,6 +1,5 @@
-import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, Menu, dialog } from 'electron';
 import path from 'path';
-import url from 'url';
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDev = process.env.NODE_ENV === 'development';
@@ -20,23 +19,16 @@ const createWindow = (): void => {
         icon: __dirname + '../React/assets/icon.png'
     });
 
-    console.log(`Running in development: ${isDev}`);
-    //const mainUrl = 'http://localhost:9000';
-    const baseUrl = isDev ? 'http://localhost:9000' : `file://${app.getAppPath()}/index.html#`; // using HashRouter instead of BrowserRouter
-    const urls = {
-        baseUrl: baseUrl,
-        indexUrl: baseUrl + '/',
-        newInvoice: baseUrl + '/invoice/new',
-        car: baseUrl + '/car',
-        report: baseUrl + '/report',
-        backup: baseUrl + '/backup',
-        quote: baseUrl + '/quote',
-        newQuote: baseUrl + '/quote/new',
-    };
-
     mainWindow.maximize();
-    //mainWindow.loadURL(urls.indexUrl);
-    mainWindow.loadFile(path.resolve(path.join(__dirname, 'index.html')));
+
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:9000');
+
+    } else {
+        //mainWindow.loadURL(`file://${app.getAppPath()}/index.html#`); // using HashRouter instead of BrowserRouter (NOT FOUND)
+        mainWindow.loadFile(path.resolve(path.join(__dirname, 'index.html')));
+    }
+   
     // Main menu
     const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
         {
@@ -63,13 +55,13 @@ const createWindow = (): void => {
                 {
                     label: 'All invoices',
                     click() {
-                        mainWindow?.loadURL(urls.indexUrl)
+                        mainWindow?.webContents.send('navigateTo', '/invoice');
                     },
                 },
                 {
                     label: 'Create new invoice',
                     click() {
-                        mainWindow?.loadURL(urls.newInvoice)
+                        mainWindow?.webContents.send('navigateTo', '/invoice/new');
                     },
                 },
             ],
@@ -80,13 +72,13 @@ const createWindow = (): void => {
                 {
                     label: 'All Quotes',
                     click() {
-                        mainWindow?.loadURL(urls.quote)
+                        mainWindow?.webContents.send('navigateTo', '/quote');
                     },
                 },
                 {
                     label: 'Create new quote',
                     click() {
-                        mainWindow?.loadURL(urls.newQuote)
+                        mainWindow?.webContents.send('navigateTo', '/quote/new');
                     },
                 },
             ],
@@ -94,13 +86,13 @@ const createWindow = (): void => {
         {
             label: 'Cars',
             click() {
-                mainWindow?.loadURL(urls.car)
+                mainWindow?.webContents.send('navigateTo', '/car');
             },
         },
         {
             label: 'Report',
             click() {
-                mainWindow?.loadURL(urls.report)
+                mainWindow?.webContents.send('navigateTo', '/report');
             },
         },
         {
@@ -109,7 +101,7 @@ const createWindow = (): void => {
                 {
                     label: 'Backup Database',
                     click() {
-                        mainWindow?.loadURL(urls.backup)
+                        mainWindow?.webContents.send('navigateTo', '/backup');
                     }
                 }
             ]
@@ -132,7 +124,7 @@ const createWindow = (): void => {
     });
 
     mainWindow.on('close', function (e) {
-        const choice = require('electron').dialog.showMessageBoxSync(mainWindow!,
+        const choice = dialog.showMessageBoxSync(mainWindow!,
             {
                 type: 'question',
                 buttons: ['Yes', 'No'],

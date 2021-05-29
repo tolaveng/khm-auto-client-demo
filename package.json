@@ -9,7 +9,7 @@
     "files": [
       "build/**/*"
     ],
-    "directories":{
+    "directories": {
       "buildResources": "/src/React/assets"
     },
     "win": {
@@ -23,7 +23,6 @@
     "build": "yarn webpack-build && yarn electron-build",
     "release": "yarn webpack-build && electron-builder --publish=always",
     "run-start": "npm run webpack-build && electron build/main.js",
-
     "react-dev": "webpack --mode=development && webpack serve --mode=development",
     "electron-dev": "nodemon",
     "dev": "cross-env NODE_ENV=development concurrently --kill-others \"npm run react-dev\" \"npm run electron-dev\"",
