@@ -24,6 +24,8 @@
     "release": "yarn webpack-build && electron-builder --publish=always",
     "run-start": "npm run webpack-build && electron build/main.js",
     "react-dev": "webpack --mode=development && webpack serve --mode=development",
+    "webpackWatch": "webpack --mode=development --watch",
+    "webpackServer": "webpack serve --mode=development",
     "electron-dev": "nodemon",
     "dev": "cross-env NODE_ENV=development concurrently --kill-others \"npm run react-dev\" \"npm run electron-dev\"",
     "lint": "eslint src/**/*.{ts,tsx}"
@@ -75,6 +77,7 @@
     "@microsoft/signalr": "^5.0.5",
     "axios": "^0.21.1",
     "file-saver": "^2.0.5",
+    "formik": "^2.2.9",
     "moment": "^2.29.1",
     "react-datepicker": "^3.4.1",
     "react-redux": "^7.2.2",
@@ -87,6 +90,7 @@
     "redux-thunk": "^2.3.0",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-icon": "^2.3.3",
-    "semantic-ui-react": "^2.0.3"
+    "semantic-ui-react": "^2.0.3",
+    "yup": "^0.32.9"
   }
 }

@@ -18,21 +18,25 @@ interface TextInputProps extends FormFieldProps {
 type Props = TextInputProps;
 
 const TextInput: React.FC<Props> = (props) => {
-    const { input, meta, label, type, placeholder, inline, readOnly, icon, onIconClick, fluid, styles, ...rest } = props;
-    const isError = meta.touched && !!meta.error;
+    const { field, form, label, type, placeholder, inline, readOnly, icon, onIconClick, fluid, styles, ...rest } = props;
+
+    const isError = form.errors[field.name] && form.touched[field.name]
 
     const inputIcon = icon ? { name: icon, circular: true, link: true, onClick: () => {
-        if (onIconClick) onIconClick(input.value)
+        if (onIconClick) onIconClick(field.value)
      }} : undefined;
 
     return (
         <Form.Field error={isError} inline={inline}>
             <label>{label}</label>
-            {!!inputIcon && <Input type={type} placeholder={placeholder} icon={inputIcon}  {...input} readOnly={readOnly} style={styles} {...rest}/>}
-            {!inputIcon && <input type={type} placeholder={placeholder} {...input} readOnly={readOnly} style={styles} {...rest}/>}
-            {isError ? <div><label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label></div> : <div><label style={{fontSize: 'x-small'}}>&nbsp;</label></div>}
+            {!!inputIcon && <Input type={type} placeholder={placeholder} icon={inputIcon}  {...field} readOnly={readOnly} style={styles} {...rest}/>}
+            {!inputIcon && <input type={type} placeholder={placeholder} {...field} readOnly={readOnly} style={styles} {...rest}/>}
+            {isError 
+             ? <div><label style={{ color: 'red', fontSize: 'x-small' }}>{form.errors[field.name]}</label></div>
+             : <div><label style={{fontSize: 'x-small'}}>&nbsp;</label></div>}
         </Form.Field>
     );
 };
+
 
 export default TextInput;

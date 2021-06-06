@@ -34,7 +34,7 @@ module.exports = (env, argv) => {
     }, {});
 
     //------ End Configure .env.development -----
-    const buildPath = '/build/'
+    const buildPath = '/build'
 
     return {
         //mode: 'development',
