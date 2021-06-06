@@ -197,7 +197,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
 
 
         if (onRowUpdated) {
-            const cellData = cells.map((c) => (c.type === 'number' ? Number(c.data) : c.data));
+            const cellData = cells.map((c) => c.data);
             onRowUpdated({ id: rowId, isNew: isNew, cells: cellData });
         }
     }

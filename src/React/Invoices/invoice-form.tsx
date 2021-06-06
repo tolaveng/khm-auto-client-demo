@@ -33,7 +33,7 @@ const serviceTableColumns: TableEditorDataColumn[] = [
         collapse: true,
         type: 'number',
         textAlign: 'right',
-        maxLength: 2,
+        maxLength: 3,
         required: true,
         default: 1,
     },
@@ -119,11 +119,11 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
             ]);
         } else {
             const newServices = [...serviceData];
-            const updateService = newServices.find((sv) => sv.serviceId == row.id);
-            if (updateService) {
-                updateService.serviceName = row.cells![0];
-                updateService.servicePrice = row.cells![1];
-                updateService.serviceQty = row.cells![2];
+            const updatedService = newServices.find((sv) => sv.serviceId == row.id);
+            if (updatedService) {
+                updatedService.serviceName = row.cells![0];
+                updatedService.servicePrice = row.cells![1];
+                updatedService.serviceQty = row.cells![2];
             }
             setServiceData(newServices);
         }
