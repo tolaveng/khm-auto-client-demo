@@ -8,18 +8,21 @@ interface SelectInputProps extends FormFieldProps {
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
-    const { input, meta, placeholder, options, style } = props;
-    const isError = meta.touched && !!meta.error;
+    const { form, field, placeholder, options, style } = props;
+    const isError = form.errors[field.name] && form.touched[field.name]
 
     return (
         <Form.Field error={isError} style={{ ...style }}>
             <Select
-                value={input.value}
-                onChange={(e, val) => input.onChange(val.value)}
+                value={field.value}
+                onChange={(e, val) => field.onChange(val.value)}
+                onBlur={(e, val) => field.onBlur(val.value)}
                 placeholder={placeholder}
                 options={options}
             />
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
+            <label style={{ color: 'red', fontSize: 'x-small' }}>
+                {isError ? form.errors[field.name] : <span>&nbsp;</span>}
+            </label>
         </Form.Field>
     );
 };

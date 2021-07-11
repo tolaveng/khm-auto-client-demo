@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Field, InjectedFormProps, reduxForm } from 'redux-form';
 import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
 import RadioInput from '../components/form/RadioInput';
@@ -11,9 +10,13 @@ import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-e
 import { PaymentMethod } from '../types/PaymentMethod';
 import { Invoice } from '../types/invoice';
 import { Service } from '../types/service';
-import normalizePhone from '../utils/normalize-phone';
 import { ServiceIndex } from '../types/service-index';
 import AutoSuggestInput from '../components/form/AutoSuggestInput';
+import { Field, Formik,  FormikProps } from 'formik';
+import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import { RoundToTwo } from '../utils/helper';
+import { Car } from '../types/car';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
@@ -73,24 +76,47 @@ export interface InvoiceFormProps {
     discount: string,
     gstTotal: string,
     amountTotal: string,
+
+    isPrintForm?: string
 }
 
+const validationSchema = Yup.object({
+    carNo: Yup.string().required('Registration Number is required'),
+})
+
 interface IProps {
+    initValues: InvoiceFormProps,
     invoice: Invoice,
-    onServiceChange: (services: Service[]) => void;
     onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
     serviceIndices: ServiceIndex[];
     isLoadFailed?: boolean;
-    carSearchHandler?: (value: string) => void;
+    carSearchHandler?: (value: string, callback:(car: Car) => void) => void;
     carMakes: string[];
     carModels: string[];
     onDeleteInvoice: (invoiceId: number) => void;
+
+    setInvoiceFormik: (formik: FormikProps<InvoiceFormProps>) => void;
 }
 
-export const INVOICE_FORM = 'INVOICE_FORM';
+const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst: number) => {
+    let subTotal = 0;
+    let gstTotal = 0;
+    let amountTotal = 0;
 
-const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IProps> = (props) => {
-    const { handleSubmit, pristine, submitting, onServiceChange, invoice, onSaveInvoice, valid, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteInvoice } = props;
+    services.forEach((service) => {
+        subTotal += Number(service.servicePrice) * Number(service.serviceQty);
+    });
+
+    amountTotal = subTotal - invoiceDiscount;
+
+    gstTotal = RoundToTwo(amountTotal / (1 + invoiceGst));
+    return {
+        subTotal, gstTotal, amountTotal
+    }
+}
+
+const InvoiceFormComp: React.FC<IProps> = (props) => {
+    const { initValues, invoice, onSaveInvoice, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteInvoice, setInvoiceFormik } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -99,46 +125,91 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
         setServiceData(invoice.services);
     }, [invoice]);
 
-    useEffect(() => {
-        onServiceChange(serviceData);
-    }, [serviceData])
-
-
-    const updateService = (row: TableEditorDataRow) => {
-
+    const updateService = (row: TableEditorDataRow, formik: FormikProps<InvoiceFormProps>) => {
+        let exitingServieData = [...serviceData];
         if (row.isNew) {
-            setServiceData([
-                ...serviceData,
-                {
-                    serviceId: row.id ?? 0,
-                    serviceName: row.cells![0],
-                    servicePrice: row.cells![1],
-                    serviceQty: row.cells![2],
-                    invoiceId: invoice ? invoice.invoiceId : 0,
-                },
-            ]);
+            exitingServieData = exitingServieData.concat({
+                serviceId: row.id ?? 0,
+                serviceName: row.cells![0],
+                servicePrice: row.cells![1],
+                serviceQty: row.cells![2],
+                invoiceId: invoice ? invoice.invoiceId : 0,
+            }
+            );
+            setServiceData(exitingServieData);
+
         } else {
-            const newServices = [...serviceData];
-            const updatedService = newServices.find((sv) => sv.serviceId == row.id);
+            const updatedService = exitingServieData.find((sv) => sv.serviceId == row.id);
             if (updatedService) {
                 updatedService.serviceName = row.cells![0];
                 updatedService.servicePrice = row.cells![1];
                 updatedService.serviceQty = row.cells![2];
             }
-            setServiceData(newServices);
+            setServiceData(exitingServieData);
         }
+        const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
+        const total = calculateTotal(exitingServieData, discount, invoice.gst);
+        formik.setFieldValue('subTotal', total.subTotal);
+        formik.setFieldValue('gstTotal', total.gstTotal);
+        formik.setFieldValue('amountTotal', total.amountTotal);
     };
 
-    const deleteService = (rowId: number) => {
+    const deleteService = (rowId: number, formik: FormikProps<InvoiceFormProps>) => {
         const newServices = serviceData.filter((sv) => sv.serviceId !== rowId);
         setServiceData(newServices);
+
+        const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
+        const total = calculateTotal(newServices, discount, invoice.gst);
+        formik.setFieldValue('subTotal', total.subTotal);
+        formik.setFieldValue('gstTotal', total.gstTotal);
+        formik.setFieldValue('amountTotal', total.amountTotal);
     };
+
+    const onDiscountChange = (value: string, formik: FormikProps<InvoiceFormProps>) => {
+        //const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
+        const discount = Number(value) ? Number(value) : 0;
+        const total = calculateTotal(serviceData, discount, invoice.gst);
+        formik.setFieldValue('subTotal', total.subTotal);
+        formik.setFieldValue('gstTotal', total.gstTotal);
+        formik.setFieldValue('amountTotal', total.amountTotal);
+    }
     // --- end service ---
 
-    const formSubmit = (formData: InvoiceFormProps, isPrint: boolean) => {
-        if (valid) {
-            return onSaveInvoice(formData, serviceData, isPrint);
+    const handleCarSearchHandler = (value: string) => {
+        if (carSearchHandler) {
+            carSearchHandler(value, function(car: Car) {
+                console.log(car.odo);
+            })
         }
+    }
+
+    const handleFormSubmit = (formValues: InvoiceFormProps, formAction: any) => {
+        onSaveInvoice(formValues, serviceData, formValues.isPrintForm == 'true')
+        .then(() => {
+            if (formValues.isPrintForm == 'true') {
+               formAction.setSubmitting(false);
+            }
+        })
+        .catch((err) => {
+            toast.error(err);
+            formAction.setSubmitting(false);
+        });
+    }
+
+    const handleSaveForm = (formik: FormikProps<InvoiceFormProps>) => {
+        formik.setFieldValue('isPrintForm', 'false');
+        if (!formik.values.carNo) {
+            toast.error('Registration number is required.')
+        }
+        formik.submitForm();
+    }
+
+    const handlePrintForm = (formik: FormikProps<InvoiceFormProps>) => {
+        formik.setFieldValue('isPrintForm', 'true');
+        if (!formik.values.carNo) {
+            toast.error('Registration number is required.')
+        }
+        formik.submitForm();
     }
 
 
@@ -149,230 +220,191 @@ const InvoiceFormComp: React.FC<InjectedFormProps<InvoiceFormProps, IProps> & IP
     }
 
     return (
-        <Form autoComplete='off'>
-            <fieldset>
-                <Form.Group widths='equal'>
-                    <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
-                    <Form.Field />
-                    {invoice.invoiceNo
-                        ? <Form.Field><label>Invoice No</label><label style={{ padding: 4, border: '1px solid #cccccc', borderRadius: 2 }}>{invoice.invoiceNo}</label></Form.Field>
-                        : <Form.Field />
-                    }
+        <Formik initialValues={initValues}
+         onSubmit={handleFormSubmit}
+         validationSchema={validationSchema}
+         enableReinitialize={true}
+         innerRef={frm => frm && setInvoiceFormik(frm)}
+         >
+            {
+                (formik) => {
+                    return (
+                        <Form autoComplete='off' onSubmit={formik.handleSubmit}>
+                            <fieldset>
+                                <Form.Group widths='equal'>
+                                    <Field label='Invoice Date' name='invoiceDate' component={DatePickerInput} type='text' defaultDate={new Date()} />
+                                    <Form.Field />
+                                    {invoice.invoiceNo
+                                        ? <Form.Field><label>Invoice No</label><label style={{ padding: 4, border: '1px solid #cccccc', borderRadius: 2 }}>{invoice.invoiceNo}</label></Form.Field>
+                                        : <Form.Field />
+                                    }
 
-                </Form.Group>
-            </fieldset>
+                                </Form.Group>
+                            </fieldset>
 
-            <fieldset>
-                <legend>Customer</legend>
-                <Form.Group widths='equal'>
-                    <Field
-                        label='Full Name'
-                        name='fullName'
-                        component={TextInput}
-                        type='text'
-                        fluid={true}
-                        autoComplete='off'
-                    />
+                            <fieldset>
+                                <legend>Customer</legend>
+                                <Form.Group widths='equal'>
+                                    <Field
+                                        label='Full Name'
+                                        name='fullName'
+                                        component={TextInput}
+                                        type='text'
+                                        fluid={true}
+                                        autoComplete='off'
+                                    />
 
-                    <Field
-                        label='Phone number'
-                        name='phoneNumber'
-                        component={TextInput}
-                        type='text'
-                        fluid={true}
-                        autoComplete='off'
-                        error={'test error'}
-                        normalize={normalizePhone}
-                    />
-                    <Field label='Email' name='email' component={TextInput} type='text' fluid={true} autoComplete='off' />
-                </Form.Group>
-                <Form.Group widths='equal'>
-                    <Field label='Company' name='company' component={TextInput} type='text' fluid={true} />
-                    <Field label='ABN' type='text' name='abn' component={TextInput} fluid={true} />
-                </Form.Group>
-                <Form.Group widths='equal'>
-                    <Field label='Address' name='address' component={TextInput} type='text' fluid={true} />
-                </Form.Group>
-            </fieldset>
-            <fieldset>
-                <legend>Car</legend>
-                <Form.Group widths='equal'>
-                    <Field label='Reg. No' name='carNo' component={TextInput} type='text' icon='search' fluid={true} onIconClick={carSearchHandler} />
-                    <Field label='ODO' name='odo' type='number' component={TextInput} fluid={true} />
-                    <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
-                </Form.Group>
-                <Form.Group widths='equal'>
-                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
-                    <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
-                </Form.Group>
-            </fieldset>
-            <fieldset style={{ minHeight: 200 }}>
-                <legend>Services</legend>
-                <TableEditor
-                    columns={serviceTableColumns}
-                    rows={mapServiceToTableEditorDataRow(serviceData)}
-                    //onRowAdded={addService}
-                    onRowUpdated={updateService}
-                    onRowDeleted={deleteService}
-                />
-            </fieldset>
+                                    <Field
+                                        label='Phone number'
+                                        name='phoneNumber'
+                                        component={TextInput}
+                                        type='text'
+                                        fluid={true}
+                                        autoComplete='off'
+                                        error={'test error'}
+                                    // normalize={normalizePhone}
+                                    />
+                                    <Field label='Email' name='email' component={TextInput} type='text' fluid={true} autoComplete='off' />
+                                </Form.Group>
+                                <Form.Group widths='equal'>
+                                    <Field label='Company' name='company' component={TextInput} type='text' fluid={true} />
+                                    <Field label='ABN' type='text' name='abn' component={TextInput} fluid={true} />
+                                </Form.Group>
+                                <Form.Group widths='equal'>
+                                    <Field label='Address' name='address' component={TextInput} type='text' fluid={true} />
+                                </Form.Group>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Car</legend>
+                                <Form.Group widths='equal'>
+                                    <Field label='Registration Number' name='carNo' component={TextInput} type='text' icon='search' fluid={true} onIconClick={handleCarSearchHandler} />
+                                    <Field label='ODO' name='odo' type='number' component={TextInput} fluid={true} />
+                                    <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
+                                </Form.Group>
+                                <Form.Group widths='equal'>
+                                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
+                                    <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
+                                </Form.Group>
+                            </fieldset>
+                            <fieldset style={{ minHeight: 200 }}>
+                                <legend>Services</legend>
+                                <TableEditor
+                                    columns={serviceTableColumns}
+                                    rows={mapServiceToTableEditorDataRow(serviceData)}
+                                    //onRowAdded={addService}
+                                    onRowUpdated={(row) => updateService(row, formik)}
+                                    onRowDeleted={(rowId) => deleteService(rowId, formik)}
+                                />
+                            </fieldset>
 
-            <Grid columns='2'>
-                <Grid.Column>
-                    <Field label='Note' name='note' type='text' component={TextAreaInput} rows='3' />
-                    <fieldset>
-                        <legend>Payment</legend>
-                        <Form.Group inline>
-                            <Field
-                                label='Cash'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='cash'
-                                value={PaymentMethod.Cash.toString()}
-                            />
-                            <span>&nbsp; &nbsp; &nbsp;</span>
-                            <Field
-                                label='Card'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='card'
-                                value={PaymentMethod.Card.toString()}
-                            />
-                            <span>&nbsp; &nbsp; &nbsp;</span>
-                            <Field
-                                label='UnPaid'
-                                name='paymentMethod'
-                                type='radio'
-                                component={RadioInput}
-                                htmlFor='unpaid'
-                                value={PaymentMethod.Unpaid.toString()}
-                            />
-                        </Form.Group>
-                    </fieldset>
-                </Grid.Column>
-                <Grid.Column textAlign='right'>
-                    <Field
-                        label='SubTotal'
-                        name='subTotal'
-                        type='text'
-                        component={TextInput}
-                        inline
-                        readOnly
-                        styles={{ textAlign: 'right', fontWeight: 'bold' }}
-                    />
-                    <Field
-                        label='Discount'
-                        name='discount'
-                        type='text'
-                        component={TextInput}
-                        inline
-                        styles={{ textAlign: 'right' }}
-                    />
-                    <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
-                    <Field
-                        label='Total (in.gst)'
-                        name='amountTotal'
-                        type='text'
-                        component={TextInput}
-                        inline
-                        readOnly
-                        styles={{ textAlign: 'right', fontWeight: 'bold' }}
-                    />
-                </Grid.Column>
-            </Grid>
-            <div>
-                <div style={{ textAlign: 'left', float: 'left' }}>
-                    {
-                        !!invoice && !!invoice.invoiceNo &&
-                        <Button basic color='red' className='action-button' type='button' onClick={handleDelete} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
-                            <Icon name='trash' />
-                            <span>DELETE</span>
-                        </Button>
-                    }
-                </div>
-                <div style={{ textAlign: 'right', float: 'right' }}>
-                    <Button primary className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, true))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
-                        <Icon name='print' />
-                        <span>Print</span>
-                    </Button>
-                    <Button basic color='blue' className='action-button' type='button' onClick={handleSubmit(val => formSubmit(val, false))} disabled={submitting || isLoadFailed} loading={submitting} icon labelPosition='left'>
-                        <Icon name='save' />
-                        <span>Save</span>
-                    </Button>
-                    <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
-                        <Icon name='cancel' />
-                        <span>Close</span>
-                    </Button>
-                </div>
-            </div>
-        </Form>
+                            <Grid columns='2'>
+                                <Grid.Column>
+                                    <Field label='Note' name='note' type='text' component={TextAreaInput} rows='3' />
+                                    <fieldset>
+                                        <legend>Payment</legend>
+                                        <Form.Group inline>
+                                            <Field
+                                                label='Cash'
+                                                name='paymentMethod'
+                                                type='radio'
+                                                component={RadioInput}
+                                                htmlFor='cash'
+                                                value={PaymentMethod.Cash.toString()}
+                                            />
+                                            <span>&nbsp; &nbsp; &nbsp;</span>
+                                            <Field
+                                                label='Card'
+                                                name='paymentMethod'
+                                                type='radio'
+                                                component={RadioInput}
+                                                htmlFor='card'
+                                                value={PaymentMethod.Card.toString()}
+                                            />
+                                            <span>&nbsp; &nbsp; &nbsp;</span>
+                                            <Field
+                                                label='UnPaid'
+                                                name='paymentMethod'
+                                                type='radio'
+                                                component={RadioInput}
+                                                htmlFor='unpaid'
+                                                value={PaymentMethod.Unpaid.toString()}
+                                            />
+                                        </Form.Group>
+                                    </fieldset>
+                                </Grid.Column>
+                                <Grid.Column textAlign='right'>
+                                    <Field
+                                        label='SubTotal'
+                                        name='subTotal'
+                                        type='text'
+                                        component={TextInput}
+                                        inline
+                                        readOnly
+                                        styles={{ textAlign: 'right', fontWeight: 'bold' }}
+                                    />
+                                    <Field
+                                        label='Discount'
+                                        name='discount'
+                                        type='number'
+                                        component={TextInput}
+                                        inline
+                                        styles={{ textAlign: 'right' }}
+                                        //onKeyUp={() => onDiscountChange(formik)}
+                                        onTextChange={(val: string) => onDiscountChange(val, formik)}
+                                    />
+                                    <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
+                                    <Field
+                                        label='Total (in.gst)'
+                                        name='amountTotal'
+                                        type='text'
+                                        component={TextInput}
+                                        inline
+                                        readOnly
+                                        styles={{ textAlign: 'right', fontWeight: 'bold' }}
+                                    />
+                                </Grid.Column>
+                            </Grid>
+                            <div>
+                                <div style={{ textAlign: 'left', float: 'left' }}>
+                                    {
+                                        !!invoice && !!invoice.invoiceNo &&
+                                        <Button basic color='red' className='action-button' type='button' onClick={handleDelete} disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'>
+                                            <Icon name='trash' />
+                                            <span>DELETE</span>
+                                        </Button>
+                                    }
+                                </div>
+                                <div style={{ textAlign: 'right', float: 'right' }}>
+                                    <Button primary className='action-button' type='button'
+                                        disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
+                                        onClick={() => handlePrintForm(formik)}
+                                        >
+                                        <Icon name='print' />
+                                        <span>Print</span>
+                                    </Button>
+                                    <Button primary color='blue' className='action-button' type='button'
+                                        disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
+                                        onClick={() => handleSaveForm(formik)}
+                                        >
+                                        <Icon name='save' />
+                                        <span>Save</span>
+                                    </Button>
+                                    <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
+                                        <Icon name='cancel' />
+                                        <span>Close</span>
+                                    </Button>
+                                </div>
+                            </div>
+                            <Field type='hidden' name='isPrintForm' value='false'/>
+                        </Form>
+                    );
+                }
+            }
+        </Formik>
     );
 };
 
-const validate = (values: any) => {
-    const errors: any = {}
-    const requiredFields = ['invoiceDate', 'carNo', 'paymentMethod']
-    requiredFields.forEach(field => {
-        if (!values[field]) {
-            errors[field] = 'Required'
-        }
-    })
-
-    if (values.email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-        errors.email = 'Invalid email address'
-    }
-
-    // if (!values.fullName && !values.phoneNumber) {
-    //     errors.fullName = 'Customer name or phone number is required';
-    //     errors.phoneNumber = 'Customer name or phone number is required';
-    // }
-
-    if (isNaN(Number(values.discount))) {
-        errors.discount = 'Number Only'
-    }
-
-    return errors
-}
-
-// const mapStateToProps = (state: RootState) => {
-//     const { invoice } = state.invoiceState;
-//     return {
-//         initialValues: {
-//             invoiceDate: invoice.invoiceDateTime,
-//             fullName: invoice.fullName,
-//             phoneNumber: invoice.phone,
-//             email: invoice.email,
-//             company: invoice.company,
-//             abn: invoice.abn,
-//             address: invoice.address,
-//             plateNo: invoice.car?.plateNo,
-//             odo: invoice.car?.odo,
-//             make: invoice.car?.carMake,
-//             model: invoice.car?.carModel,
-//             year: invoice.car?.carYear,
-//             note: invoice.note,
-//             paymentMethod: invoice.paymentMethod.toString(),
-//         },
-//         services: invoice.services
-//     }
-// }
 
 
-// const InvoiceFormFx = reduxForm<InvoiceForm, IProps>({
-//     validate,
-//     form: INVOICE_FORM,
-//     enableReinitialize: false,
-// })(InvoiceFormComp);
-
-// export const InvoiceForm = connect(mapStateToProps)(InvoiceFormFx);
-
-
-export const InvoiceForm = reduxForm<InvoiceFormProps, IProps>({
-    validate,
-    form: INVOICE_FORM,
-    enableReinitialize: true, //update when the initial value update
-    keepDirtyOnReinitialize: true    // reinit the value, it keeps edited value
-})(InvoiceFormComp);
+export const InvoiceForm = InvoiceFormComp;
 

@@ -7,14 +7,16 @@ interface TextAreaInputProps extends FormFieldProps {
 }
 
 const TextAreaInput: React.FC<TextAreaInputProps> = (props) => {
-    const { input, meta, label, placeholder, rows, style} = props;
-    const isError = meta.touched && !!meta.error;
+    const { form, field, label, placeholder, rows, style} = props;
+    const isError = form.errors[field.name] && form.touched[field.name]
 
     return (
         <Form.Field error={isError} style={{...style}}>
             <label>{label}</label>
-            <textarea placeholder={placeholder} rows={rows} {...input} style={{...style}}/>
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
+            <textarea placeholder={placeholder} rows={rows} {...field} style={{...style}}/>
+            <label style={{ color: 'red', fontSize: 'x-small' }}>
+                {isError ? form.errors[field.name] : <span>&nbsp;</span>}
+            </label>
         </Form.Field>
     );
 };

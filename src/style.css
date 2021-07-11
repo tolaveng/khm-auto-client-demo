@@ -54,6 +54,9 @@ input[type='number'] {
     z-index: 2;
 }
 
+.ui.table.table-sticky td {
+    padding: 4px 10px !important;
+}
 
 .ui.button:active {
     transform: translateY(0.25em);

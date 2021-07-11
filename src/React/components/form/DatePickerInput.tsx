@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { Form, FormFieldProps} from 'semantic-ui-react';
 
@@ -12,21 +12,19 @@ interface DatePickerInputProps extends FormFieldProps {
 
 
 const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
-    const { input, placeholder, meta, label, style, readOnly, disabled, defaultDate } = props;
-    const isError = meta.touched && !!meta.error;
+    const { form, field, placeholder, label, readOnly, disabled, defaultDate} = props;
+    const isError = form.errors[field.name] && form.touched[field.name]
 
 
     const setChange = (date: Date) => {
         if (!date) return '';
-        // update state, avoid warning, delay 100ms
-        setTimeout(() => {
-            input.onChange(moment(date).format("DD/MM/YYYY"))
-        }, 100);        
+        const dateString = moment(date).format("DD/MM/YYYY");
+        form.setFieldValue(field.name, dateString);      
     }
 
     let selectedDate = defaultDate;
-    const parseDate = input.value ? moment(input.value, "DD/MM/YYYY") : null;
-    const parseISODate = input.value ? moment(input.value, "YYYY-MM-DD") : null;
+    const parseDate = field.value ? moment(field.value, "DD/MM/YYYY") : null;
+    const parseISODate = field.value ? moment(field.value, "YYYY-MM-DD") : null;
 
     if (parseDate && parseDate.isValid())
     {
@@ -36,9 +34,9 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
     {
         selectedDate = parseISODate.toDate();
     }
-    else if (selectedDate){
-        setChange(selectedDate);
-    }
+    // else if (selectedDate){
+    //     setChange(selectedDate);
+    // }
     
     return (
         <Form.Field error={isError}>
@@ -52,13 +50,14 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
                     readOnly={readOnly}
                     disabled={disabled}
                     closeOnScroll={true}
-                    onBlur={input.onBlur}
                     placeholderText={placeholder}
                 />
                 <i className="calendar alternate outline icon"></i>
                 </div>
             </Form.Group>
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
+            <label style={{ color: 'red', fontSize: 'x-small' }}>
+                {isError ? form.errors[field.name] : <span>&nbsp;</span>}
+            </label>
         </Form.Field>
     );
 };

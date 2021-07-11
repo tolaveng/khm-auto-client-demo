@@ -43,8 +43,8 @@ module.exports = (env, argv) => {
         //target: 'electron-renderer',
         devtool: argv.mode && argv.mode == 'development' ? 'source-map' : false,
         devServer: {
-            contentBase: path.join(__dirname, buildPath),
-            compress: false,
+            contentBase: path.join(__dirname, './build'),
+            compress: argv.mode != 'development',
             hot: false,  /** hot for target: web */
             port: 9000,
             historyApiFallback: true,
@@ -87,7 +87,8 @@ module.exports = (env, argv) => {
         output: {
             path: path.join(__dirname, buildPath), // absolute path: where to write bundle file to
             filename: 'bundle.js',
-            publicPath: './'                        // where to access from browser
+            //publicPath: './'                        // Electron: where to access from browser
+            publicPath: '/build'                        // where to access from browser
         },
         plugins: [
             new HtmlWebpackPlugin({

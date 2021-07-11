@@ -58,7 +58,7 @@ export const loadInvoices = (pageRequest: PageRequest, filter?: InvoiceFilter) =
 };
 
 
-export const loadInvoice = (invoiceId: number, callback: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+export const loadInvoice = (invoiceId: number, callback?: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
         type: SET_APP_LOADING_ACTION
     })
@@ -212,7 +212,7 @@ export const deleteInvoice = (invoiceId: number) => async (dispatch: Dispatch<An
 }
 
 
-export const makeInvoiceFromQuote = (quoteId: number, callback : (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+export const makeInvoiceFromQuote = (quoteId: number, callback?: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
         type: SET_APP_LOADING_ACTION
     })

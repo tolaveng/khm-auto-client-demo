@@ -38,7 +38,7 @@ const InitState: TableEditorRowState = {
     isChanged: false
 };
 
-export class TableEditorRow extends React.PureComponent<TableEditorRowProp, TableEditorRowState> {
+export class TableEditorRow extends React.Component<TableEditorRowProp, TableEditorRowState> {
     private tableRowRef = createRef<HTMLElement>();
 
     constructor(props: TableEditorRowProp) {
@@ -274,7 +274,7 @@ export class TableEditorRow extends React.PureComponent<TableEditorRowProp, Tabl
                 {cells.map((cell, index) => this.renderDataCell(rowId, cell, index))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title={rowId}></Button>
+                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title='Delete'></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>

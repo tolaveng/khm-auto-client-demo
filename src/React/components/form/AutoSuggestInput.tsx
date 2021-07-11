@@ -7,8 +7,8 @@ interface DropdownInputProps extends FormFieldProps {
 }
 
 const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
-    const { input, meta, label, placeholder, style, options} = props;
-    const isError = meta.touched && !!meta.error;
+    const { form, field, label, placeholder, style, options} = props;
+    const isError = form.errors[field.name] && form.touched[field.name]
 
     const [optionState, setOptionState] = useState({
         isShow: false,
@@ -38,27 +38,28 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
             const newOptions = options.filter((opt) => opt.toLowerCase().startsWith(val.toLowerCase()));
             setOptionState({options: newOptions, isShow: true})
         }
-        input.onChange(val);
+        form.setFieldValue(field.name, val);
     }
 
     const blurHandler = (evt: React.ChangeEvent<HTMLInputElement>) => {
         setTimeout(() => {
             setOptionState({...optionState, isShow: false})
-            input.onBlur(evt);
         }, 200);
     }
 
     const selectHandler = (value: string) => {
         setOptionState({...optionState, isShow: false})
-        input.onChange(value);
+        form.setFieldValue(field.name, value);
     }
 
     return (
         <Form.Field error={isError} style={{...style}}>
             <label>{label}</label>
-            <input placeholder={placeholder} style={{...style}} value={input.value} onChange={changeHandler} onBlur={blurHandler} autoComplete='off'/>
+            <input placeholder={placeholder} style={{...style}} value={field.value} onChange={changeHandler} onBlur={blurHandler} autoComplete='off'/>
             {optionState.isShow && renderDropdown()}
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small' }}>{meta.error}</label> : <label style={{fontSize: 'x-small'}}>&nbsp;</label>}
+            <label style={{ color: 'red', fontSize: 'x-small' }}>
+                {isError ? form.errors[field.name] : <span>&nbsp;</span>}
+            </label>
         </Form.Field>
     );
 };

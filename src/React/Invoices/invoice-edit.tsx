@@ -5,9 +5,7 @@ import { HeaderLine } from '../components/HeaderLine';
 import { connect } from 'react-redux';
 import { RootState } from '../types/root-state';
 import { Invoice } from '../types/invoice';
-import { InvoiceForm, InvoiceFormProps, INVOICE_FORM } from './invoice-form';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import { change, formValueSelector } from 'redux-form';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
 import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
@@ -18,6 +16,9 @@ import moment from 'moment';
 import { InvoicePrint } from './invoice-print';
 import { useReactToPrint } from 'react-to-print';
 import { ServiceIndex } from '../types/service-index';
+import { InvoiceForm, InvoiceFormProps } from './invoice-form';
+import { FormikProps } from 'formik';
+import { FormProps } from 'redux-form';
 
 interface InvoiceEditStateProps {
     userId: number;
@@ -26,17 +27,15 @@ interface InvoiceEditStateProps {
     isFailed: boolean;
     carFoundResults: Car[]
     carMakes: string[],
-    carModels: string[],
-    invoiceDiscount: number,
+    carModels: string[]
 }
 
 interface InvoiceEditDispatchProps {
     actions: {
-        changeField: (form: string, field: string, value: any) => void;
         saveInvoice: (invoice: Invoice, callback: (result: ResponseResult) => void) => void;
-        loadInvoice: (invoiceId: number, callback: (invoice: Invoice) => void) => void;
+        loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
-        makeInvoiceFromQuote: (quoteId: number, callback: (invoice: Invoice) => void) => void;
+        makeInvoiceFromQuote: (quoteId: number) => void;
         loadServiceIndices: () => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
@@ -48,16 +47,33 @@ interface InvoiceEditDispatchProps {
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
 
 
+const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst: number) => {
+    let subTotal = 0;
+    let gstTotal = 0;
+    let amountTotal = 0;
+
+    services.forEach((service) => {
+        subTotal += Number(service.servicePrice) * Number(service.serviceQty);
+    });
+
+    amountTotal = subTotal - invoiceDiscount;
+
+    gstTotal = RoundToTwo(amountTotal / (1 + invoiceGst));
+    
+    return {
+        subTotal, gstTotal, amountTotal
+    }
+}
+
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels, invoiceDiscount } = props;
+    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
 
     const invoicePrintRef = useRef<any>();
-
-    const [initialValue, setInitialValue] = useState(false);
+    let invoiceFormik: FormikProps<InvoiceFormProps>;
+    
     const [openModal, setOpenModal] = useState(false);
     const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
-    const [services, setServices] = useState(invoice.services);
-
+    
     const handlePrint = useReactToPrint({
         content: () => invoicePrintRef.current,
         bodyClass: 'print-only',
@@ -74,17 +90,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
     useEffect(() => {
         if (invoiceId) {
-            actions.loadInvoice(invoiceId, inv => {
-                setServices(inv.services);
-                setInitialValue(true);
-            });
+            actions.loadInvoice(invoiceId);
         } else if (quoteId) {
-            actions.makeInvoiceFromQuote(quoteId, () => {
-                setInitialValue(true);
-            });
+            actions.makeInvoiceFromQuote(quoteId);
         } else {
             actions.makeNewInvoice();
-            setInitialValue(true);
         }
     }, [invoiceId]);
 
@@ -94,39 +104,12 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         actions.loadCarModels();
     }, []);
 
-    useEffect(() => {
-        const total = calculateTotal(services);
-        actions.changeField(INVOICE_FORM, 'subTotal', total.subTotal.toFixed(2));
-        actions.changeField(INVOICE_FORM, 'gstTotal', total.gstTotal.toFixed(2));
-        actions.changeField(INVOICE_FORM, 'amountTotal', total.amountTotal.toFixed(2));
-    }, [services, invoiceDiscount]);
-
-
-    function calculateTotal(services: Service[]) {
-        let subTotal = 0;
-        let gstTotal = 0;
-        let amountTotal = 0;
-
-        services.forEach((service) => {
-            subTotal += Number(service.servicePrice) * Number(service.serviceQty);
-        });
-
-        amountTotal = subTotal - invoiceDiscount;
-
-        gstTotal = RoundToTwo(amountTotal / (1 + invoice.gst));
-        
-        return {
-            subTotal, gstTotal, amountTotal
-        }
-    }
-
 
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
 
             if (!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
-                toast.error('Reg No. and a Service are required.');
-                reject('Reg No. and a Service are required.');
+                reject('At least one service is required.');
                 return;
             }
 
@@ -178,17 +161,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             car: car,
             services: serviceData,
             userId: userId,
-            discount: Number(invoiceDiscount) ? Number(invoiceDiscount) : 0,
+            discount: Number(formData.discount) ? Number(formData.discount) : 0,
 
             modifiedDateTime: new Date().toISOString(),
         };
     }
-
-
-    function serviceChange(services: Service[]) {
-        setServices(services);
-    }
-
 
     function carSearchHandler(value: string) {
         actions.findCars(value, function (cars: Car[]) {
@@ -196,12 +173,18 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         });
     }
 
+    function setInvoiceFormik(frm: FormikProps<InvoiceFormProps>) {
+        invoiceFormik = frm;
+    }
+
     function carSelectHandler(car: Car) {
-        actions.changeField(INVOICE_FORM, 'carNo', car.carNo);
-        actions.changeField(INVOICE_FORM, 'odo', car.odo);
-        actions.changeField(INVOICE_FORM, 'year', car.carYear);
-        actions.changeField(INVOICE_FORM, 'make', car.carMake);
-        actions.changeField(INVOICE_FORM, 'model', car.carModel);
+        if (invoiceFormik) {
+            invoiceFormik.setFieldValue('carNo', car.carNo);
+            invoiceFormik.setFieldValue('odo', car.odo);
+            invoiceFormik.setFieldValue('year', car.carYear);
+            invoiceFormik.setFieldValue('make', car.carMake);
+            invoiceFormik.setFieldValue('model', car.carModel);
+        }
         setOpenModal(false);
     }
 
@@ -218,10 +201,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }
 
     function renderForm() {
-        const total = calculateTotal(invoice.services);
+        const total = calculateTotal(invoice.services, invoice.discount, invoice.gst);
         
-        const discountForm = initialValue ? invoiceDiscount : invoice.discount;
-
         const invoiceForm: InvoiceFormProps = {
             invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
             fullName: invoice.fullName? invoice.fullName : '' ,
@@ -230,15 +211,15 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             company: invoice.company ?? '',
             abn: invoice.abn ?? '',
             address: invoice.address ?? '',
-            carNo: invoice.car?.carNo,
-            odo: invoice.car?.odo,
-            make: invoice.car?.carMake,
-            model: invoice.car?.carModel,
-            year: invoice.car?.carYear,
+            carNo: invoice.car.carNo ? invoice.car.carNo : '',
+            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : 0,
+            make: (invoice.car && invoice.car.carMake)? invoice.car.carMake : '',
+            model: (invoice.car && invoice.car.carModel)? invoice.car.carModel : '',
+            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : 0,
             note: invoice.note,
             paymentMethod: invoice.paymentMethod.toString(),
             subTotal: total.subTotal.toFixed(2),
-            discount: Number(discountForm) ? Number(discountForm).toString() : '',
+            discount: Number(invoice.discount) ? Number(invoice.discount).toString() : '',
             gstTotal: total.gstTotal.toFixed(2),
             amountTotal: total.amountTotal.toFixed(2),
         };
@@ -247,8 +228,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <InvoiceForm invoice={invoice} initialValues={invoiceForm}
-                        onSaveInvoice={saveInvoice} onServiceChange={serviceChange}
+                    <InvoiceForm
+                        setInvoiceFormik={setInvoiceFormik}
+                        invoice={invoice}
+                        initValues={invoiceForm}
+                        onSaveInvoice={saveInvoice}
                         serviceIndices={serviceIndices}
                         isLoadFailed={isFailed}
                         carSearchHandler={carSearchHandler}
@@ -338,10 +322,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     );
 };
 
-const selector = formValueSelector(INVOICE_FORM);
 
 const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
-    const invoiceDiscount = selector(state, 'discount');
     return {
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
@@ -350,13 +332,11 @@ const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
         carFoundResults: state.invoiceState.carFoundResults,
         carMakes: state.invoiceState.carMakes,
         carModels: state.invoiceState.carModels,
-        invoiceDiscount: invoiceDiscount,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchProps => ({
     actions: {
-        changeField: bindActionCreators(change, dispatch),
         saveInvoice: bindActionCreators(saveInvoice, dispatch),
         loadInvoice: bindActionCreators(loadInvoice, dispatch),
         makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch),

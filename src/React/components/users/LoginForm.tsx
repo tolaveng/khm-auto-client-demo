@@ -30,11 +30,11 @@ class LoginForm extends React.PureComponent<IProps> {
         password: Yup.string().required('Password is required')
     })
 
-    handleFormSubmit = async (formValues: IFormProps, onSubmitProp: any) : Promise<void> => {
+    handleFormSubmit = async (formValues: IFormProps, actions: any) : Promise<void> => {
         const {onSubmit} = this.props;
         onSubmit(formValues.username, formValues.password).catch((e) => {
             toast.error(e);
-            onSubmitProp.setSubmitting(false)
+            actions.setSubmitting(false)
         });
     };
 

@@ -8,14 +8,16 @@ interface RadioInputProps extends FormFieldProps {
 }
 
 const RadioInput: React.FC<RadioInputProps> = (props) => {
-    const { input, meta, label, htmlFor, ...rest } = props;
-    const isError = meta.touched && !!meta.error;
+    const { form, field, label, htmlFor, ...rest } = props;
+    const isError = form.errors[field.name] && form.touched[field.name]
 
     return (
         <Form.Field error={isError} inline>
-            <input type='radio' id={htmlFor} style={{margin: 8}} {...input} {...rest}/>
+            <input type='radio' id={htmlFor} style={{margin: 8}} {...field} {...rest}/>
             <label htmlFor={htmlFor}>{label}</label>
-            {isError ? <label style={{ color: 'red', fontSize: 'x-small', display: 'block' }}>{meta.error}</label> : <label style={{fontSize: 'x-small', display: 'block'}}>&nbsp;</label>}
+            <label style={{ color: 'red', fontSize: 'x-small' }}>
+                {isError ? form.errors[field.name] : <span>&nbsp;</span>}
+            </label>
         </Form.Field>
     );
 };
