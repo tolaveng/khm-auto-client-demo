@@ -213,6 +213,9 @@ export const makeInvoiceFromQuote = (quoteId: number, callback?: (invoice: Invoi
     dispatch({
         type: SET_APP_LOADING_ACTION
     })
+    dispatch({
+        type: InvoiceActionTypes.LOAD_INVOICE_REQUEST
+    })
 
     try {
         const invoice = await Api.invoice.fromQuote(quoteId);

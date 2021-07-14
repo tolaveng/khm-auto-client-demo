@@ -1,4 +1,3 @@
-import { FormReducer } from "redux-form";
 import { User } from "../components/users/types";
 import { Car } from "./car";
 import { Invoice } from "./invoice";
@@ -26,6 +25,7 @@ export interface InvoiceState {
 
 
 export interface QuoteState {
+    isLoading: boolean;
     quotes: PageResponse<Quote>;
     quote: Quote;
     isFailed: boolean;
@@ -36,7 +36,6 @@ export interface QuoteState {
 
 
 export interface RootState {
-    form: any,
     app: AppState,
     user: User,
     carState: PageResponse<Car>;

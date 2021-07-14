@@ -18,7 +18,6 @@ import { useReactToPrint } from 'react-to-print';
 import { ServiceIndex } from '../types/service-index';
 import { InvoiceForm, InvoiceFormProps } from './invoice-form';
 import { FormikProps } from 'formik';
-import { FormProps } from 'redux-form';
 import { LoaderSpinner } from '../components/LoaderSpinner';
 
 interface InvoiceEditStateProps {

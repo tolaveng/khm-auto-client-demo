@@ -3,5 +3,6 @@ export interface Service {
     serviceName: string;
     servicePrice: number;
     serviceQty: number;
-    invoiceId: number;
+    invoiceId?: number;
+    quoteId?: number;
 }

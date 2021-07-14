@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
@@ -96,6 +96,7 @@ interface IProps {
     onDeleteInvoice: (invoiceId: number) => void;
     onServiceNameChange: (value: string) => void;
 
+    // set ref in parent
     setInvoiceFormik: (formik: FormikProps<InvoiceFormProps>) => void;
 }
 
@@ -151,9 +152,9 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         }
         const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
         const total = calculateTotal(exitingServieData, discount, invoice.gst);
-        formik.setFieldValue('subTotal', total.subTotal);
-        formik.setFieldValue('gstTotal', total.gstTotal);
-        formik.setFieldValue('amountTotal', total.amountTotal);
+        formik.setFieldValue('subTotal', total.subTotal.toFixed(2));
+        formik.setFieldValue('gstTotal', total.gstTotal.toFixed(2));
+        formik.setFieldValue('amountTotal', total.amountTotal.toFixed(2));
     };
 
     const deleteService = (rowId: number, formik: FormikProps<InvoiceFormProps>) => {
@@ -162,18 +163,18 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
 
         const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
         const total = calculateTotal(newServices, discount, invoice.gst);
-        formik.setFieldValue('subTotal', total.subTotal);
-        formik.setFieldValue('gstTotal', total.gstTotal);
-        formik.setFieldValue('amountTotal', total.amountTotal);
+        formik.setFieldValue('subTotal', total.subTotal.toFixed(2));
+        formik.setFieldValue('gstTotal', total.gstTotal.toFixed(2));
+        formik.setFieldValue('amountTotal', total.amountTotal.toFixed(2));
     };
 
     const onDiscountChange = (value: string, formik: FormikProps<InvoiceFormProps>) => {
         //const discount = Number(formik.values.discount) ? Number(formik.values.discount) : 0;
         const discount = Number(value) ? Number(value) : 0;
         const total = calculateTotal(serviceData, discount, invoice.gst);
-        formik.setFieldValue('subTotal', total.subTotal);
-        formik.setFieldValue('gstTotal', total.gstTotal);
-        formik.setFieldValue('amountTotal', total.amountTotal);
+        formik.setFieldValue('subTotal', total.subTotal.toFixed(2));
+        formik.setFieldValue('gstTotal', total.gstTotal.toFixed(2));
+        formik.setFieldValue('amountTotal', total.amountTotal.toFixed(2));
     }
 
     const handleServiceChange = (rowId: number, columnId: number, value: string) => {
@@ -189,7 +190,7 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
     const handleCarSearchHandler = (value: string) => {
         if (carSearchHandler) {
             carSearchHandler(value, function (car: Car) {
-                console.log(car.odo);
+                //ignored
             })
         }
     }
@@ -198,7 +199,6 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         onSaveInvoice(formValues, serviceData, formValues.isPrintForm == 'true')
             .then(() => {
                 if (formValues.isPrintForm == 'true') {
-                    console.log('print true');
                     formAction.setSubmitting(false);
                 }
             })

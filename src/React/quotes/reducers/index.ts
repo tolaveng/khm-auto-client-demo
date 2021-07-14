@@ -20,6 +20,7 @@ const initQuote: Quote = {
 
 
 const initState: QuoteState = {
+    isLoading: false,
     quotes: {
         data: [],
         hasNext: false,
@@ -37,18 +38,21 @@ const initState: QuoteState = {
 
 export const quoteReducer = (state = initState, action: LoadQuoteAction): QuoteState => {
     switch (action.type) {
+        case QuoteActionTypes.LOAD_QUOTE_REQUEST:
+            return { ...state, isLoading: true };
+
         case QuoteActionTypes.LOAD_QUOTES_SUCCESS:
             return { ...state, quotes: action.quotes, isFailed: false };
 
         case QuoteActionTypes.LOAD_QUOTE_SUCCESS:
-            return { ...state, quote: action.quote, isFailed: false };
+            return { ...state, quote: action.quote, isFailed: false, isLoading: false };
 
         case QuoteActionTypes.LOAD_QUOTES_FAILED:
         case QuoteActionTypes.LOAD_QUOTE_FAILED:
-            return { ...state, isFailed: true };
+            return { ...state, isFailed: true, isLoading: false };
 
         case QuoteActionTypes.MAKE_NEW_QUOTE:
-            return { ...state, quote: initQuote, isFailed: false };
+            return { ...state, quote: initQuote, isFailed: false, isLoading: false };
 
         case QuoteActionTypes.UPDATE_QUOTE:
             return { ...state, quote: action.quote, isFailed: false };

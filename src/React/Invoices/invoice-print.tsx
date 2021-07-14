@@ -92,9 +92,9 @@ class InvoicePrintComp extends React.Component<IProps> {
                     </thead>
                     <tbody>
                         {
-                            invoice.services.map((ser) => {
+                            invoice.services.map((ser, i) => {
                                 return (
-                                    <tr className='invoice-service-table-data' key={ser.serviceId}>
+                                    <tr className='invoice-service-table-data' key={`${ser.serviceId}_${i}`}>
                                         <td style={{ textAlign: 'left' }}>
                                             {ser.serviceName.split('\n').map((item, key) => {
                                                 return <span key={key}>{item}<br /></span>

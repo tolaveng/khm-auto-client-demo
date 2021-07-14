@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { Form, FormFieldProps} from 'semantic-ui-react';
 
@@ -19,7 +19,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
     const setChange = (date: Date) => {
         if (!date) return '';
         const dateString = moment(date).format("DD/MM/YYYY");
-        form.setFieldValue(field.name, dateString);      
+        form.setFieldValue(field.name, dateString);
     }
 
     let selectedDate = defaultDate;
@@ -34,9 +34,13 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
     {
         selectedDate = parseISODate.toDate();
     }
-    // else if (selectedDate){
-    //     setChange(selectedDate);
-    // }
+
+    useEffect(() =>{
+          // set init date
+        if (selectedDate) {
+            setChange(selectedDate);
+        }
+    }, [])
     
     return (
         <Form.Field error={isError}>

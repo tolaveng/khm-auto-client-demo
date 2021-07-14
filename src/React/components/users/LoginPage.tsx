@@ -1,9 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { AnyAction } from 'redux';
-import { SubmissionError } from 'redux-form';
 import { ThunkDispatch } from 'redux-thunk';
 import { Container, Grid } from 'semantic-ui-react';
 import { RootState } from 'src/React/types/root-state';

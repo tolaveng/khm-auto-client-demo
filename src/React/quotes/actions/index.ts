@@ -10,6 +10,7 @@ import { Car } from 'src/React/types/car';
 import { toast } from 'react-toastify';
 
 export const QuoteActionTypes = {
+    LOAD_QUOTE_REQUEST: 'LOAD_QUOTE_REQUEST',
     LOAD_QUOTES_SUCCESS: 'LOAD_QUOTES_SUCCESS',
     LOAD_QUOTE_SUCCESS: 'LOAD_QUOTE_SUCCESS',
     LOAD_QUOTES_FAILED: 'LOAD_QUOTES_FAILED',
@@ -58,9 +59,9 @@ export const loadQuotes = (pageRequest: PageRequest, filter?: InvoiceFilter) => 
 };
 
 
-export const loadQuote = (quoteId: number, callback: (quote: Quote) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+export const loadQuote = (quoteId: number) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
-        type: SET_APP_LOADING_ACTION
+        type: QuoteActionTypes.LOAD_QUOTE_REQUEST
     })
     try {
         const quote = await Api.quote.getQuote(quoteId)
@@ -68,16 +69,12 @@ export const loadQuote = (quoteId: number, callback: (quote: Quote) => void) => 
             type: QuoteActionTypes.LOAD_QUOTE_SUCCESS,
             quote
         });
-        if (callback) callback(quote);
     } catch (ex) {
         console.log('Cannot load quote', ex);
         dispatch({
             type: QuoteActionTypes.LOAD_QUOTE_FAILED,
         })
     }
-    dispatch({
-        type: UNSET_APP_LOADING_ACTION
-    })
 };
 
 

@@ -5,10 +5,9 @@ import { HeaderLine } from '../components/HeaderLine';
 import { connect } from 'react-redux';
 import { RootState } from '../types/root-state';
 import { Quote } from '../types/quote';
-import { QuoteForm, QuoteFormProps, QUOTE_FORM } from './quote-form';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import { change, formValueSelector } from 'redux-form';
 import { Service } from '../types/service';
+import { RoundToTwo } from '../utils/helper';
 import { deleteQuote, findCars, loadCarMakes, loadCarModels, loadQuote, loadServiceIndices, makeNewQuote, saveQuote } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
@@ -17,25 +16,27 @@ import moment from 'moment';
 import { QuotePrint } from './quote-print';
 import { useReactToPrint } from 'react-to-print';
 import { ServiceIndex } from '../types/service-index';
+import { QuoteForm, QuoteFormProps } from './quote-form';
+import { FormikProps } from 'formik';
+import { LoaderSpinner } from '../components/LoaderSpinner';
 
 interface QuoteEditStateProps {
+    isLoading: boolean;
     userId: number;
     quote: Quote;
     serviceIndices: ServiceIndex[];
     isFailed: boolean;
     carFoundResults: Car[]
     carMakes: string[],
-    carModels: string[],
-    quoteDiscount: number,
+    carModels: string[]
 }
 
 interface QuoteEditDispatchProps {
     actions: {
-        changeField: (form: string, field: string, value: any) => void;
         saveQuote: (quote: Quote, callback: (result: ResponseResult) => void) => void;
-        loadQuote: (quoteId: number, callback: (quote: Quote) => void) => void;
+        loadQuote: (quoteId: number) => void;
         makeNewQuote: () => void;
-        loadServiceIndices: () => void;
+        loadServiceIndices: (serviceName: string) => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
         loadCarModels: () => void;
@@ -46,16 +47,30 @@ interface QuoteEditDispatchProps {
 type Props = QuoteEditStateProps & QuoteEditDispatchProps;
 
 
+const calculateTotal = (services: Service[], quoteDiscount: number) => {
+    let subTotal = 0;
+    let amountTotal = 0;
+
+    services.forEach((service) => {
+        subTotal += Number(service.servicePrice) * Number(service.serviceQty);
+    });
+
+    amountTotal = subTotal - quoteDiscount;
+
+    return {
+        subTotal, amountTotal
+    }
+}
+
 const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, quote, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels, quoteDiscount } = props;
+    const { isLoading, userId, quote, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
 
     const quotePrintRef = useRef<any>();
-
-    const [initialValue, setInitialValue] = useState(false);
+    let quoteFormik: FormikProps<QuoteFormProps>;
+    
     const [openModal, setOpenModal] = useState(false);
     const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
-    const [services, setServices] = useState(quote.services);
-
+    
     const handlePrint = useReactToPrint({
         content: () => quotePrintRef.current,
         bodyClass: 'print-only',
@@ -71,52 +86,24 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
 
     useEffect(() => {
         if (quoteId) {
-            actions.loadQuote(quoteId, inv => {
-                setServices(inv.services);
-                setInitialValue(true);
-                console.log('init quote')
-            });
+            actions.loadQuote(quoteId);
         } else {
             actions.makeNewQuote();
-            setInitialValue(true);
         }
     }, [quoteId]);
 
     useEffect(() => {
-        actions.loadServiceIndices();
+        actions.loadServiceIndices('');
         actions.loadCarMakes();
         actions.loadCarModels();
     }, []);
-
-    useEffect(() => {
-        const total = calculateTotal(services);
-        actions.changeField(QUOTE_FORM, 'subTotal', total.subTotal.toFixed(2));
-        actions.changeField(QUOTE_FORM, 'amountTotal', total.amountTotal.toFixed(2));
-    }, [services, quoteDiscount]);
-
-
-    function calculateTotal(services: Service[]) {
-        let subTotal = 0;
-        let amountTotal = 0;
-
-        services.forEach((service) => {
-            subTotal += Number(service.servicePrice) * Number(service.serviceQty);
-        });
-
-        amountTotal = subTotal - quoteDiscount;
-
-        return {
-            subTotal, amountTotal
-        }
-    }
 
 
     function saveQuote(formData: QuoteFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
 
             if (!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
-                toast.error('Reg No. and a Service are required.');
-                reject('Reg No. and a Service are required.');
+                reject('At least one service is required.');
                 return;
             }
 
@@ -126,11 +113,10 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
                 if (result.success) {
                     resolve()
                     if (isPrint) {
-                        if (handlePrint)
-                            handlePrint()
+                        handlePrint && handlePrint()
                         return;
                     } else {
-                        history.push('/quote');
+                        history.push('/quotes');
                         return;
                     }
                 } else {
@@ -165,17 +151,11 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
             car: car,
             services: serviceData,
             userId: userId,
-            discount: Number(quoteDiscount) ? Number(quoteDiscount) : 0,
+            discount: Number(formData.discount) ? Number(formData.discount) : 0,
 
             modifiedDateTime: new Date().toISOString(),
         };
     }
-
-
-    function serviceChange(services: Service[]) {
-        setServices(services);
-    }
-
 
     function carSearchHandler(value: string) {
         actions.findCars(value, function (cars: Car[]) {
@@ -183,21 +163,27 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
         });
     }
 
+    function setQuoteFormik(frm: FormikProps<QuoteFormProps>) {
+        quoteFormik = frm;
+    }
+
     function carSelectHandler(car: Car) {
-        actions.changeField(QUOTE_FORM, 'carNo', car.carNo);
-        actions.changeField(QUOTE_FORM, 'odo', car.odo);
-        actions.changeField(QUOTE_FORM, 'year', car.carYear);
-        actions.changeField(QUOTE_FORM, 'make', car.carMake);
-        actions.changeField(QUOTE_FORM, 'model', car.carModel);
+        if (quoteFormik) {
+            quoteFormik.setFieldValue('carNo', car.carNo);
+            quoteFormik.setFieldValue('odo', car.odo);
+            quoteFormik.setFieldValue('year', car.carYear);
+            quoteFormik.setFieldValue('make', car.carMake);
+            quoteFormik.setFieldValue('model', car.carModel);
+        }
         setOpenModal(false);
+    }
+
+    function handlServiceNameChange(value: string) {
+        actions.loadServiceIndices(value);
     }
 
     const onDeleteQuote = (quoteId: number) => {
         setConfirmDeleteModal(true);
-    }
-
-    const makeInvoiceFromQuote = (quoteId: number) => {
-        history.push(`/invoice/fromquote/${quoteId}`)
     }
 
     const handleDeleteQuote = async () => {
@@ -209,26 +195,24 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
     }
 
     function renderForm() {
-        const total = calculateTotal(quote.services);
+        const total = calculateTotal(quote.services, quote.discount);
         
-        const discountForm = initialValue ? quoteDiscount : quote.discount;
-
         const quoteForm: QuoteFormProps = {
             quoteDate: moment(quote.quoteDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
-            fullName: quote.fullName,
+            fullName: quote.fullName? quote.fullName : '' ,
             phoneNumber: quote.phone ? quote.phone : '',
             email: quote.email ?? '',
             company: quote.company ?? '',
             abn: quote.abn ?? '',
             address: quote.address ?? '',
-            carNo: quote.car?.carNo,
-            odo: quote.car?.odo,
-            make: quote.car?.carMake,
-            model: quote.car?.carModel,
-            year: quote.car?.carYear,
+            carNo: quote.car.carNo ? quote.car.carNo : '',
+            odo: (quote.car && quote.car.odo)? quote.car.odo : 0,
+            make: (quote.car && quote.car.carMake)? quote.car.carMake : '',
+            model: (quote.car && quote.car.carModel)? quote.car.carModel : '',
+            year: (quote.car && quote.car.carYear) ? quote.car?.carYear : 0,
             note: quote.note,
             subTotal: total.subTotal.toFixed(2),
-            discount: Number(discountForm) ? Number(discountForm).toString() : '',
+            discount: Number(quote.discount) ? Number(quote.discount).toString() : '',
             amountTotal: total.amountTotal.toFixed(2),
         };
 
@@ -236,15 +220,18 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
             <Grid>
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
-                    <QuoteForm quote={quote} initialValues={quoteForm}
-                        onSaveQuote={saveQuote} onServiceChange={serviceChange}
+                    <QuoteForm
+                        setQuoteFormik={setQuoteFormik}
+                        quote={quote}
+                        initValues={quoteForm}
+                        onSaveQuote={saveQuote}
                         serviceIndices={serviceIndices}
                         isLoadFailed={isFailed}
                         carSearchHandler={carSearchHandler}
                         carMakes = {carMakes}
                         carModels = {carModels}
                         onDeleteQuote = {onDeleteQuote}
-                        makeInvoiceFromQuote = {makeInvoiceFromQuote}
+                        onServiceNameChange = {handlServiceNameChange}
                         />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
@@ -315,7 +302,8 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
     return (
         <Container fluid>
             <HeaderLine label={quote.quoteId ? 'Edit Quote' : 'New Quote'} />
-            {renderForm()}
+            {isLoading && <LoaderSpinner />}
+            {!isLoading && renderForm()}
 
             {openModal && renderModal()}
             {confirmDeleteModal && renderDeleteModal()}
@@ -328,11 +316,10 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
     );
 };
 
-const selector = formValueSelector(QUOTE_FORM);
 
 const mapStateToProps = (state: RootState): QuoteEditStateProps => {
-    const quoteDiscount = selector(state, 'discount');
     return {
+        isLoading: state.quoteState.isLoading,
         userId: state.user.userId,
         quote: state.quoteState.quote,
         serviceIndices: state.serviceIndices,
@@ -340,13 +327,11 @@ const mapStateToProps = (state: RootState): QuoteEditStateProps => {
         carFoundResults: state.quoteState.carFoundResults,
         carMakes: state.quoteState.carMakes,
         carModels: state.quoteState.carModels,
-        quoteDiscount: quoteDiscount,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): QuoteEditDispatchProps => ({
     actions: {
-        changeField: bindActionCreators(change, dispatch),
         saveQuote: bindActionCreators(saveQuote, dispatch),
         loadQuote: bindActionCreators(loadQuote, dispatch),
         makeNewQuote: bindActionCreators(makeNewQuote, dispatch),
