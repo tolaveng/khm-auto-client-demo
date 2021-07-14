@@ -10,12 +10,14 @@ import { Car } from 'src/React/types/car';
 import { toast } from 'react-toastify';
 
 export const InvoiceActionTypes = {
+    LOAD_INVOICE_REQUEST: 'LOAD_INVOICE_REQUEST',
     LOAD_INVOICES_SUCCESS: 'LOAD_INVOICES_SUCCESS',
     LOAD_INVOICE_SUCCESS: 'LOAD_INVOICE_SUCCESS',
     LOAD_INVOICES_FAILED: 'LOAD_INVOICES_FAILED',
     LOAD_INVOICE_FAILED: 'LOAD_INVOICE_FAILED',
     MAKE_NEW_INVOICE: 'MAKE_NEW_INVOICE',
-    UPDATE_INVOICE: 'UPDATE_INVOICE',
+    UPDATE_INVOICE_SUCESS: 'UPDATE_INVOICE_SUCESS',
+    UPDATE_INVOICE_FAILED: 'UPDATE_INVOICE_FAILED',
     LOAD_SERVICEINDEX_SUCCESS: 'LOAD_SERVICEINDEX_SUCCESS',
 
     FIND_CAR_REQUEST: 'FIND_CAR_REQUEST',
@@ -60,7 +62,7 @@ export const loadInvoices = (pageRequest: PageRequest, filter?: InvoiceFilter) =
 
 export const loadInvoice = (invoiceId: number, callback?: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
-        type: SET_APP_LOADING_ACTION
+        type: InvoiceActionTypes.LOAD_INVOICE_REQUEST
     })
     try {
         const invoice = await Api.invoice.getInvoice(invoiceId)
@@ -75,9 +77,6 @@ export const loadInvoice = (invoiceId: number, callback?: (invoice: Invoice) => 
             type: InvoiceActionTypes.LOAD_INVOICE_FAILED,
         })
     }
-    dispatch({
-        type: UNSET_APP_LOADING_ACTION
-    })
 };
 
 
@@ -99,7 +98,7 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
             result = await Api.invoice.update(invoice);
             if(result && result.success) {
                 dispatch({
-                    type: InvoiceActionTypes.UPDATE_INVOICE,
+                    type: InvoiceActionTypes.UPDATE_INVOICE_SUCESS,
                     invoice: invoice
                 })
             }
@@ -107,7 +106,7 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
             result = await Api.invoice.create(invoice);
             if (result && result.success && result.data) {
                 dispatch({
-                    type: InvoiceActionTypes.UPDATE_INVOICE,
+                    type: InvoiceActionTypes.UPDATE_INVOICE_SUCESS,
                     invoice: result.data
                 })
             }
@@ -123,9 +122,7 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
                 callback({success: false, message: 'Unexpected error'});
             }
         }
-        dispatch({
-            type: UNSET_APP_LOADING_ACTION
-        })
+
     } catch (e) {
         callback({success: false, message: 'Unexpected error'});
     }
@@ -135,20 +132,20 @@ export const saveInvoice = (invoice: Invoice, callback: (result: ResponseResult)
 }
 
 
-export const loadServiceIndices = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
-    dispatch({
-        type: SET_APP_LOADING_ACTION
-    })
-    const results = await Api.invoice.loadServiceIndices()
-    if (results) {
+export const loadServiceIndices = (serviceName: string) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    // dispatch({
+    //     type: SET_APP_LOADING_ACTION
+    // })
+    const results = await Api.invoice.loadServiceIndices(serviceName)
+    if (results && results.length > 0) {
         dispatch({
             type: InvoiceActionTypes.LOAD_SERVICEINDEX_SUCCESS,
             payload: results
         })
     }
-    dispatch({
-        type: UNSET_APP_LOADING_ACTION
-    })
+    // dispatch({
+    //     type: UNSET_APP_LOADING_ACTION
+    // })
 }
 
 export const findCars = (carNo: string, callback: (car: Car[]) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {

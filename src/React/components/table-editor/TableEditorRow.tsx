@@ -218,18 +218,21 @@ export class TableEditorRow extends React.Component<TableEditorRowProp, TableEdi
     }
 
     static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
-        if (props.isNew != state.isNew) {
+        // Reset new row state after parent props changed (parent re-render)
+        if (props.isNew && !state.isNew) {
+            const id = props.row.id ? props.row.id : (-1 * Date.now());
             const cells = TableEditorRow.deriveDataCellsFromProps(props);
+    
             return {
-                rowId: props.row.id ? props.row.id : (-1 * Date.now()),
-                rowState: props.isNew ? RowState.Edit : state.rowState,
-                cells,
-                isNew: props.isNew
+                rowId: id,
+                isNew: props.isNew,
+                rowState: props.isNew ? RowState.Edit : RowState.View,
+                cells: cells,
             };
         }
 
-        // should update data in view state
-        if (!state.isNew && props.row.id === state.rowId && state.rowState == RowState.View) {
+        // Update state in data view, after finish editing
+        if (!props.isNew && props.row.id === state.rowId && state.rowState == RowState.View) {
             const cells = TableEditorRow.deriveDataCellsFromProps(props);
             let shouldUpdate = false;
             for (let i = 0; i < cells.length; i++) {
@@ -244,8 +247,40 @@ export class TableEditorRow extends React.Component<TableEditorRowProp, TableEdi
                 };
             }
         }
+
         return null;
     }
+
+    // static getDerivedStateFromProps(props: TableEditorRowProp, state: TableEditorRowState) {
+    //     debugger;
+    //     if (props.isNew != state.isNew) {
+    //         const cells = TableEditorRow.deriveDataCellsFromProps(props);
+    //         return {
+    //             rowId: props.row.id ? props.row.id : (-1 * Date.now()),
+    //             rowState: props.isNew ? RowState.Edit : state.rowState,
+    //             cells,
+    //             isNew: props.isNew
+    //         };
+    //     }
+
+    //     // should update data in view state
+    //     if (!state.isNew && props.row.id === state.rowId && state.rowState == RowState.View) {
+    //         const cells = TableEditorRow.deriveDataCellsFromProps(props);
+    //         let shouldUpdate = false;
+    //         for (let i = 0; i < cells.length; i++) {
+    //             if (cells[i] !== state.cells[i]) {
+    //                 shouldUpdate = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (shouldUpdate) {
+    //             return {
+    //                 cells
+    //             };
+    //         }
+    //     }
+    //     return null;
+    // }
 
 
     componentDidMount() {
@@ -274,7 +309,7 @@ export class TableEditorRow extends React.Component<TableEditorRowProp, TableEdi
                 {cells.map((cell, index) => this.renderDataCell(rowId, cell, index))}
                 <Table.Cell key={`${rowId}_${columns.length}`}>
                     <ButtonGroup>
-                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title='Delete'></Button>
+                        <Button type='button' basic icon='trash' onClick={this.deleteRow} title={'Delete' + rowId}></Button>
                     </ButtonGroup>
                 </Table.Cell>
             </Table.Row>
@@ -300,13 +335,13 @@ export class TableEditorRow extends React.Component<TableEditorRowProp, TableEdi
         const key = rowId ? rowId : -1;
         return (
             <Ref innerRef={this.tableRowRef}>
-                <Table.Row key={`edit_row_${rowId}`}>
+                <Table.Row key={`edit_row_${rowId}`} className='table-editor-row-edit'>
                     {cells.map((cell, index) => (
                         <Table.Cell key={`edit_${rowId}_${index}`} className='table-editor-cell-edit'>{this.renderInputType(rowId, cell, index)}</Table.Cell>
                     ))}
                     <Table.Cell key={rowId + columns.length}>
                         <ButtonGroup>
-                            <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Cancel'}></Button>
+                            <Button type='button' basic icon='cancel' onClick={this.resetRow} title={'Cancel' + rowId}></Button>
                         </ButtonGroup>
                     </Table.Cell>
                 </Table.Row>

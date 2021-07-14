@@ -19,8 +19,10 @@ import { ServiceIndex } from '../types/service-index';
 import { InvoiceForm, InvoiceFormProps } from './invoice-form';
 import { FormikProps } from 'formik';
 import { FormProps } from 'redux-form';
+import { LoaderSpinner } from '../components/LoaderSpinner';
 
 interface InvoiceEditStateProps {
+    isLoading: boolean;
     userId: number;
     invoice: Invoice;
     serviceIndices: ServiceIndex[];
@@ -36,7 +38,7 @@ interface InvoiceEditDispatchProps {
         loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
         makeInvoiceFromQuote: (quoteId: number) => void;
-        loadServiceIndices: () => void;
+        loadServiceIndices: (serviceName: string) => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
         loadCarModels: () => void;
@@ -66,7 +68,7 @@ const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst
 }
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
-    const { userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
+    const { isLoading, userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;
 
     const invoicePrintRef = useRef<any>();
     let invoiceFormik: FormikProps<InvoiceFormProps>;
@@ -99,7 +101,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }, [invoiceId]);
 
     useEffect(() => {
-        actions.loadServiceIndices();
+        actions.loadServiceIndices('');
         actions.loadCarMakes();
         actions.loadCarModels();
     }, []);
@@ -119,8 +121,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                 if (result.success) {
                     resolve()
                     if (isPrint) {
-                        if (handlePrint)
-                            handlePrint()
+                        handlePrint && handlePrint()
                         return;
                     } else {
                         history.push('/invoices');
@@ -188,6 +189,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         setOpenModal(false);
     }
 
+    function handlServiceNameChange(value: string) {
+        actions.loadServiceIndices(value);
+    }
+
     const onDeleteInvoice = (invoiceId: number) => {
         setConfirmDeleteModal(true);
     }
@@ -239,6 +244,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                         carMakes = {carMakes}
                         carModels = {carModels}
                         onDeleteInvoice = {onDeleteInvoice}
+                        onServiceNameChange = {handlServiceNameChange}
                         />
                 </Grid.Column>
                 <Grid.Column width={4}></Grid.Column>
@@ -309,7 +315,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     return (
         <Container fluid>
             <HeaderLine label={invoice.invoiceNo ? 'Edit Invoice' : 'New Invoice'} />
-            {renderForm()}
+            {isLoading && <LoaderSpinner />}
+            {!isLoading && renderForm()}
 
             {openModal && renderModal()}
             {confirmDeleteModal && renderDeleteModal()}
@@ -325,6 +332,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
 
 const mapStateToProps = (state: RootState): InvoiceEditStateProps => {
     return {
+        isLoading: state.invoiceState.isLoading,
         userId: state.user.userId,
         invoice: state.invoiceState.invoice,
         serviceIndices: state.serviceIndices,

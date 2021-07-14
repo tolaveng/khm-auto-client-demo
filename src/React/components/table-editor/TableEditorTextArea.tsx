@@ -143,7 +143,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         }
 
         const items =autoCompleteData.filter((data) => {
-            if (data.startsWith(value)) {
+            if (data.toLocaleLowerCase().startsWith(value.toLocaleLowerCase())) {
                return data;
             }
         })

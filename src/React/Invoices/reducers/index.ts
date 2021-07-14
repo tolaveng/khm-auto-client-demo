@@ -27,6 +27,7 @@ const initInvoice: Invoice = {
 
 
 const initState: InvoiceState = {
+    isLoading: false,
     invoices: {
         data: [],
         hasNext: false,
@@ -44,36 +45,40 @@ const initState: InvoiceState = {
 
 export const invoiceReducer = (state = initState, action: LoadInvoicesAction): InvoiceState => {
     switch (action.type) {
+        case InvoiceActionTypes.LOAD_INVOICE_REQUEST:
+            return { ...state, isLoading: true };
+
         case InvoiceActionTypes.LOAD_INVOICES_SUCCESS:
-            return { ...state, invoices: action.invoices, isFailed: false };
+            return { ...state, invoices: action.invoices, isFailed: false, isLoading: false };
 
         case InvoiceActionTypes.LOAD_INVOICE_SUCCESS:
-            return { ...state, invoice: action.invoice, isFailed: false };
+            return { ...state, invoice: action.invoice, isFailed: false, isLoading: false };
 
+        case InvoiceActionTypes.UPDATE_INVOICE_FAILED:
         case InvoiceActionTypes.LOAD_INVOICES_FAILED:
         case InvoiceActionTypes.LOAD_INVOICE_FAILED:
-            return { ...state, isFailed: true};
+            return { ...state, isFailed: true, isLoading: false };
 
         case InvoiceActionTypes.MAKE_NEW_INVOICE:
-            return { ...state, invoice: initInvoice, isFailed: false };
+            return { ...state, invoice: initInvoice, isFailed: false, isLoading: false };
 
-        case InvoiceActionTypes.UPDATE_INVOICE:
-            return { ...state, invoice: action.invoice, isFailed: false };
+        case InvoiceActionTypes.UPDATE_INVOICE_SUCESS:
+            return { ...state, invoice: action.invoice, isFailed: false, isLoading: false };
 
-            case InvoiceActionTypes.FIND_CAR_REQUEST:
-                return { ...state};
+        case InvoiceActionTypes.FIND_CAR_REQUEST:
+            return { ...state, isLoading: true };
 
-                case InvoiceActionTypes.FIND_CAR_SUCCESS:
-                return { ...state, carFoundResults: action.carFoundResults};
+        case InvoiceActionTypes.FIND_CAR_SUCCESS:
+            return { ...state, carFoundResults: action.carFoundResults, isLoading: false };
 
-                case InvoiceActionTypes.FIND_CAR_FAILED:
-                return { ...state};
+        case InvoiceActionTypes.FIND_CAR_FAILED:
+            return { ...state, isLoading: false };
 
-                case InvoiceActionTypes.CAR_MAKE:
-                return { ...state, carMakes: action.carMakes};
+        case InvoiceActionTypes.CAR_MAKE:
+            return { ...state, carMakes: action.carMakes };
 
-                case InvoiceActionTypes.CAR_MODEL:
-                return { ...state, carModels: action.carModels};
+        case InvoiceActionTypes.CAR_MODEL:
+            return { ...state, carModels: action.carModels };
         default:
             return state;
     }
@@ -85,7 +90,7 @@ const initServiceIndices: ServiceIndex[] = [];
 export const serviceIndexReducer = (state = initServiceIndices, action: AnyAction): ServiceIndex[] => {
     switch (action.type) {
         case InvoiceActionTypes.LOAD_SERVICEINDEX_SUCCESS:
-            return [...state, ...action.payload];
+            return [...action.payload];
         default:
             return state;
     }

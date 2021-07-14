@@ -1,6 +1,7 @@
 /* table editor */
 .table-editor {
     background-color: #f7f7f7 !important;
+    /* border-collapse: collapse !important; */
 }
 
 .table-editor thead th {
@@ -17,19 +18,30 @@
 
 .table-editor .table-editor-cell-edit {
     padding: 0 !important;
+    height: 1px; /* hack to set height % of the inner div */
+}
+
+.table-editor .table-editor-row-edit {
+    background-color: #dddddd;
 }
 
 /* table editor Row*/
+.table-editor .table-editor-input
+{
+    height: 100%;
+}
 
 .table-editor .table-editor-input input,
 .table-editor textarea.table-editor-input
  {
     flex: none !important;
     padding: 6px  8px !important;
+    height: 100% !important;
 }
 
 .table-editor .table-editor-input input:read-only {
-    border: none;
+    background-color: transparent !important;
+    border: none !important;
 }
 
 .table-editor-input-error {

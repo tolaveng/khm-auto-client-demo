@@ -15,6 +15,7 @@ export interface AppState {
 
 
 export interface InvoiceState {
+    isLoading: boolean;
     invoices: PageResponse<Invoice>;
     invoice: Invoice;
     isFailed: boolean;

@@ -9,6 +9,7 @@ export interface TableEditorProp {
     rows?: TableEditorDataRow[];
     readonly?: boolean;
 
+    onChange?: (rowId: number, columnId: number, value: any) => void;
     onRowUpdated?: (row: TableEditorDataRow) => void;
     onRowDeleted?: (rowId: number) => void;
 }
@@ -46,18 +47,18 @@ export class TableEditor extends React.Component<TableEditorProp> {
     }
 
     renderNewRow() {
-        const { readonly, columns, onRowUpdated } = this.props;
+        const { readonly, columns, onRowUpdated, onChange } = this.props;
         if (readonly) return null;
-        return <TableEditorRow key={(-1 * Date.now())} isNew={true} row={{ cells: null }} columns={columns} onRowUpdated={onRowUpdated} />;
+        return <TableEditorRow key={-1} isNew={true} row={{ cells: null }} columns={columns} onRowUpdated={onRowUpdated} onChange={onChange} />;
     }
 
     renderDataRow() {
-        const { rows, columns, onRowUpdated, onRowDeleted } = this.props;
+        const { rows, columns, onRowUpdated, onRowDeleted, onChange } = this.props;
         if (!rows || !Array.isArray(rows) ) {
             return <Table.Row><Table.Cell error>Rows property must be an array.</Table.Cell></Table.Row>
         }
         if (rows.length === 0) return null;
-        return rows.map((row, index) => <TableEditorRow key={`${row.id}_${index}`} row={row} columns={columns} onRowUpdated={onRowUpdated} onRowDeleted={onRowDeleted} />);
+        return rows.map((row, index) => <TableEditorRow key={`${row.id}_${index}`} row={row} columns={columns} onRowUpdated={onRowUpdated} onRowDeleted={onRowDeleted} onChange={onChange} />);
     }
 
 

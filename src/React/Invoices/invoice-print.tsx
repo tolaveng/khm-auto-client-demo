@@ -112,11 +112,13 @@ class InvoicePrintComp extends React.Component<IProps> {
 
                 <div className='print-space'></div>
                 {
-                    invoice.note && <div style={{ fontSize: '0.8rem' }}>
-                        <span><b>Note: </b></span>
+                    invoice.note && <div style={{ fontSize: '0.8rem', border: '1px solid #000000', padding: 12, maxWidth: '60%' }}>
+                        <div><b>Note </b></div>
+                        <p>
                         {invoice.note.split('\n').map((item, key) => {
                             return <span key={key}>{item}<br /></span>
                         })}
+                        </p>
                     </div>
                 }
             </div>
@@ -149,7 +151,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                                 <td style={{ textAlign: 'right' }}>{calTotal.gstTotal.toFixed(2)}</td>
                             </tr>
                             <tr style={{ backgroundColor: '#cccccc' }}>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Total (in.gst)</td>
+                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Balance due</td>
                                 <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{calTotal.amountTotal.toFixed(2)}</td>
                             </tr>
                         </tbody>

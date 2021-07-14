@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
@@ -12,7 +12,7 @@ import { Invoice } from '../types/invoice';
 import { Service } from '../types/service';
 import { ServiceIndex } from '../types/service-index';
 import AutoSuggestInput from '../components/form/AutoSuggestInput';
-import { Field, Formik,  FormikProps } from 'formik';
+import { Field, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { RoundToTwo } from '../utils/helper';
@@ -90,10 +90,11 @@ interface IProps {
     onSaveInvoice: (formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean) => Promise<void>;
     serviceIndices: ServiceIndex[];
     isLoadFailed?: boolean;
-    carSearchHandler?: (value: string, callback:(car: Car) => void) => void;
+    carSearchHandler?: (value: string, callback: (car: Car) => void) => void;
     carMakes: string[];
     carModels: string[];
     onDeleteInvoice: (invoiceId: number) => void;
+    onServiceNameChange: (value: string) => void;
 
     setInvoiceFormik: (formik: FormikProps<InvoiceFormProps>) => void;
 }
@@ -116,7 +117,8 @@ const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst
 }
 
 const InvoiceFormComp: React.FC<IProps> = (props) => {
-    const { initValues, invoice, onSaveInvoice, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels, onDeleteInvoice, setInvoiceFormik } = props;
+    const { initValues, invoice, onSaveInvoice, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels,
+        onDeleteInvoice, setInvoiceFormik, onServiceNameChange } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -173,11 +175,20 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         formik.setFieldValue('gstTotal', total.gstTotal);
         formik.setFieldValue('amountTotal', total.amountTotal);
     }
+
+    const handleServiceChange = (rowId: number, columnId: number, value: string) => {
+        if (columnId == 0 && value && value.length > 3 && value.length < 16) { // description
+            if (onServiceNameChange) {
+                onServiceNameChange(value)
+            }
+        }
+    }
+
     // --- end service ---
 
     const handleCarSearchHandler = (value: string) => {
         if (carSearchHandler) {
-            carSearchHandler(value, function(car: Car) {
+            carSearchHandler(value, function (car: Car) {
                 console.log(car.odo);
             })
         }
@@ -185,15 +196,16 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
 
     const handleFormSubmit = (formValues: InvoiceFormProps, formAction: any) => {
         onSaveInvoice(formValues, serviceData, formValues.isPrintForm == 'true')
-        .then(() => {
-            if (formValues.isPrintForm == 'true') {
-               formAction.setSubmitting(false);
-            }
-        })
-        .catch((err) => {
-            toast.error(err);
-            formAction.setSubmitting(false);
-        });
+            .then(() => {
+                if (formValues.isPrintForm == 'true') {
+                    console.log('print true');
+                    formAction.setSubmitting(false);
+                }
+            })
+            .catch((err) => {
+                toast.error(err);
+                formAction.setSubmitting(false);
+            });
     }
 
     const handleSaveForm = (formik: FormikProps<InvoiceFormProps>) => {
@@ -220,12 +232,14 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
     }
 
     return (
-        <Formik initialValues={initValues}
-         onSubmit={handleFormSubmit}
-         validationSchema={validationSchema}
-         enableReinitialize={true}
-         innerRef={frm => frm && setInvoiceFormik(frm)}
-         >
+        <Formik
+            key={invoice.invoiceId}
+            initialValues={initValues}
+            onSubmit={handleFormSubmit}
+            validationSchema={validationSchema}
+            enableReinitialize={false}  // using key cause React to create a new form
+            innerRef={frm => frm && setInvoiceFormik(frm)}
+        >
             {
                 (formik) => {
                     return (
@@ -294,6 +308,7 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                     //onRowAdded={addService}
                                     onRowUpdated={(row) => updateService(row, formik)}
                                     onRowDeleted={(rowId) => deleteService(rowId, formik)}
+                                    onChange={handleServiceChange}
                                 />
                             </fieldset>
 
@@ -349,12 +364,11 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                         component={TextInput}
                                         inline
                                         styles={{ textAlign: 'right' }}
-                                        //onKeyUp={() => onDiscountChange(formik)}
                                         onTextChange={(val: string) => onDiscountChange(val, formik)}
                                     />
                                     <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
                                     <Field
-                                        label='Total (in.gst)'
+                                        label='Balance due'
                                         name='amountTotal'
                                         type='text'
                                         component={TextInput}
@@ -378,16 +392,16 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                     <Button primary className='action-button' type='button'
                                         disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
                                         onClick={() => handlePrintForm(formik)}
-                                        >
+                                    >
                                         <Icon name='print' />
-                                        <span>Print</span>
+                                        <span>Save & Print</span>
                                     </Button>
                                     <Button primary color='blue' className='action-button' type='button'
                                         disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
                                         onClick={() => handleSaveForm(formik)}
-                                        >
+                                    >
                                         <Icon name='save' />
-                                        <span>Save</span>
+                                        <span>Save & Close</span>
                                     </Button>
                                     <Button basic color='blue' className='action-button' type='button' as={Link} to='/invoice' icon labelPosition='left'>
                                         <Icon name='cancel' />
@@ -395,7 +409,7 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                     </Button>
                                 </div>
                             </div>
-                            <Field type='hidden' name='isPrintForm' value='false'/>
+                            <Field type='hidden' name='isPrintForm' value='false' />
                         </Form>
                     );
                 }
