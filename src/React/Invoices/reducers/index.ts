@@ -4,15 +4,17 @@ import { InvoiceActionTypes, LoadInvoicesAction } from '../actions';
 import { Car } from '../../types/car';
 import { PaymentMethod } from '../../types/PaymentMethod';
 import { ServiceIndex } from 'src/React/types/service-index';
-import { Action, AnyAction } from 'redux';
+import { AnyAction } from 'redux';
+import moment from 'moment';
 
+const toDay = moment().format('YYYY-MM-DD');
 
 const initInvoice: Invoice = {
     invoiceId: 0,
     invoiceNo: 0,
-    invoiceDate: new Date().toISOString(),
-    modifiedDateTime: new Date().toISOString(),
-    paidDate: new Date().toISOString(),
+    invoiceDate: toDay,
+    modifiedDateTime: toDay,
+    paidDate: toDay,
     paymentMethod: PaymentMethod.Cash,
     gst: 10,
     note: '',

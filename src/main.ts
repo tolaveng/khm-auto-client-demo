@@ -108,13 +108,13 @@ const createWindow = (): void => {
         }
     ];
 
-    //if (isDev) {
+    if (isDev) {
         mainMenuTemplate.push({
             label: 'Devs',
             submenu: [{ role: 'forceReload' }, { role: 'toggleDevTools' }],
         });
         mainWindow.webContents.openDevTools();
-    //}
+    }
     const menu = Menu.buildFromTemplate(mainMenuTemplate);
     Menu.setApplicationMenu(menu);
     // End main menu

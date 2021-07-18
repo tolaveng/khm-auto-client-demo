@@ -10,7 +10,7 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  devtool: 'source-map', //'inline-source-map',
+  //devtool: 'source-map', //'inline-source-map',
   module: {
     rules: [{
         test: /\.(js|ts|tsx)$/,

@@ -22,7 +22,7 @@ module.exports = (env, argv) => {
     
     // Check if the file exists, otherwise fall back to the production .env
     const finalPath = fs.existsSync(envPath) ? envPath : basePath;
-    console.log('Env File Path: ' + finalPath);
+    //console.log('Env File Path: ' + finalPath);
 
     // Set the path parameter in the dotenv config
     const fileEnv = dotenv.config({ path: finalPath }).parsed;
@@ -41,7 +41,7 @@ module.exports = (env, argv) => {
         //entry: './src/index.tsx',
         entry: path.resolve(__dirname, 'src/index.tsx'),
         //target: 'electron-renderer',
-        devtool: argv.mode && argv.mode == 'development' ? 'source-map' : false,
+        devtool: argv.mode && argv.mode == 'development' ? 'inline-source-map' : false,
         devServer: {
             contentBase: path.join(__dirname, './build'),
             compress: argv.mode != 'development',
@@ -87,8 +87,8 @@ module.exports = (env, argv) => {
         output: {
             path: path.join(__dirname, buildPath), // absolute path: where to write bundle file to
             filename: 'bundle.js',
-            //publicPath: './'                        // Electron: where to access from browser
-            publicPath: '/build'                        // where to access from browser
+            //publicPath: './'                        // Electron: where to access from browser : pro
+            publicPath: argv.mode == 'development' ? '/build' : './'                        // where to access from browser : dev
         },
         plugins: [
             new HtmlWebpackPlugin({

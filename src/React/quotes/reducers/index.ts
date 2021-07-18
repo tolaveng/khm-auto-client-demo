@@ -2,12 +2,14 @@ import { QuoteState } from '../../types/root-state';
 import { QuoteActionTypes, LoadQuoteAction } from '../actions';
 import { Car } from '../../types/car';
 import { Quote } from 'src/React/types/quote';
+import moment from 'moment';
 
+const toDay = moment().format('YYYY-MM-DD');
 
 const initQuote: Quote = {
     quoteId: 0,
-    quoteDate: new Date().toISOString(),
-    modifiedDateTime: new Date().toISOString(),
+    quoteDate: toDay,
+    modifiedDateTime: toDay,
     note: '',
     odo: 0,
     fullName: '',
