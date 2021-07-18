@@ -133,9 +133,9 @@ export const saveQuote = (quote: Quote, callback: (result: ResponseResult) => vo
 
 
 export const loadServiceIndices = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
-    dispatch({
-        type: SET_APP_LOADING_ACTION
-    })
+    // dispatch({
+    //     type: SET_APP_LOADING_ACTION
+    // })
     const results = await Api.quote.loadServiceIndices()
     if (results) {
         dispatch({
@@ -143,9 +143,9 @@ export const loadServiceIndices = () => async (dispatch: Dispatch<AnyAction>): P
             payload: results
         })
     }
-    dispatch({
-        type: UNSET_APP_LOADING_ACTION
-    })
+    // dispatch({
+    //     type: UNSET_APP_LOADING_ACTION
+    // })
 }
 
 export const findCars = (carNo: string, callback: (car: Car[]) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {

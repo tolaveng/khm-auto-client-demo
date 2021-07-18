@@ -1,8 +1,9 @@
 export interface SummaryReport {
     invoiceNo: number;
     invoiceDate: string;
-    serviceName: string;
-    price: number;
-    qty: number;
-    gst: number;
+    services: string;
+    subTotal: number;
+    discount: number;
+    amountTotal: number;
+    gstTotal: number;
 }

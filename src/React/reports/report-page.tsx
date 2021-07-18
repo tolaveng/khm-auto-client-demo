@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Button, Container, Form, Grid, Icon, Message, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
@@ -10,7 +10,6 @@ import { RootState } from '../types/root-state';
 import { downloadSummaryReport, loadSummaryReport } from './actions';
 import moment from 'moment';
 import ReactDatePicker from 'react-datepicker';
-import { RoundToTwo } from '../utils/helper';
 import { SummaryReportFilter } from '../types/summary-report-filter';
 
 
@@ -36,7 +35,7 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
         fromDate: moment(firstDate).format('YYYY-MM-DD'),
         toDate: moment(lastDate).format('YYYY-MM-DD'),
         sortBy: 'InvoiceDate',
-        sortDir: 'DESC',
+        sortDir: 'ASC',
         shouldUpdate: true
     });
 
@@ -83,18 +82,6 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
         actions.downloadSummaryReport(filter);
     };
 
-    const calculateTotal = (price: number, qty: number, gst: number) => {
-        let subTotal = 0;
-        let gstTotal = 0;
-        let grandTotal = 0;
-        grandTotal = Number(price) * Number(qty);
-        gstTotal = RoundToTwo(grandTotal / (1 + gst));
-        subTotal = grandTotal - gstTotal;
-        return {
-            subTotal: subTotal.toFixed(2), gstTotal: gstTotal.toFixed(2), grandTotal: grandTotal.toFixed(2)
-        }
-    }
-
     const renderReports = () => {
         if (!summaryReports || summaryReports.data.length == 0) return null;
 
@@ -103,12 +90,18 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                 <Table.Row key={report.invoiceNo + '_' + i}>
                     <Table.Cell>{report.invoiceNo}</Table.Cell>
                     <Table.Cell>{report.invoiceDate}</Table.Cell>
-                    <Table.Cell>{report.serviceName}</Table.Cell>
-                    <Table.Cell>{Number(report.price).toFixed(2)}</Table.Cell>
-                    <Table.Cell>{report.qty}</Table.Cell>
-                    <Table.Cell style={{ fontWeight: 'bold' }}>{calculateTotal(report.price, report.qty, report.gst).grandTotal}</Table.Cell>
-                    <Table.Cell>{calculateTotal(report.price, report.qty, report.gst).gstTotal}</Table.Cell>
-                    <Table.Cell>{calculateTotal(report.price, report.qty, report.gst).subTotal}</Table.Cell>
+                    <Table.Cell>
+                        {
+                            report.services.substr(0, 100).split('\n').map((item, key) => {
+                                return <span key={key}>{item}<br /></span>
+                            })
+                        }
+                        </Table.Cell>
+                    <Table.Cell textAlign='right'>{report.subTotal.toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right'>{report.discount.toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.amountTotal.toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.gstTotal.toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{(report.amountTotal - report.gstTotal).toFixed(2)}</Table.Cell>
                 </Table.Row>
             );
         });
@@ -174,9 +167,9 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                                 <Table.HeaderCell collapsing
                                     sorted={filter.sortBy === 'InvoiceDate' && filter.sortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => setSortBy('InvoiceDate')}>Invoice Date</Table.HeaderCell>
-                                <Table.HeaderCell>Service</Table.HeaderCell>
-                                <Table.HeaderCell collapsing>Price</Table.HeaderCell>
-                                <Table.HeaderCell collapsing>Qty</Table.HeaderCell>
+                                <Table.HeaderCell>Services</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>SubTotal</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>Discount</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>Total (in GST)</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>GST</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>Total (ex GST)</Table.HeaderCell>
