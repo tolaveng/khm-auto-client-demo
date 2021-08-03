@@ -57,9 +57,9 @@ const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst
         subTotal += Number(service.servicePrice) * Number(service.serviceQty);
     });
 
-    amountTotal = subTotal - invoiceDiscount;
-
-    gstTotal = RoundToTwo(amountTotal / (1 + invoiceGst));
+    subTotal = subTotal - invoiceDiscount;
+    gstTotal = RoundToTwo(subTotal * invoiceGst/100);
+    amountTotal = subTotal + gstTotal;
     
     return {
         subTotal, gstTotal, amountTotal
@@ -139,8 +139,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             carNo: formData.carNo,
             carModel: formData.model,
             carMake: formData.make,
-            carYear: formData.year,
-            odo: formData.odo
+            carYear: formData.year ? formData.year : 0,
+            odo: formData.odo ? formData.odo : 0
         };
 
         return {
@@ -150,7 +150,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             paymentMethod: Number(formData.paymentMethod),
             gst: invoice.gst,
             note: formData.note,
-            odo: formData.odo,
+            odo: formData.odo ? formData.odo : 0,
             fullName: formData.fullName,
             phone: formData.phoneNumber,
             email: formData.email,
@@ -216,10 +216,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             abn: invoice.abn ?? '',
             address: invoice.address ?? '',
             carNo: invoice.car.carNo ? invoice.car.carNo : '',
-            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : 0,
+            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : '',
             make: (invoice.car && invoice.car.carMake)? invoice.car.carMake : '',
             model: (invoice.car && invoice.car.carModel)? invoice.car.carModel : '',
-            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : 0,
+            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : '',
             note: invoice.note,
             paymentMethod: invoice.paymentMethod.toString(),
             subTotal: total.subTotal.toFixed(2),

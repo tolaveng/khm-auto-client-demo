@@ -101,7 +101,7 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                     <Table.Cell textAlign='right'>{report.discount.toFixed(2)}</Table.Cell>
                     <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.amountTotal.toFixed(2)}</Table.Cell>
                     <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.gstTotal.toFixed(2)}</Table.Cell>
-                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{(report.amountTotal - report.gstTotal).toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{(report.amountTotal + report.gstTotal).toFixed(2)}</Table.Cell>
                 </Table.Row>
             );
         });
@@ -170,9 +170,9 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                                 <Table.HeaderCell>Services</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>SubTotal</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>Discount</Table.HeaderCell>
-                                <Table.HeaderCell collapsing>Total (in GST)</Table.HeaderCell>
-                                <Table.HeaderCell collapsing>GST</Table.HeaderCell>
                                 <Table.HeaderCell collapsing>Total (ex GST)</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>GST</Table.HeaderCell>
+                                <Table.HeaderCell collapsing>Total (in GST)</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>{renderReports()}</Table.Body>

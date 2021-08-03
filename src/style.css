@@ -19,7 +19,7 @@ fieldset {
 }
 
 fieldset legend {
-    color: #888888;
+    color: #777777;
     font-weight: bold;
     padding: 4px;
 }
@@ -41,10 +41,11 @@ input[type='number'] {
     border-color: #ff0000 !important;
 }
 
-/* .ui.input > input {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-} */
+.ui.input > input,
+.field > input,
+.field > textarea {
+    border-color: #000000 !important;
+}
 
 
 .table-sticky thead tr:first-child > th {
@@ -56,6 +57,10 @@ input[type='number'] {
 
 .ui.table.table-sticky td {
     padding: 4px 10px !important;
+}
+
+table.ui.table, .ui.table td, .ui.table th {
+    border-color: #777777 !important;
 }
 
 .ui.button:active {
@@ -71,6 +76,7 @@ input[type='number'] {
 .react-datepicker-wrapper,
 .react-datepicker__input-container > input[type='text'] {
     width: 100% !important;
+    border-color: #000000 !important;
 }
 
 

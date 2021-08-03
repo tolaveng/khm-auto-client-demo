@@ -109,9 +109,10 @@ const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst
         subTotal += Number(service.servicePrice) * Number(service.serviceQty);
     });
 
-    amountTotal = subTotal - invoiceDiscount;
+    subTotal = subTotal - invoiceDiscount;
+    gstTotal = RoundToTwo(subTotal * invoiceGst/100);
+    amountTotal = subTotal + gstTotal;
 
-    gstTotal = RoundToTwo(amountTotal / (1 + invoiceGst));
     return {
         subTotal, gstTotal, amountTotal
     }
@@ -121,6 +122,8 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
     const { initValues, invoice, onSaveInvoice, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels,
         onDeleteInvoice, setInvoiceFormik, onServiceNameChange } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
+
+    const carColors = ["Black", "White", "Green", "Blue", "Yellow", "Purple", "Gold"];
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
 
@@ -296,6 +299,7 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                                 </Form.Group>
                                 <Form.Group widths='equal'>
+                                    <Field label='Color' name='color' component={AutoSuggestInput} type='text' fluid={true} options={carColors} />
                                     <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
                                     <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
                                 </Form.Group>

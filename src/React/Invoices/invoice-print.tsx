@@ -27,8 +27,10 @@ class InvoicePrintComp extends React.Component<IProps> {
         services.forEach((service) => {
             subTotal += Number(service.servicePrice) * Number(service.serviceQty);
         });
-        amountTotal = subTotal - invoice.discount;
-        gstTotal = RoundToTwo(amountTotal / (1 + invoice.gst));
+        
+        subTotal = subTotal - invoice.discount;
+        gstTotal = RoundToTwo(subTotal * invoice.gst/100);
+        amountTotal = subTotal + gstTotal;
 
         return {
             subTotal, amountTotal, gstTotal

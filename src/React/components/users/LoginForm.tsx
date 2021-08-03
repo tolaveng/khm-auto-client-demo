@@ -50,7 +50,7 @@ class LoginForm extends React.PureComponent<IProps> {
                                 <legend>Sign In</legend>
                                 <Grid>
                                     <Grid.Column width={4} style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                        <Icon name='key' style={{ fontSize: 64, color: '#bbbbbb' }} />
+                                        <Icon name='key' style={{ fontSize: 64, color: '#777777' }} />
                                     </Grid.Column>
                                     <Grid.Column width={10}>
                                         <Field

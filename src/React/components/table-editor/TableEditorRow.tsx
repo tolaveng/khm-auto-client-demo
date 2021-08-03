@@ -365,7 +365,7 @@ export class TableEditorRow extends React.Component<TableEditorRowProp, TableEdi
                         key={cellName}
                         onTextChange={(e, val) => this.cellInputValueChange(e, val, cellIndex)}
                         onKeyPress={(e) => this.cellInputKeyPress(e, cellIndex)}
-                        rows={2}
+                        rows={3}
                         className={`table-editor-input ${cell.isInValid ? 'table-editor-input-error' : ''}`}
                         autoCompleteData={autoCompletData}
                     

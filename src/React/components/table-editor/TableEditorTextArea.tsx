@@ -115,7 +115,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
 
 
     renderInput(): JSX.Element {
-        const { rows, name } = this.props;
+        const { rows, name, className } = this.props;
         const {value} = this.state;
         return (
             <textarea
@@ -129,6 +129,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
                 value={value}
                 ref={this.inputRef}
                 onFocus={this.onInputFocus}
+                className={className}
             />
         );
     }
