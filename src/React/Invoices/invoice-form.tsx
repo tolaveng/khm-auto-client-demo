@@ -67,6 +67,7 @@ export interface InvoiceFormProps {
     address: string,
     carNo: string,
     odo: number,
+    color: string,
     make: string,
     model: string,
     year: number,
@@ -123,7 +124,10 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         onDeleteInvoice, setInvoiceFormik, onServiceNameChange } = props;
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
-    const carColors = ["Black", "White", "Green", "Blue", "Yellow", "Purple", "Gold"];
+    const carColors = ["Black", "Cyan", "Red", "Dark Red", "Orange", "Pink", "White", "Green", "Blue", "Light Blue", "Dark Blue", "Teal", "Sky Blue", "Khaki", "Lavender",
+     "Yellow", "Light Yellow", "Purple", "Gold", "Silver", "Navy", "Peru", "Brown", "Violet", "Orchid", "Olive", "Magenta", "Indigo", "Slate Blue",
+    "Chocolate", "Sienna", "Maroon", "Ivory", "Light Gray", "Gray", "Dark Gray"
+    ];
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
 

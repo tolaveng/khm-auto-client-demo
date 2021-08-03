@@ -137,6 +137,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     function makeInvoiceFromForm(formData: InvoiceFormProps, serviceData: Service[]): Invoice {
         const car: Car = {
             carNo: formData.carNo,
+            color: formData.color,
             carModel: formData.model,
             carMake: formData.make,
             carYear: formData.year ? formData.year : 0,
@@ -180,8 +181,9 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     function carSelectHandler(car: Car) {
         if (invoiceFormik) {
             invoiceFormik.setFieldValue('carNo', car.carNo);
-            invoiceFormik.setFieldValue('odo', car.odo);
-            invoiceFormik.setFieldValue('year', car.carYear);
+            invoiceFormik.setFieldValue('odo', car.odo ? car.odo : '');
+            invoiceFormik.setFieldValue('year', car.carYear ? car.carYear: '');
+            invoiceFormik.setFieldValue('color', car.color ? car.color: '');
             invoiceFormik.setFieldValue('make', car.carMake);
             invoiceFormik.setFieldValue('model', car.carModel);
         }
@@ -216,10 +218,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             abn: invoice.abn ?? '',
             address: invoice.address ?? '',
             carNo: invoice.car.carNo ? invoice.car.carNo : '',
-            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : '',
+            color: invoice.car.color ? invoice.car.color : '',
+            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : 0,
             make: (invoice.car && invoice.car.carMake)? invoice.car.carMake : '',
             model: (invoice.car && invoice.car.carModel)? invoice.car.carModel : '',
-            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : '',
+            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : 0,
             note: invoice.note,
             paymentMethod: invoice.paymentMethod.toString(),
             subTotal: total.subTotal.toFixed(2),
@@ -266,6 +269,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                                 <Table.HeaderCell>Reg. No</Table.HeaderCell>
                                 <Table.HeaderCell>ODO</Table.HeaderCell>
                                 <Table.HeaderCell>Year</Table.HeaderCell>
+                                <Table.HeaderCell>Color</Table.HeaderCell>
                                 <Table.HeaderCell>Make</Table.HeaderCell>
                                 <Table.HeaderCell>Model</Table.HeaderCell>
                             </Table.Row>
@@ -277,6 +281,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                                         <Table.Cell>{car.carNo}</Table.Cell>
                                         <Table.Cell>{car.odo}</Table.Cell>
                                         <Table.Cell>{car.carYear}</Table.Cell>
+                                        <Table.Cell>{car.color}</Table.Cell>
                                         <Table.Cell>{car.carMake}</Table.Cell>
                                         <Table.Cell>{car.carModel}</Table.Cell>
                                     </Table.Row>
