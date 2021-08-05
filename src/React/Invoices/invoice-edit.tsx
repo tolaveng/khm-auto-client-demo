@@ -8,7 +8,7 @@ import { Invoice } from '../types/invoice';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
+import { copyInvoice, deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -37,6 +37,7 @@ interface InvoiceEditDispatchProps {
         loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
         makeInvoiceFromQuote: (quoteId: number) => void;
+        copyInvoice: (copyId: number) => void;
         loadServiceIndices: (serviceName: string) => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
@@ -85,26 +86,28 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         history.push('/login');
         return null;
     }
-
+    
     const invoiceId = Number(props.match.params.id) ?? 0;
     const quoteId = Number(props.match.params.quoteId) ?? 0;
+    const copyId = Number(props.match.params.copyId) ?? 0;
 
     useEffect(() => {
         if (invoiceId) {
             actions.loadInvoice(invoiceId);
         } else if (quoteId) {
             actions.makeInvoiceFromQuote(quoteId);
+        } else if (copyId) {
+            actions.copyInvoice(copyId);
         } else {
             actions.makeNewInvoice();
         }
-    }, [invoiceId]);
+    }, []);
 
     useEffect(() => {
         actions.loadServiceIndices('');
         actions.loadCarMakes();
         actions.loadCarModels();
     }, []);
-
 
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
@@ -140,8 +143,8 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             color: formData.color,
             carModel: formData.model,
             carMake: formData.make,
-            carYear: formData.year ? formData.year : 0,
-            odo: formData.odo ? formData.odo : 0
+            carYear: Number(formData.year) ? Number(formData.year) : 0,
+            odo: Number(formData.odo) ? Number(formData.odo) : 0
         };
 
         return {
@@ -151,7 +154,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             paymentMethod: Number(formData.paymentMethod),
             gst: invoice.gst,
             note: formData.note,
-            odo: formData.odo ? formData.odo : 0,
+            odo: Number(formData.odo) ? Number(formData.odo) : 0,
             fullName: formData.fullName,
             phone: formData.phoneNumber,
             email: formData.email,
@@ -219,10 +222,10 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             address: invoice.address ?? '',
             carNo: invoice.car.carNo ? invoice.car.carNo : '',
             color: invoice.car.color ? invoice.car.color : '',
-            odo: (invoice.car && invoice.car.odo)? invoice.car.odo : 0,
+            odo: (invoice.car && invoice.car.odo)? invoice.car.odo.toString() : '',
             make: (invoice.car && invoice.car.carMake)? invoice.car.carMake : '',
             model: (invoice.car && invoice.car.carModel)? invoice.car.carModel : '',
-            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear : 0,
+            year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear.toString() : '',
             note: invoice.note,
             paymentMethod: invoice.paymentMethod.toString(),
             subTotal: total.subTotal.toFixed(2),
@@ -352,6 +355,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         saveInvoice: bindActionCreators(saveInvoice, dispatch),
         loadInvoice: bindActionCreators(loadInvoice, dispatch),
         makeNewInvoice: bindActionCreators(makeNewInvoice, dispatch),
+        copyInvoice: bindActionCreators(copyInvoice, dispatch),
         loadServiceIndices: bindActionCreators(loadServiceIndices, dispatch),
         findCars: bindActionCreators(findCars, dispatch),
         loadCarMakes: bindActionCreators(loadCarMakes, dispatch),

@@ -30,23 +30,24 @@ const App: React.FC<AppProps> = (props) => {
             <Switch>
                 <Route path='/login' component={LoginPage} />
 
-                <AuthRoute exact path='/invoice/edit/:id' component={InvoiceEditPage} />
-                <AuthRoute exact path='/invoice/fromquote/:quoteId' component={InvoiceEditPage} />
-                <AuthRoute path='/invoice/new' component={InvoiceEditPage} />
-                <AuthRoute path={'/invoice'} component={InvoicePage} />
-                <AuthRoute path={'/invoices'} component={InvoicePage} />
+                <AuthRoute key={1} exact path='/invoice/edit/:id' component={InvoiceEditPage} />
+                <AuthRoute key={2} exact path='/invoice/fromquote/:quoteId' component={InvoiceEditPage} />
+                <AuthRoute key={3} exact path='/invoice/copy/:copyId' component={InvoiceEditPage} />
+                <AuthRoute key={4} path='/invoice/new' component={InvoiceEditPage} />
+                <AuthRoute key={5} path={'/invoice'} component={InvoicePage} />
+                <AuthRoute key={6} path={'/invoices'} component={InvoicePage} />
 
-                <AuthRoute exact path='/quote/edit/:id' component={QuoteEditPage} />
-                <AuthRoute path='/quote/new' component={QuoteEditPage} />
-                <AuthRoute exact path={'/quote'} component={QuotePage} />
-                <AuthRoute exact path={'/quotes'} component={QuotePage} />
+                <AuthRoute key={7} exact path='/quote/edit/:id' component={QuoteEditPage} />
+                <AuthRoute key={8} path='/quote/new' component={QuoteEditPage} />
+                <AuthRoute key={9} exact path={'/quote'} component={QuotePage} />
+                <AuthRoute key={10} exact path={'/quotes'} component={QuotePage} />
 
-                <AuthRoute path={'/car'} component={CarPage} />
-                <AuthRoute path={'/report'} component={ReportPage} />
+                <AuthRoute key={11} path={'/car'} component={CarPage} />
+                <AuthRoute key={12} path={'/report'} component={ReportPage} />
 
-                <AuthRoute path={'/backup'} component={BackupPage} />
+                <AuthRoute key={13} path={'/backup'} component={BackupPage} />
 
-                <AuthRoute path='/' component={InvoicePage} />
+                <AuthRoute key={14} path='/' component={InvoicePage} />
             </Switch>
 
             <ToastContainer

@@ -79,6 +79,34 @@ export const loadInvoice = (invoiceId: number, callback?: (invoice: Invoice) => 
     }
 };
 
+export const copyInvoice = (invoiceId: number, callback?: (invoice: Invoice) => void) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: InvoiceActionTypes.LOAD_INVOICE_REQUEST
+    })
+    try {
+        const invoice = await Api.invoice.getInvoice(invoiceId)
+        // make as new invoice
+        invoice.invoiceNo = 0;
+        invoice.invoiceId = 0;
+        invoice.services = [];
+        invoice.discount = 0;
+        invoice.note = '';
+        invoice.invoiceDate = '';
+        invoice.modifiedDateTime = '';
+        invoice.paidDate = '';
+
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICE_SUCCESS,
+            invoice
+        });
+        if (callback) callback(invoice);
+    } catch (ex) {
+        console.log('Cannot load invoice', ex);
+        dispatch({
+            type: InvoiceActionTypes.LOAD_INVOICE_FAILED,
+        })
+    }
+};
 
 export const makeNewInvoice = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({

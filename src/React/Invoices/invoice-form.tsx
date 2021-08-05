@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
@@ -66,11 +66,11 @@ export interface InvoiceFormProps {
     abn: string,
     address: string,
     carNo: string,
-    odo: number,
+    odo: string,
     color: string,
     make: string,
     model: string,
-    year: number,
+    year: string,
     note: string,
     paymentMethod: string,
     subTotal: string,
@@ -111,7 +111,7 @@ const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst
     });
 
     subTotal = subTotal - invoiceDiscount;
-    gstTotal = RoundToTwo(subTotal * invoiceGst/100);
+    gstTotal = RoundToTwo(subTotal * invoiceGst / 100);
     amountTotal = subTotal + gstTotal;
 
     return {
@@ -125,8 +125,8 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
     const [serviceData, setServiceData] = useState(invoice.services ?? []);
 
     const carColors = ["Black", "Cyan", "Red", "Dark Red", "Orange", "Pink", "White", "Green", "Blue", "Light Blue", "Dark Blue", "Teal", "Sky Blue", "Khaki", "Lavender",
-     "Yellow", "Light Yellow", "Purple", "Gold", "Silver", "Navy", "Peru", "Brown", "Violet", "Orchid", "Olive", "Magenta", "Indigo", "Slate Blue",
-    "Chocolate", "Sienna", "Maroon", "Ivory", "Light Gray", "Gray", "Dark Gray"
+        "Yellow", "Light Yellow", "Purple", "Gold", "Silver", "Navy", "Peru", "Brown", "Violet", "Orchid", "Olive", "Magenta", "Indigo", "Slate Blue",
+        "Chocolate", "Sienna", "Maroon", "Ivory", "Light Gray", "Gray", "Dark Gray"
     ];
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
@@ -238,9 +238,11 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         }
     }
 
+    const formKey = useRef(invoice.invoiceId ? invoice.invoiceId : Date.now()); // random key
+
     return (
         <Formik
-            key={invoice.invoiceId}
+            key={formKey.current}
             initialValues={initValues}
             onSubmit={handleFormSubmit}
             validationSchema={validationSchema}
@@ -397,6 +399,17 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                     }
                                 </div>
                                 <div style={{ textAlign: 'right', float: 'right' }}>
+                                    {
+                                        !!invoice && !!invoice.invoiceNo &&
+                                        <Button color='green' className='action-button' type='button'
+                                            as={Link} to={'/invoice/copy/' + invoice.invoiceId}
+                                            disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
+                                        >
+                                            <Icon name='copy' />
+                                            <span>Copy Invoice</span>
+                                        </Button>
+                                    }
+
                                     <Button primary className='action-button' type='button'
                                         disabled={formik.isSubmitting || isLoadFailed} loading={formik.isSubmitting} icon labelPosition='left'
                                         onClick={() => handlePrintForm(formik)}
