@@ -7,7 +7,6 @@ import { RootState } from '../types/root-state';
 import { Quote } from '../types/quote';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Service } from '../types/service';
-import { RoundToTwo } from '../utils/helper';
 import { deleteQuote, findCars, loadCarMakes, loadCarModels, loadQuote, loadServiceIndices, makeNewQuote, saveQuote } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
@@ -130,17 +129,18 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
     function makeQuoteFromForm(formData: QuoteFormProps, serviceData: Service[]): Quote {
         const car: Car = {
             carNo: formData.carNo,
+            color: formData.color,
             carModel: formData.model,
             carMake: formData.make,
-            carYear: formData.year,
-            odo: formData.odo
+            carYear: Number(formData.year) ? Number(formData.year) : 0,
+            odo: Number(formData.odo) ? Number(formData.odo) : 0
         };
 
         return {
             quoteId: quote.quoteId,
             quoteDate: moment(formData.quoteDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             note: formData.note,
-            odo: formData.odo,
+            odo: Number(formData.odo) ? Number(formData.odo) : 0,
             fullName: formData.fullName,
             phone: formData.phoneNumber,
             email: formData.email,
@@ -170,8 +170,9 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
     function carSelectHandler(car: Car) {
         if (quoteFormik) {
             quoteFormik.setFieldValue('carNo', car.carNo);
-            quoteFormik.setFieldValue('odo', car.odo);
-            quoteFormik.setFieldValue('year', car.carYear);
+            quoteFormik.setFieldValue('odo', car.odo ? car.odo : '');
+            quoteFormik.setFieldValue('year', car.carYear ? car.carYear: '');
+            quoteFormik.setFieldValue('color', car.color ? car.color: '');
             quoteFormik.setFieldValue('make', car.carMake);
             quoteFormik.setFieldValue('model', car.carModel);
         }
@@ -206,10 +207,11 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
             abn: quote.abn ?? '',
             address: quote.address ?? '',
             carNo: quote.car.carNo ? quote.car.carNo : '',
-            odo: (quote.car && quote.car.odo)? quote.car.odo : 0,
+            color: quote.car.color ? quote.car.color : '',
+            odo: (quote.car && quote.car.odo)? quote.car.odo.toString() : '',
             make: (quote.car && quote.car.carMake)? quote.car.carMake : '',
             model: (quote.car && quote.car.carModel)? quote.car.carModel : '',
-            year: (quote.car && quote.car.carYear) ? quote.car?.carYear : 0,
+            year: (quote.car && quote.car.carYear) ? quote.car?.carYear.toString() : '',
             note: quote.note,
             subTotal: total.subTotal.toFixed(2),
             discount: Number(quote.discount) ? Number(quote.discount).toString() : '',
@@ -254,6 +256,7 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
                                 <Table.HeaderCell>Reg. No</Table.HeaderCell>
                                 <Table.HeaderCell>ODO</Table.HeaderCell>
                                 <Table.HeaderCell>Year</Table.HeaderCell>
+                                <Table.HeaderCell>Color</Table.HeaderCell>
                                 <Table.HeaderCell>Make</Table.HeaderCell>
                                 <Table.HeaderCell>Model</Table.HeaderCell>
                             </Table.Row>
@@ -265,6 +268,7 @@ const QuoteEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) 
                                         <Table.Cell>{car.carNo}</Table.Cell>
                                         <Table.Cell>{car.odo}</Table.Cell>
                                         <Table.Cell>{car.carYear}</Table.Cell>
+                                        <Table.Cell>{car.color}</Table.Cell>
                                         <Table.Cell>{car.carMake}</Table.Cell>
                                         <Table.Cell>{car.carModel}</Table.Cell>
                                     </Table.Row>

@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Button, Form, Icon } from 'semantic-ui-react';
 import DatePickerInput from '../components/form/DatePickerInput';
-import RadioInput from '../components/form/RadioInput';
 import TextAreaInput from '../components/form/TextAreaInput';
 import TextInput from '../components/form/TextInput';
 import { TableEditor } from '../components/table-editor/TableEditor';
 import { TableEditorDataColumn, TableEditorDataRow } from '../components/table-editor/type';
-import { PaymentMethod } from '../types/PaymentMethod';
 import { Quote } from '../types/quote';
 import { Service } from '../types/service';
 import { ServiceIndex } from '../types/service-index';
@@ -15,7 +13,6 @@ import AutoSuggestInput from '../components/form/AutoSuggestInput';
 import { Field, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { RoundToTwo } from '../utils/helper';
 import { Car } from '../types/car';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
@@ -66,10 +63,11 @@ export interface QuoteFormProps {
     abn: string,
     address: string,
     carNo: string,
-    odo: number,
+    odo: string,
+    color: string,
     make: string,
     model: string,
-    year: number,
+    year: string,
     note: string,
     subTotal: string,
     discount: string,
@@ -119,6 +117,11 @@ const QuoteFormComp: React.FC<IProps> = (props) => {
     const [serviceData, setServiceData] = useState(quote.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
+
+    const carColors = ["Black", "Cyan", "Red", "Dark Red", "Orange", "Pink", "White", "Green", "Blue", "Light Blue", "Dark Blue", "Teal", "Sky Blue", "Khaki", "Lavender",
+        "Yellow", "Light Yellow", "Purple", "Gold", "Silver", "Navy", "Peru", "Brown", "Violet", "Orchid", "Olive", "Magenta", "Indigo", "Slate Blue",
+        "Chocolate", "Sienna", "Maroon", "Ivory", "Light Gray", "Gray", "Dark Gray", "Cacao", "Chaco", "Coral",
+    ];
 
     useEffect(() => {
         setServiceData(quote.services);
@@ -289,6 +292,7 @@ const QuoteFormComp: React.FC<IProps> = (props) => {
                                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                                 </Form.Group>
                                 <Form.Group widths='equal'>
+                                    <Field label='Color' name='color' component={AutoSuggestInput} type='text' fluid={true} options={carColors} />
                                     <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
                                     <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
                                 </Form.Group>
