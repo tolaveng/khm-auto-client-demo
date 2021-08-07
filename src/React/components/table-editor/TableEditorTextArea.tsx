@@ -1,4 +1,5 @@
-import React, { createRef } from 'react'
+import React, { createRef, CSSProperties } from 'react'
+import { isSchema } from 'yup';
 
 
 interface IProps {
@@ -6,7 +7,7 @@ interface IProps {
     value: string;
     autoCompleteData?: string[];
     onTextChange?: (evt: React.ChangeEvent<HTMLTextAreaElement> | undefined, value: string) => void;
-    onKeyPress?: (evt:  React.KeyboardEvent<HTMLTextAreaElement>) => void;
+    onKeyPress?: (evt: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     rows: number;
     className?: string;
     onFocus?: () => void;
@@ -14,21 +15,27 @@ interface IProps {
 
 interface IState {
     value: string;
-    isShowList: boolean
+    isShowList: boolean,
+    options: string[],
+    selectedIndex: number
 }
 
 
 class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
 {
     private inputRef = createRef<HTMLTextAreaElement>();
+    private itemRefs : HTMLLIElement[]  = [];
+    private selectRef = createRef<HTMLUListElement>();
     private isMounted = false;
-    
+
     constructor(props: IProps) {
         super(props);
 
         this.state = {
             value: '',
-            isShowList: false
+            isShowList: false,
+            options: [],
+            selectedIndex: -1,
         }
 
         this.renderInput = this.renderInput.bind(this);
@@ -37,6 +44,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         this.onInputBlur = this.onInputBlur.bind(this);
         this.onInputFocus = this.onInputFocus.bind(this);
         this.onItemSelected = this.onItemSelected.bind(this);
+        this.onKeyDownHandler = this.onKeyDownHandler.bind(this);
         this.renderAutoCompleteData = this.renderAutoCompleteData.bind(this);
     }
 
@@ -65,13 +73,22 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
 
 
     onInputChange(evt: React.ChangeEvent<HTMLTextAreaElement>): void {
-        const {onTextChange} = this.props;
-        const currentValue = evt.target.value;
+        const { onTextChange, autoCompleteData } = this.props;
+        const currentValue = evt.currentTarget.value;
+
+        let options: string[] = [];
+        if (autoCompleteData && autoCompleteData.length > 0 && currentValue.length > 1) {
+            options = autoCompleteData.filter((data) => {
+                if (data.toLocaleLowerCase().startsWith(currentValue.toLocaleLowerCase())) {
+                    return data;
+                }
+            })
+        }
         
-        if (currentValue && currentValue.length > 1) {
-            this.setState({...this.state, value: currentValue, isShowList: true})
+        if (options.length > 0) {
+            this.setState({ ...this.state, value: currentValue, isShowList: true, options: options, selectedIndex: -1 })
         } else {
-            this.setState({...this.state, value: currentValue, isShowList: false})
+            this.setState({ ...this.state, value: currentValue, isShowList: false, selectedIndex: -1 })
         }
         if (onTextChange) {
             onTextChange(evt, currentValue);
@@ -80,30 +97,30 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
 
 
     onInputKeyPress(evt: React.KeyboardEvent<HTMLTextAreaElement>): void {
-        const {onKeyPress} = this.props;
+        const { onKeyPress } = this.props;
         if (onKeyPress) {
             onKeyPress(evt);
         }
     }
 
-    onInputFocus() : void {
-        const {onFocus} = this.props;
+    onInputFocus(): void {
+        const { onFocus } = this.props;
         if (onFocus) {
             onFocus();
         }
     }
 
     onInputBlur(evt: React.FocusEvent<HTMLTextAreaElement>): void {
-        setTimeout(() =>{
+        setTimeout(() => {
             if (!this.isMounted) return;
-            this.setState({...this.state, isShowList: false})
+            this.setState({ ...this.state, isShowList: false })
         }, 200); // wait the select item click
     }
 
 
     onItemSelected(value: string): void {
-        const {onTextChange} = this.props;
-        this.setState({...this.state, value: value, isShowList: false}, () => {
+        const { onTextChange } = this.props;
+        this.setState({ ...this.state, value: value, isShowList: false }, () => {
             if (this.inputRef.current) {
                 this.inputRef.current.focus();
             }
@@ -113,16 +130,66 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         }
     }
 
+    onKeyDownHandler = (evt: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        const {options, isShowList, selectedIndex} = this.state;
+        const {onTextChange} = this.props;
+
+        switch (evt.key) {
+            case 'ArrowUp': {
+                if (!isShowList) return;
+                evt.preventDefault();
+                const newSelectedIndex = selectedIndex > 0 ? selectedIndex - 1 : 0;
+                this.setState({ ...this.state, selectedIndex: newSelectedIndex }, () => {
+                    this.itemRefs[newSelectedIndex].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+                });
+            }
+                break;
+
+            case 'ArrowDown': {
+                if (!isShowList) return;
+                evt.preventDefault();
+                const newSelectedIndex = selectedIndex < options.length - 1 ? selectedIndex + 1 : options.length - 1;
+                this.setState({ ...this.state, selectedIndex: newSelectedIndex }, () => {
+                    this.itemRefs[newSelectedIndex].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+                });
+            }
+                break;
+
+            case 'Enter': {
+                if (!isShowList) return;
+                if (options.length > 0 && selectedIndex > -1) {
+                    const value = options[selectedIndex];
+                    this.setState({ ...this.state, isShowList: false, value: value }, () => {
+                        if (this.inputRef.current) {
+                            this.inputRef.current.focus();
+                        }
+                        if (onTextChange) {
+                            onTextChange(undefined, value);
+                        }
+                    });
+                }
+            }
+                break;
+
+            case 'Escape':
+                //setOptionState({ ...optionState, isShow: false })
+                break;
+            default:
+        }
+
+    }
+
 
     renderInput(): JSX.Element {
         const { rows, name, className } = this.props;
-        const {value} = this.state;
+        const { value } = this.state;
         return (
             <textarea
                 name={name}
                 key={name}
                 onChange={this.onInputChange}
                 onKeyPress={this.onInputKeyPress}
+                onKeyDown={this.onKeyDownHandler}
                 onBlur={this.onInputBlur}
                 autoComplete='off'
                 rows={rows}
@@ -135,28 +202,26 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
     }
 
 
-    renderAutoCompleteData(): JSX.Element[] | null {
-        const { autoCompleteData } = this.props;
-        const {value} = this.state;
-
-        if (!autoCompleteData || autoCompleteData.length == 0) {
+    renderAutoCompleteData() {
+        const { options, selectedIndex } = this.state;
+        if (options.length == 0) {
             return null;
         }
 
-        const items =autoCompleteData.filter((data) => {
-            if (data.toLocaleLowerCase().startsWith(value.toLocaleLowerCase())) {
-               return data;
-            }
-        })
-
         return (
-            items.map((data, i) => {
-                return (
-                    <li key={i} onClick={() => this.onItemSelected(data)}>
-                        {data}
-                    </li>
-                );
-            })
+            <ul ref={this.selectRef} className='table-editor-autocomplete-data'>
+                {
+                    options.map((data, i) => {
+                        const selected = selectedIndex === i ? 'selected' : '';
+                        return (
+                            <li key={i} style={selectOptionStyles} className={selected} onClick={() => this.onItemSelected(data)}
+                            ref={el => {if (el) this.itemRefs[i] = el}} >
+                                {data}
+                            </li>
+                        );
+                    })
+                }
+            </ul>
         );
     }
 
@@ -166,15 +231,39 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         return (
             <div className='table-editor-autocomplete-wrapper'>
                 {this.renderInput()}
-                { isShowList &&
-                    <ul className='table-editor-autocomplete-data'>
-                        {this.renderAutoCompleteData()}
-                    </ul>
-                }
+                { isShowList && this.renderAutoCompleteData()}
             </div>
         );
     }
 }
 
+const dropdownStyles: CSSProperties = {
+    margin: 0,
+    position: 'relative',
+    width: '100%'
+}
+
+const selectStyles: CSSProperties = {
+    appearance: 'none',
+    border: '1px solid #000000',
+    borderRadius: '0px 0px 4px 4px',
+    margin: 0,
+    padding: '8px 0px',
+    position: 'absolute',
+    width: '100%',
+    top: '-2px',
+    maxHeight: '240px',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    zIndex: 1000
+}
+
+const selectOptionStyles: CSSProperties = {
+    background: 'transparent',
+    margin: 0,
+    padding: '8px',
+    borderBottom: '1px solid #cccccc',
+    cursor: 'pointer',
+}
 
 export const TableEditorTextArea = TableEditorTextAreaComp;

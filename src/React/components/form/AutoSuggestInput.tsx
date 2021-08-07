@@ -49,7 +49,7 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
     }
 
     const renderDropdown = () => {
-        const { options, isShow } = optionState;
+        const { options, isShow, selectedIndex } = optionState;
         if (!isShow || options.length == 0) return null;
         let listSize = options.length > 6 ? 6 : options.length;
         listSize = listSize == 1 ? listSize + 1 : listSize; // +1 display as list, not dropdown
@@ -58,7 +58,9 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
                 <select ref={selectRef} multiple={false} style={selectStyles} size={listSize} onClick={selectHandler}>
                     {
                         options.map((opt, i) => {
-                            return <option key={i} style={selectOptionStyles} value={opt}>{opt}</option>
+                            return <option key={i} style={selectOptionStyles} value={opt}>
+                                {opt}
+                                </option>
                         })
                     }
                 </select>
@@ -83,13 +85,7 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
         form.setFieldValue(field.name, val);
     }
 
-    const blurHandler = (evt: React.ChangeEvent<HTMLInputElement>) => {
-        // setTimeout(() => {
-        //     setOptionState({...optionState, isShow: false})
-        // }, 200);
-    }
-
-    const keyPressHandler = (evt: React.KeyboardEvent<HTMLInputElement>) => {
+    const keyDownHandler = (evt: React.KeyboardEvent<HTMLInputElement>) => {
         switch (evt.key) {
             case 'ArrowUp': {
                 evt.preventDefault();
@@ -134,8 +130,7 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
             <label>{label}</label>
             <input ref={inputRef} autoComplete='off' placeholder={placeholder} style={{ ...style }} value={field.value}
                 onChange={changeHandler}
-                onBlur={blurHandler}
-                onKeyDown={keyPressHandler}
+                onKeyDown={keyDownHandler}
             />
             {optionState.isShow && renderDropdown()}
             <label style={{ color: 'red', fontSize: 'x-small' }}>
