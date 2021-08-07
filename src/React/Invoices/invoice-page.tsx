@@ -123,6 +123,7 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                     <Table.Cell>
                         <Button.Group>
                             <Button basic icon='pencil' as={Link} to={`/invoice/edit/${inv.invoiceId}`} title={'Edit Invoice'} />
+                            <span style={{borderLeft: '2px solid #CCCCCC', height:'20px', marginTop: '8px'}}></span>
                             <Button basic icon='copy' as={Link} to={`/invoice/copy/${inv.invoiceId}`} title={'Copy Invoice'} />
                             </Button.Group>
                     </Table.Cell>

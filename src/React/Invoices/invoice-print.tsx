@@ -62,6 +62,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                                 {!!invoice.car.carMake && <tr><td>Make:</td><td>{invoice.car.carMake}</td></tr>}
                                 {!!invoice.car.carModel && <tr><td>Model:</td><td>{invoice.car.carModel}</td></tr>}
                                 {!!invoice.car.carYear && <tr><td>Year:</td><td>{invoice.car.carYear}</td></tr>}
+                                {!!invoice.car.color && <tr><td>Color:</td><td>{invoice.car.color}</td></tr>}
                             </tbody>
                         </table>
                     </div>
