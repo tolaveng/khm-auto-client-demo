@@ -130,7 +130,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
         }
     }
 
-    onKeyDownHandler = (evt: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    onKeyDownHandler = (evt: React.KeyboardEvent<HTMLTextAreaElement>) : void => {
         const {options, isShowList, selectedIndex} = this.state;
         const {onTextChange} = this.props;
 
@@ -172,7 +172,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
                 break;
 
             case 'Escape':
-                //setOptionState({ ...optionState, isShow: false })
+                this.setState({ ...this.state, isShowList: false});
                 break;
             default:
         }
@@ -235,27 +235,6 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
             </div>
         );
     }
-}
-
-const dropdownStyles: CSSProperties = {
-    margin: 0,
-    position: 'relative',
-    width: '100%'
-}
-
-const selectStyles: CSSProperties = {
-    appearance: 'none',
-    border: '1px solid #000000',
-    borderRadius: '0px 0px 4px 4px',
-    margin: 0,
-    padding: '8px 0px',
-    position: 'absolute',
-    width: '100%',
-    top: '-2px',
-    maxHeight: '240px',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    zIndex: 1000
 }
 
 const selectOptionStyles: CSSProperties = {

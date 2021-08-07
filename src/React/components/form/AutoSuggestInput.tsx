@@ -17,8 +17,9 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
         selectedIndex: -1
     });
 
-    const selectRef = useRef() as MutableRefObject<HTMLSelectElement>;
-    const inputRef = useRef() as MutableRefObject<HTMLInputElement>;
+    const selectRef = useRef<HTMLUListElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const itemRefs: HTMLLIElement[] = [];
 
     useEffect(() => {
         setOptionState({ isShow: false, options, selectedIndex: 0 });
@@ -32,8 +33,8 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
     }, [])
 
     const handleOutsideClick = (evt: MouseEvent) => {
-        const inputClick = inputRef.current.contains(evt.target);
-        const selectClick = selectRef.current && selectRef.current.contains(evt.target);
+        const inputClick = inputRef.current && inputRef.current.contains(evt.target as Node);
+        const selectClick = selectRef.current && selectRef.current.contains(evt.target as Node);
 
         if (!selectClick && !inputClick) {
             setOptionState({ ...optionState, isShow: false });
@@ -41,29 +42,30 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
     }
 
 
-    const selectHandler = (evt: React.MouseEvent<HTMLSelectElement>) => {
-        const selectedIndex = evt.currentTarget.selectedIndex;
-        setOptionState({ ...optionState, selectedIndex: selectedIndex, isShow: false })
-        form.setFieldValue(field.name, optionState.options[selectedIndex]);
-        inputRef.current.focus();
+    const selectHandler = (value: string) => {
+        setOptionState({ ...optionState, isShow: false })
+        form.setFieldValue(field.name, value);
+        inputRef.current?.focus();
     }
 
     const renderDropdown = () => {
         const { options, isShow, selectedIndex } = optionState;
         if (!isShow || options.length == 0) return null;
-        let listSize = options.length > 6 ? 6 : options.length;
-        listSize = listSize == 1 ? listSize + 1 : listSize; // +1 display as list, not dropdown
+        
         return (
             <div style={dropdownStyles}>
-                <select ref={selectRef} multiple={false} style={selectStyles} size={listSize} onClick={selectHandler}>
+                <ul ref={selectRef} style={selectStyles}>
                     {
                         options.map((opt, i) => {
-                            return <option key={i} style={selectOptionStyles} value={opt}>
+                            const selectedStyles = selectedIndex === i ?  selectedOptionStyles: {};
+                            return <li key={i} ref={el => {if (el) itemRefs[i] = el}}
+                            style={{...selectOptionStyles, ...selectedStyles}}
+                             onClick={() => selectHandler(opt)}>
                                 {opt}
-                                </option>
+                            </li>
                         })
                     }
-                </select>
+                </ul>
             </div>
         );
     }
@@ -77,7 +79,6 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
             } else {
                 newOptions = options.filter((opt) => opt.toLowerCase().startsWith(val.toLowerCase()));
             }
-            
             setOptionState({ options: newOptions, isShow: true, selectedIndex: -1 })
         } else {
             setOptionState({ ...optionState, isShow: false, selectedIndex: -1 })
@@ -91,8 +92,8 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
                 evt.preventDefault();
                 if (!optionState.isShow) return;
                 const selectedIndex = optionState.selectedIndex > 0 ? optionState.selectedIndex - 1 : 0;
-                selectRef.current.selectedIndex = selectedIndex;
                 setOptionState({ ...optionState, selectedIndex: selectedIndex })
+                itemRefs[selectedIndex].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
                 // form.setFieldValue(field.name, optionState.options[selectedIndex]);
             }
                 break;
@@ -101,8 +102,8 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
                 evt.preventDefault();
                 if (!optionState.isShow) return;
                 const selectedIndex = optionState.selectedIndex < optionState.options.length - 1 ? optionState.selectedIndex + 1 : optionState.options.length - 1;
-                selectRef.current.selectedIndex = selectedIndex;
                 setOptionState({ ...optionState, selectedIndex: selectedIndex })
+                itemRefs[selectedIndex].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
                 //form.setFieldValue(field.name, optionState.options[selectedIndex]);
             }
                 break;
@@ -148,8 +149,10 @@ const dropdownStyles: CSSProperties = {
 
 const selectStyles: CSSProperties = {
     appearance: 'none',
+    backgroundColor: '#ededed',
     border: '1px solid #000000',
     borderRadius: '0px 0px 4px 4px',
+    listStyle: 'none',
     margin: 0,
     padding: '8px 0px',
     position: 'absolute',
@@ -167,6 +170,11 @@ const selectOptionStyles: CSSProperties = {
     padding: '8px',
     borderBottom: '1px solid #cccccc',
     cursor: 'pointer',
+}
+
+const selectedOptionStyles : CSSProperties = {
+    background: '#0000aa',
+    color: '#ffffff'
 }
 
 export default AutoSuggestInput;
