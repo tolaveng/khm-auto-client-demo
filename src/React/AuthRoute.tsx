@@ -29,7 +29,9 @@ const AuthRouteComp: React.FC<Props> = (props) => {
     const { component: Component, actions, user, ...rest } = props;
 
     useEffect(() => {
-        actions.checkUserSingedIn();
+        if (!user.userId) {
+            actions.checkUserSingedIn();
+        }
     }, []);
 
 

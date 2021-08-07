@@ -37,7 +37,7 @@ interface InvoiceEditDispatchProps {
         loadInvoice: (invoiceId: number) => void;
         makeNewInvoice: () => void;
         makeInvoiceFromQuote: (quoteId: number) => void;
-        copyInvoice: (copyId: number) => void;
+        copyInvoice: (copyId: number, callback?: (invoice: Invoice) => void) => void;
         loadServiceIndices: (serviceName: string) => void;
         findCars: (carNo: string, callback: (car: Car[]) => void) => void
         loadCarMakes: () => void;
@@ -92,12 +92,18 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     const copyId = Number(props.match.params.copyId) ?? 0;
 
     useEffect(() => {
+        if (!userId) {
+            return;
+        }
+
         if (invoiceId) {
             actions.loadInvoice(invoiceId);
         } else if (quoteId) {
             actions.makeInvoiceFromQuote(quoteId);
         } else if (copyId) {
-            actions.copyInvoice(copyId);
+            actions.copyInvoice(copyId, function(){
+                toast.info("Invoice Copied", {position: 'bottom-right', autoClose: 2000});
+            });
         } else {
             actions.makeNewInvoice();
         }
@@ -124,9 +130,11 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                     resolve()
                     if (isPrint) {
                         handlePrint && handlePrint()
+                        toast.success('Invoice Saved', {position: 'bottom-right', autoClose: 1500});
                         return;
                     } else {
                         history.push('/invoices');
+                        toast.success('Invoice Saved', {position: 'bottom-right', autoClose: 1500});
                         return;
                     }
                 } else {

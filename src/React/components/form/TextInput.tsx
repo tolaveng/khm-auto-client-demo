@@ -25,7 +25,7 @@ const TextInput: React.FC<Props> = (props) => {
     const isError = form.errors[field.name] && form.touched[field.name]
 
     const inputIcon = icon ? {
-        name: icon, circular: true, link: true, onClick: () => {
+        name: icon, circular: true, link: true, inverted:false, color:'blue', onClick: () => {
             if (onIconClick) onIconClick(field.value)
         }
     } : undefined;

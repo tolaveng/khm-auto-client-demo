@@ -33,12 +33,12 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute key={1} exact path='/invoice/edit/:id' component={InvoiceEditPage} />
                 <AuthRoute key={2} exact path='/invoice/fromquote/:quoteId' component={InvoiceEditPage} />
                 <AuthRoute key={3} exact path='/invoice/copy/:copyId' component={InvoiceEditPage} />
-                <AuthRoute key={4} path='/invoice/new' component={InvoiceEditPage} />
-                <AuthRoute key={5} path={'/invoice'} component={InvoicePage} />
+                <AuthRoute key={4} exact path='/invoice/new' component={InvoiceEditPage} />
+                <AuthRoute key={5} exact path={'/invoice'} component={InvoicePage} />
                 <AuthRoute key={6} path={'/invoices'} component={InvoicePage} />
 
                 <AuthRoute key={7} exact path='/quote/edit/:id' component={QuoteEditPage} />
-                <AuthRoute key={8} path='/quote/new' component={QuoteEditPage} />
+                <AuthRoute key={8} exact path='/quote/new' component={QuoteEditPage} />
                 <AuthRoute key={9} exact path={'/quote'} component={QuotePage} />
                 <AuthRoute key={10} exact path={'/quotes'} component={QuotePage} />
 
