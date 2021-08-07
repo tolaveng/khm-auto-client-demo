@@ -14,6 +14,7 @@ import { Field, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { Car } from '../types/car';
+import Colors from '../constants/colors';
 
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
@@ -117,11 +118,6 @@ const QuoteFormComp: React.FC<IProps> = (props) => {
     const [serviceData, setServiceData] = useState(quote.services ?? []);
 
     serviceTableColumns[0].autoCompletData = serviceIndices.map(ser => ser.serviceName);
-
-    const carColors = ["Black", "Cyan", "Red", "Dark Red", "Orange", "Pink", "White", "Green", "Blue", "Light Blue", "Dark Blue", "Teal", "Sky Blue", "Khaki", "Lavender",
-        "Yellow", "Light Yellow", "Purple", "Gold", "Silver", "Navy", "Peru", "Brown", "Violet", "Orchid", "Olive", "Magenta", "Indigo", "Slate Blue",
-        "Chocolate", "Sienna", "Maroon", "Ivory", "Light Gray", "Gray", "Dark Gray", "Cacao", "Chaco", "Coral",
-    ];
 
     useEffect(() => {
         setServiceData(quote.services);
@@ -292,9 +288,9 @@ const QuoteFormComp: React.FC<IProps> = (props) => {
                                     <Field label='Year' name='year' component={TextInput} type='text' fluid={true} maxLength={4} max={9999} />
                                 </Form.Group>
                                 <Form.Group widths='equal'>
-                                    <Field label='Color' name='color' component={AutoSuggestInput} type='text' fluid={true} options={carColors} />
-                                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} />
-                                    <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} />
+                                    <Field label='Color' name='color' component={AutoSuggestInput} type='text' fluid={true} options={Colors.CarColors} useContains={true}/>
+                                    <Field label='Make' name='make' component={AutoSuggestInput} type='text' fluid={true} options={carMakes} useContains={true} />
+                                    <Field label='Model' name='model' component={AutoSuggestInput} type='text' fluid={true} options={carModels} useContains={true} />
                                 </Form.Group>
                             </fieldset>
                             <fieldset style={{ minHeight: 200 }}>

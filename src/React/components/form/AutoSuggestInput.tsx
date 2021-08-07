@@ -3,11 +3,12 @@ import { Form, FormFieldProps } from 'semantic-ui-react';
 
 interface DropdownInputProps extends FormFieldProps {
     label: string;
-    options: string[]
+    options: string[];
+    useContains?: boolean;
 }
 
 const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
-    const { form, field, label, placeholder, style, options } = props;
+    const { form, field, label, placeholder, style, options, useContains } = props;
     const isError = form.errors[field.name] && form.touched[field.name]
 
     const [optionState, setOptionState] = useState({
@@ -68,7 +69,13 @@ const AutoSuggestInput: React.FC<DropdownInputProps> = (props) => {
     const changeHandler = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const val = evt.target.value;
         if (val.length > 1) {
-            const newOptions = options.filter((opt) => opt.toLowerCase().startsWith(val.toLowerCase()));
+            let newOptions = [];
+            if (useContains) {
+                newOptions = options.filter((opt) => opt.toLowerCase().indexOf(val.toLowerCase()) > -1);
+            } else {
+                newOptions = options.filter((opt) => opt.toLowerCase().startsWith(val.toLowerCase()));
+            }
+            
             setOptionState({ options: newOptions, isShow: true, selectedIndex: -1 })
         } else {
             setOptionState({ ...optionState, isShow: false, selectedIndex: -1 })
