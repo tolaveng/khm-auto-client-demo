@@ -178,7 +178,7 @@ class QuotePrintComp extends React.Component<IProps> {
 
                 <p style={{ fontSize: '0.8rem' }}>
                     Direct deposit to: {company.bankName} <br />
-                    Account Name: {company.name} <br />
+                    Account Name: {company.bankAccountName} <br />
                     BSB: {company.bankBsb} <br />
                     Account No: {company.bankAccountNumber} <br />
                 </p>

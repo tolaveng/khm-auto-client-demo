@@ -67,7 +67,7 @@ const quote = {
 
 const company = {
     get: (): Promise<Company> => requests.get<Company>('/company'),
-    update: (company: Company): Promise<ResponseResult> => requests.post<ResponseResult>('/company/update', company),
+    update: (company: Company): Promise<ResponseResult> => requests.post<ResponseResult>('/company/updatecompany', company),
 };
 
 

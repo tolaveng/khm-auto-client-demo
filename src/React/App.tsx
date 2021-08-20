@@ -15,6 +15,7 @@ import { BackupPage } from './backup/backup-page';
 import { QuotePage } from './quotes/quote-page';
 import { QuoteEditPage } from './quotes/quote-edit';
 import { ElectronRouter } from './ElectronRoute';
+import { CompanyPage } from './company/company-page';
 
 interface AppProps {
     isAppLoading: boolean;
@@ -46,6 +47,8 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute key={12} path={'/report'} component={ReportPage} />
 
                 <AuthRoute key={13} path={'/backup'} component={BackupPage} />
+
+                <AuthRoute key={13} path={'/company'} component={CompanyPage} />
 
                 <AuthRoute key={14} path='/' component={InvoicePage} />
             </Switch>

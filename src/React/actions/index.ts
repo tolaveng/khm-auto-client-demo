@@ -1,5 +1,6 @@
 import { AnyAction, Dispatch } from "redux";
 import Api from "../api/api";
+import { Company } from "../types/company";
 
 export const SET_APP_LOADING_ACTION = 'SET_APP_LOADING_ACTION';
 export const UNSET_APP_LOADING_ACTION = 'UNSET_APP_LOADING_ACTION';
@@ -16,6 +17,20 @@ export const getCompany = () => async(dispatch: Dispatch<AnyAction>): Promise<vo
             company: company
         });
     }catch(e) {
+        dispatch({ type: UNSET_APP_LOADING_ACTION });
+    }
+
+    dispatch({ type: UNSET_APP_LOADING_ACTION });
+};
+
+export const updateCompany = (company: Company, callback: (success: boolean) => void) => async(dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({ type: SET_APP_LOADING_ACTION });
+
+    try{
+        await Api.company.update(company);
+        callback(true);
+    }catch(e) {
+        callback(false);
         dispatch({ type: UNSET_APP_LOADING_ACTION });
     }
 

@@ -99,6 +99,12 @@ const createWindow = (): void => {
             label: 'Tools',
             submenu: [
                 {
+                    label: 'Company',
+                    click() {
+                        mainWindow?.webContents.send('navigateTo', '/company');
+                    }
+                },
+                {
                     label: 'Backup Database',
                     click() {
                         mainWindow?.webContents.send('navigateTo', '/backup');
