@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { User } from '../components/users/types';
 import { Car } from '../types/car';
+import { Company } from '../types/company';
 import { Invoice } from '../types/invoice';
 import { InvoiceFilter } from '../types/invoice-filter';
 import { PageRequest } from '../types/page-request';
@@ -64,6 +65,12 @@ const quote = {
 };
 
 
+const company = {
+    get: (): Promise<Company> => requests.get<Company>('/company'),
+    update: (company: Company): Promise<ResponseResult> => requests.post<ResponseResult>('/company/update', company),
+};
+
+
 const user = {
     login: (username: string, password: string): Promise<ResponseResult<User>> => requests.post<ResponseResult<User>>('/user/login', {username, password}),
     current: (): Promise<User> => {
@@ -95,6 +102,7 @@ const Api = {
     quote,
     user,
     car,
+    company,
 };
 
 export default Api;

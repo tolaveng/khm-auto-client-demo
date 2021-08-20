@@ -5,7 +5,7 @@ import { invoiceReducer, serviceIndexReducer } from '../invoices/reducers';
 import { quoteReducer } from '../quotes/reducers';
 import { SummaryReportReducer } from '../reports/reducers';
 import { RootState } from '../types/root-state';
-import appReducer from './appReducer';
+import appReducer, { CompanyReducer } from './appReducer';
 
 export default combineReducers<RootState>({
     app: appReducer,
@@ -15,4 +15,5 @@ export default combineReducers<RootState>({
     quoteState: quoteReducer,
     serviceIndices: serviceIndexReducer,
     summaryReports: SummaryReportReducer,
+    company: CompanyReducer,
 });

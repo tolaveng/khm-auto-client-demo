@@ -5,6 +5,7 @@ import { PageResponse } from "./page-response";
 import { SummaryReport } from "./summary-report";
 import { ServiceIndex } from "./service-index";
 import { Quote } from "./quote";
+import { Company } from "./company";
 
 export interface AppState {
     isAppLoading?: boolean,
@@ -43,4 +44,5 @@ export interface RootState {
     quoteState: QuoteState;
     serviceIndices: ServiceIndex[];
     summaryReports: PageResponse<SummaryReport>;
+    company: Company;
 }

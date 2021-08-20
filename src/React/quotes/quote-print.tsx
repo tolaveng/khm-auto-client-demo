@@ -1,12 +1,29 @@
 import moment from 'moment';
 import React from 'react';
+import { connect } from 'react-redux';
+import { AnyAction, bindActionCreators, Dispatch } from 'redux';
+import { getCompany } from '../actions';
+import { Company } from '../types/company';
 import { Quote } from '../types/quote';
+import { RootState } from '../types/root-state';
 import { Service } from '../types/service';
 import { pad6 } from '../utils/helper';
 
-interface IProps {
+interface QuotePageProps {
     quote: Quote
 }
+
+interface PrintPageStateProps {
+    company: Company
+}
+
+interface PrintPageDispatchProps {
+    actions:{
+        getCompany: () => void;
+    }
+}
+
+type IProps = QuotePageProps & PrintPageStateProps & PrintPageDispatchProps;
 
 class QuotePrintComp extends React.Component<IProps> {
     constructor(props: IProps) {
@@ -17,6 +34,9 @@ class QuotePrintComp extends React.Component<IProps> {
         this.renderFooter = this.renderFooter.bind(this);
     }
 
+    componentDidMount() {
+        this.props.actions.getCompany();
+    }
 
     calculateTotal(services: Service[]) {
         const { quote } = this.props;
@@ -34,7 +54,7 @@ class QuotePrintComp extends React.Component<IProps> {
     }
 
     renderContent() {
-        const { quote } = this.props;
+        const { quote, company } = this.props;
 
         return (
             <div className='invoice-content'>
@@ -42,9 +62,9 @@ class QuotePrintComp extends React.Component<IProps> {
                     <div className='print-col-left'>
                         <p>
                             <span className='invoice-heading'>KHM Motor Sports</span> <br />
-                            ABN: 96802833899 <br />
-                            15 Lightwood Rd Springvale, VIC 3171 <br />
-                            Phone: 0435 805 533
+                            ABN: {company.abn} <br />
+                            {company.address} <br />
+                            Phone: {company.phone}
                         </p>
                     </div>
                     <div className='print-col-right'>
@@ -125,7 +145,7 @@ class QuotePrintComp extends React.Component<IProps> {
 
 
     renderFooter() {
-        const { quote } = this.props;
+        const { quote, company } = this.props;
         const calTotal = this.calculateTotal(quote.services);
 
         return (
@@ -157,10 +177,10 @@ class QuotePrintComp extends React.Component<IProps> {
                 <div className='print-space'></div>
 
                 <p style={{ fontSize: '0.8rem' }}>
-                    Direct deposit to: Commonwealth Bank <br />
-                    Account Name: KHM MOTOR SPORTS <br />
-                    BSB: 063 171 <br />
-                    Account No: 011127384 <br />
+                    Direct deposit to: {company.bankName} <br />
+                    Account Name: {company.name} <br />
+                    BSB: {company.bankBsb} <br />
+                    Account No: {company.bankAccountNumber} <br />
                 </p>
             </div>
         );
@@ -195,4 +215,18 @@ class QuotePrintComp extends React.Component<IProps> {
 
 }
 
-export const QuotePrint = QuotePrintComp;
+const mapStateToProps = (state: RootState): PrintPageStateProps => {
+    return {
+        company: state.company
+    }
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): PrintPageDispatchProps => {
+    return {
+        actions: {
+            getCompany : bindActionCreators(getCompany, dispatch)
+        }
+    }
+}
+
+export const QuotePrint = connect(mapStateToProps, mapDispatchToProps, null, {forwardRef: true})(QuotePrintComp);
