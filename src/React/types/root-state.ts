@@ -6,6 +6,7 @@ import { SummaryReport } from "./summary-report";
 import { ServiceIndex } from "./service-index";
 import { Quote } from "./quote";
 import { Company } from "./company";
+import { InvoiceFilter } from "./invoice-filter";
 
 export interface AppState {
     isAppLoading?: boolean,
@@ -22,6 +23,7 @@ export interface InvoiceState {
     carMakes: string[];
     carModels: string[];
     carFoundResults: Car[];
+    invoiceFilter: InvoiceFilter;
 }
 
 

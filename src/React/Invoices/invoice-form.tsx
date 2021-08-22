@@ -30,7 +30,6 @@ const serviceTableColumns: TableEditorDataColumn[] = [
         collapse: true,
         type: 'number',
         textAlign: 'right',
-        required: true,
     },
     {
         name: 'Qty',
@@ -38,7 +37,6 @@ const serviceTableColumns: TableEditorDataColumn[] = [
         type: 'number',
         textAlign: 'right',
         maxLength: 3,
-        required: true,
         default: 1,
     },
     {
@@ -234,15 +232,16 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
         }
     }
 
-    const formKey = useRef(invoice.invoiceId ? invoice.invoiceId : Date.now()); // random key
-
+    const rnd = useRef(Date.now());
+    const formKey = invoice.invoiceId ? invoice.invoiceId : rnd.current;
+    
     return (
         <Formik
-            key={formKey.current}
+            key={formKey}
             initialValues={initValues}
             onSubmit={handleFormSubmit}
             validationSchema={validationSchema}
-            enableReinitialize={false}  // using key cause React to create a new form
+            enableReinitialize={false}  // default: false, using key to create a new form
             innerRef={frm => frm && setInvoiceFormik(frm)}
         >
             {

@@ -6,6 +6,7 @@ import { PaymentMethod } from '../../types/PaymentMethod';
 import { ServiceIndex } from 'src/React/types/service-index';
 import { AnyAction } from 'redux';
 import moment from 'moment';
+import { InvoiceFilter } from 'src/React/types/invoice-filter';
 
 const toDay = moment().format('YYYY-MM-DD');
 
@@ -27,6 +28,14 @@ const initInvoice: Invoice = {
     discount: 0
 };
 
+const initFilter: InvoiceFilter = {
+    InvoiceNo: '',
+    CarNo: '',
+    Customer: '',
+    InvoiceDate: '',
+    SortBy: 'InvoiceNo',
+    SortDir: 'DESC',
+}
 
 const initState: InvoiceState = {
     isLoading: false,
@@ -41,7 +50,8 @@ const initState: InvoiceState = {
     isFailed: false,
     carMakes: [],
     carModels: [],
-    carFoundResults: []
+    carFoundResults: [],
+    invoiceFilter: initFilter,
 };
 
 
@@ -81,6 +91,13 @@ export const invoiceReducer = (state = initState, action: LoadInvoicesAction): I
 
         case InvoiceActionTypes.CAR_MODEL:
             return { ...state, carModels: action.carModels };
+
+        case InvoiceActionTypes.SET_INVOICE_FILTER:
+                return { ...state, invoiceFilter: action.invoiceFilter };
+        
+        case InvoiceActionTypes.RESET_INVOICE_FILTER:
+                return { ...state, invoiceFilter: initFilter };
+
         default:
             return state;
     }

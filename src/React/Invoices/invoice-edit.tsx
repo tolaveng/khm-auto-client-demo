@@ -8,7 +8,7 @@ import { Invoice } from '../types/invoice';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Service } from '../types/service';
 import { RoundToTwo } from '../utils/helper';
-import { copyInvoice, deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
+import { clearInvoice, copyInvoice, deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
 import { toast } from 'react-toastify';
@@ -43,6 +43,7 @@ interface InvoiceEditDispatchProps {
         loadCarMakes: () => void;
         loadCarModels: () => void;
         deleteInvoice: (invoiceId: number) => void;
+        clearInvoice: () => void;
     };
 }
 
@@ -106,7 +107,13 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             });
         } else {
             actions.makeNewInvoice();
+            if (invoiceFormik) {
+                invoiceFormik.resetForm();
+            }
         }
+        return (() => {
+            actions.clearInvoice();
+        });
     }, []);
 
     useEffect(() => {
@@ -114,12 +121,19 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         actions.loadCarMakes();
         actions.loadCarModels();
     }, []);
+    
 
     function saveInvoice(formData: InvoiceFormProps, serviceData: Service[], isPrint: boolean): Promise<void> {
         return new Promise(function (resolve, reject) {
 
             if (!formData || !formData.carNo || !serviceData || serviceData.length == 0) {
                 reject('At least one service is required.');
+                return;
+            }
+
+            const hasNoPrice = serviceData.some(x => !x.servicePrice || isNaN(x.servicePrice));
+            if (hasNoPrice) {
+                reject('Check service price!');
                 return;
             }
 
@@ -217,9 +231,12 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
         }
     }
 
+    const rnd = useRef(Date.now());
+    const formKey = invoice.invoiceId ? invoice.invoiceId : rnd.current;
+    
     function renderForm() {
         const total = calculateTotal(invoice.services, invoice.discount, invoice.gst);
-        
+
         const invoiceForm: InvoiceFormProps = {
             invoiceDate: moment(invoice.invoiceDate, 'YYYY-MM-DD').format('DD/MM/YYYY'),
             fullName: invoice.fullName? invoice.fullName : '' ,
@@ -247,6 +264,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
                 <Grid.Column width={2}></Grid.Column>
                 <Grid.Column width={10}>
                     <InvoiceForm
+                        key={formKey}
                         setInvoiceFormik={setInvoiceFormik}
                         invoice={invoice}
                         initValues={invoiceForm}
@@ -370,6 +388,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoiceEditDispatchP
         loadCarModels: bindActionCreators(loadCarModels, dispatch),
         deleteInvoice: bindActionCreators(deleteInvoice, dispatch),
         makeInvoiceFromQuote: bindActionCreators(makeInvoiceFromQuote, dispatch),
+        clearInvoice: bindActionCreators(clearInvoice, dispatch),
     },
 });
 

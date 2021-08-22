@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, HashRouter } from 'react-router-dom';
+import { Switch, Route, HashRouter } from 'react-router-dom';
 import { InvoicePage } from './invoices/invoice-page';
 import { InvoiceEditPage } from './invoices/invoice-edit';
 import { connect } from 'react-redux';

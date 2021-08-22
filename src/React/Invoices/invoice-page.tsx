@@ -4,27 +4,31 @@ import ReactDatePicker from 'react-datepicker';
 import { connect } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import { Button, Container, Form, Grid, Icon, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
+import { Button, Container, Form, FormGroup, Grid, Icon, Pagination, PaginationProps, Segment, Table } from 'semantic-ui-react';
 import { HeaderLine } from '../components/HeaderLine';
 import { Invoice } from '../types/invoice';
-import { loadInvoices } from './actions';
+import { clearInvoiceFilter, loadInvoices, setInvoiceFilter } from './actions';
 import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
 import { User } from '../components/users/types';
 import { RootState } from '../types/root-state';
 import { InvoiceFilter } from '../types/invoice-filter';
+import { Field, Formik, FormikProps } from 'formik';
 
 
 interface InvoicePageDispatchProps {
     actions: {
-        loadInvoices: (pageRequest: PageRequest, filter?: InvoiceFilter) => void
+        loadInvoices: (pageRequest: PageRequest, filter?: InvoiceFilter) => void,
+        setInvoiceFilter: (filter: InvoiceFilter) => void,
+        clearInvoiceFilter: () => void,
     };
 }
 
 
 interface InvoicePageStateProps {
     user: User,
-    invoices: PageResponse<Invoice>
+    invoices: PageResponse<Invoice>,
+    invoiceFilter: InvoiceFilter,
 }
 
 type Props = InvoicePageStateProps & InvoicePageDispatchProps;
@@ -34,7 +38,7 @@ function useQuery() {
 }
 
 const InvoicePageComp: React.FC<Props> = (props) => {
-    const { user, invoices, actions } = props;
+    const { user, invoices, actions, invoiceFilter } = props;
 
     const query = useQuery();
     let queryCarNo = '';
@@ -44,69 +48,38 @@ const InvoicePageComp: React.FC<Props> = (props) => {
     }
 
     const [pageRequest, setPageRequest] = useState<PageRequest>({ PageNumber: 1, PageSize: 50, });
-
-    const initFilter: InvoiceFilter = {
-        InvoiceNo: '',
-        CarNo: queryCarNo,
-        Customer: '',
-        InvoiceDate: '',
-        SortBy: 'InvoiceNo',
-        SortDir: 'DESC',
-    }
-    const [filter, setFilter] = useState<InvoiceFilter>(initFilter);
-    const [shouldUpdate, setShouldUpdate] = useState(true);
-
+    
     useEffect(() => {
-        if (shouldUpdate) {
-            actions.loadInvoices(pageRequest, filter);
-        }
-    }, [pageRequest, filter, shouldUpdate]);
+        actions.loadInvoices(pageRequest, invoiceFilter);
+    }, [pageRequest]);
 
     const handlePaginationChange = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>, { activePage }: PaginationProps) => {
-        setShouldUpdate(true);
         setPageRequest({ ...pageRequest, PageNumber: Number(activePage) })
     }
 
-    const filterHandler = (evt: React.FormEvent<HTMLFormElement>) => {
-        evt.preventDefault();
-        setShouldUpdate(true);
-        setPageRequest({ ...pageRequest, PageNumber: 1 })
-    };
-
-    const setInvoiceDate = (date: Date) => {
-        setShouldUpdate(false);
-        if (date) {
-            setFilter({ ...filter, InvoiceDate: moment(date).format('YYYY-MM-DD') });
-        } else {
-            setFilter({ ...filter, InvoiceDate: '' });
-        }
+    const clearInvoiceFilter = (form: FormikProps<InvoiceFilter>) => {
+        actions.clearInvoiceFilter();
+        setPageRequest({ ...pageRequest, PageNumber: 1 });
+        form.resetForm();
     }
 
-    const setFilterValue = (evt: ChangeEvent<HTMLInputElement>) => {
-        const val = evt.target.value;
-        setShouldUpdate(false);
-        switch (evt.target.name) {
-            case 'txtInvoiceNo':
-                setFilter({ ...filter, InvoiceNo: val });
-                break;
-
-            case 'txtCarNo':
-                setFilter({ ...filter, CarNo: val });
-                break;
-
-            case 'txtCustomer':
-                setFilter({ ...filter, Customer: val });
-                break;
-        }
+    const filterHandler = (formValues: InvoiceFilter) => {
+        actions.setInvoiceFilter({...invoiceFilter,
+            InvoiceNo: formValues.InvoiceNo,
+            CarNo: formValues.CarNo,
+            Customer: formValues.Customer,
+            InvoiceDate: formValues.InvoiceDate ? moment(formValues.InvoiceDate).format('YYYY-MM-DD') : '',
+         });
+        setPageRequest({ ...pageRequest, PageNumber: 1 });
     };
 
     const sortBy = (columnName: string) => {
-        setShouldUpdate(true);
-        if (filter && filter.SortBy === columnName) {
-            setFilter({ ...filter, SortDir: filter.SortDir == 'ASC' ? 'DESC' : 'ASC' });
+        if (invoiceFilter && invoiceFilter.SortBy === columnName) {
+            actions.setInvoiceFilter({ ...invoiceFilter, SortDir: invoiceFilter.SortDir == 'ASC' ? 'DESC' : 'ASC' });
         } else {
-            setFilter({ ...filter, SortBy: columnName, SortDir: 'ASC' });
+            actions.setInvoiceFilter({ ...invoiceFilter, SortBy: columnName, SortDir: 'ASC' });
         }
+        setPageRequest({ ...pageRequest, PageNumber: 1 })
     }
 
     const renderInvoices = () => {
@@ -138,32 +111,44 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 
         return (
             <Segment>
-                <Form onSubmit={filterHandler} autoComplete='false'>
-                    <Form.Field>
-                        <label>Invoice No</label>
-                        <input name='txtInvoiceNo' value={filter.InvoiceNo} onChange={setFilterValue} />
-                    </Form.Field>
-                    <Form.Field>
-                        <label>Plate No</label>
-                        <input name='txtCarNo' value={filter.CarNo} onChange={setFilterValue} />
-                    </Form.Field>
-                    <Form.Field>
-                        <label>Customer</label>
-                        <input name='txtCustomer' value={filter.Customer} onChange={setFilterValue} />
-                    </Form.Field>
-                    <Form.Field>
-                        <label>Date</label>
-                        <ReactDatePicker
-                            dateFormat='dd/MM/yyyy'
-                            selected={filter.InvoiceDate ? moment(filter.InvoiceDate, 'YYYY-MM-DD').toDate() : null}
-                            onChange={(date) => setInvoiceDate(date as Date)}
-                        />
-                    </Form.Field>
-                    <Button type='submit' basic color='blue' icon labelPosition='left'>
-                        <Icon name='search' />
-                        <span>Find</span>
-                    </Button>
-                </Form>
+                <Formik initialValues={invoiceFilter} onSubmit={filterHandler} enableReinitialize>
+                    {formik => (
+                        <Form onSubmit={formik.handleSubmit} autoComplete='false'>
+                        <Form.Field>
+                            <label>Invoice No</label>
+                            <Field name='InvoiceNo' />
+                        </Form.Field>
+                        <Form.Field>
+                            <label>Plate No</label>
+                            <Field name='CarNo' />
+                        </Form.Field>
+                        <Form.Field>
+                            <label>Customer</label>
+                            <Field name='Customer' />
+                        </Form.Field>
+                        <Form.Field>
+                            <label>Date</label>
+                            <Field name='InvoiceDate' component={ReactDatePicker}
+                                dateFormat='dd/MM/yyyy'
+                                selected={formik.values.InvoiceDate ? moment(formik.values.InvoiceDate, 'YYYY-MM-DD').toDate() : null}
+                                onChange={(date: any) => formik.setFieldValue('InvoiceDate', date as Date)}
+                            />
+                        </Form.Field>
+                        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <Button type='submit' basic color='blue' icon labelPosition='left'>
+                            <Icon name='search' />
+                            <span>Find</span>
+                        </Button>
+                        <Button type='button' basic color='blue' icon labelPosition='left' style={{alignSelf: 'flex-end'}}
+                            onClick={() => clearInvoiceFilter(formik)}
+                        >
+                            <Icon name='redo' />
+                            <span>Clear</span>
+                        </Button>
+                        </div>
+                    </Form>
+                    )}
+                </Formik>
             </Segment>
         );
     };
@@ -182,13 +167,13 @@ const InvoicePageComp: React.FC<Props> = (props) => {
                         <Table.Header>
                             <Table.Row>
                                 <Table.HeaderCell collapsing
-                                    sorted={filter.SortBy === 'InvoiceNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    sorted={invoiceFilter.SortBy === 'InvoiceNo' && invoiceFilter.SortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => sortBy('InvoiceNo')}>No</Table.HeaderCell>
                                 <Table.HeaderCell collapsing
-                                    sorted={filter.SortBy === 'InvoiceDate' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    sorted={invoiceFilter.SortBy === 'InvoiceDate' && invoiceFilter.SortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => sortBy('InvoiceDate')}>Date</Table.HeaderCell>
                                 <Table.HeaderCell
-                                    sorted={filter.SortBy === 'CarNo' && filter.SortDir === 'ASC' ? 'ascending' : 'descending'}
+                                    sorted={invoiceFilter.SortBy === 'CarNo' && invoiceFilter.SortDir === 'ASC' ? 'ascending' : 'descending'}
                                     onClick={() => sortBy('CarNo')}>Plate No</Table.HeaderCell>
                                 <Table.HeaderCell>Customer</Table.HeaderCell>
                                 <Table.HeaderCell>Phone</Table.HeaderCell>
@@ -217,13 +202,16 @@ const InvoicePageComp: React.FC<Props> = (props) => {
 const mapStateToProps = (state: RootState): InvoicePageStateProps => {
     return {
         user: state.user,
-        invoices: state.invoiceState.invoices
+        invoices: state.invoiceState.invoices,
+        invoiceFilter: state.invoiceState.invoiceFilter,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): InvoicePageDispatchProps => ({
     actions: {
-        loadInvoices: bindActionCreators(loadInvoices, dispatch)
+        loadInvoices: bindActionCreators(loadInvoices, dispatch),
+        setInvoiceFilter: bindActionCreators(setInvoiceFilter, dispatch),
+        clearInvoiceFilter: bindActionCreators(clearInvoiceFilter, dispatch),
     }
 });
 

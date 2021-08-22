@@ -24,7 +24,9 @@ export const InvoiceActionTypes = {
     FIND_CAR_SUCCESS: 'FIND_CAR_SUCCESS',
     FIND_CAR_FAILED: 'FIND_CAR_FAILED',
     CAR_MAKE: 'CAR_MAKE',
-    CAR_MODEL: 'CAR_MODEL'
+    CAR_MODEL: 'CAR_MODEL',
+    SET_INVOICE_FILTER: 'SET_INVOICE_FILTER',
+    RESET_INVOICE_FILTER: 'RESET_INVOICE_FILTER',
 }
 
 
@@ -34,7 +36,8 @@ export type LoadInvoicesAction = Action & {
     invoice: Invoice,
     carMakes: string[],
     carModels: string[],
-    carFoundResults: Car[]
+    carFoundResults: Car[],
+    invoiceFilter: InvoiceFilter,
 }
 
 
@@ -54,6 +57,31 @@ export const loadInvoices = (pageRequest: PageRequest, filter?: InvoiceFilter) =
             type: InvoiceActionTypes.LOAD_INVOICES_FAILED,
         })
     }
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+};
+
+export const setInvoiceFilter = (filter: InvoiceFilter) => async(dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    dispatch({
+        type: InvoiceActionTypes.SET_INVOICE_FILTER,
+        invoiceFilter: filter
+    })
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+};
+
+export const clearInvoiceFilter = () => async(dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    dispatch({
+        type: InvoiceActionTypes.RESET_INVOICE_FILTER
+    })
     dispatch({
         type: UNSET_APP_LOADING_ACTION
     })
@@ -109,6 +137,15 @@ export const copyInvoice = (invoiceId: number, callback?: (invoice: Invoice) => 
 };
 
 export const makeNewInvoice = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: InvoiceActionTypes.LOAD_INVOICE_REQUEST
+    })
+    dispatch({
+        type: InvoiceActionTypes.MAKE_NEW_INVOICE
+    })
+}
+
+export const clearInvoice = () => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
     dispatch({
         type: InvoiceActionTypes.MAKE_NEW_INVOICE
     })
