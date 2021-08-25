@@ -1,11 +1,11 @@
+import { CSSProperties } from "react";
 
 
 export interface TableEditorDataColumn {
     name: string;
-    collapse?: boolean;
+    style?: CSSProperties;
     type?: string;
     required?: boolean;
-    textAlign?: string;
     maxLength?: number;
     readOnly?: boolean;
     default?: any;

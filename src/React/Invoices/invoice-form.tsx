@@ -22,28 +22,26 @@ import Colors from '../constants/colors';
 const serviceTableColumns: TableEditorDataColumn[] = [
     {
         name: 'Service Description',
+        style: {width: '70%', textAlign: 'left'},
         type: 'textarea',
         required: true,
     },
     {
         name: 'Price',
-        collapse: true,
+        style: {width: '14%', textAlign: 'right'},
         type: 'number',
-        textAlign: 'right',
     },
     {
         name: 'Qty',
-        collapse: true,
+        style: {width: '8%', textAlign: 'right'},
         type: 'number',
-        textAlign: 'right',
         maxLength: 3,
         default: 1,
     },
     {
         name: 'Total',
-        collapse: true,
+        style: {width: '8%', textAlign: 'right'},
         type: 'number',
-        textAlign: 'right',
         readOnly: true,
     },
 ];

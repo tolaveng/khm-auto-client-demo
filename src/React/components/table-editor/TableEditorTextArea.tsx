@@ -1,5 +1,4 @@
 import React, { createRef, CSSProperties } from 'react'
-import { isSchema } from 'yup';
 
 
 interface IProps {
@@ -11,6 +10,7 @@ interface IProps {
     rows: number;
     className?: string;
     onFocus?: () => void;
+    autoFocus?: boolean
 }
 
 interface IState {
@@ -158,6 +158,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
             case 'Enter': {
                 if (!isShowList) return;
                 if (options.length > 0 && selectedIndex > -1) {
+                    evt.preventDefault();
                     const value = options[selectedIndex];
                     this.setState({ ...this.state, isShowList: false, value: value }, () => {
                         if (this.inputRef.current) {
@@ -181,7 +182,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
 
 
     renderInput(): JSX.Element {
-        const { rows, name, className } = this.props;
+        const { rows, name, className, autoFocus } = this.props;
         const { value } = this.state;
         return (
             <textarea
@@ -197,6 +198,7 @@ class TableEditorTextAreaComp extends React.PureComponent<IProps, IState>
                 ref={this.inputRef}
                 onFocus={this.onInputFocus}
                 className={className}
+                autoFocus={autoFocus}
             />
         );
     }
