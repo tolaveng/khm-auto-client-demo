@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver';
 import { toast } from "react-toastify";
 
 export const SummaryReportActionType = {
+    GET_REPORT_TOTAL_SUCCESS: 'GET_REPORT_TOTAL_SUCCESS',
     LOAD_REPORT_SUCCESS: 'LOAD_REPORT_SUCCESS',
     LOAD_REPORT_FAILED: 'LOAD_REPORT_FAILED',
     DOWNLOAD_REPORT_FAILED: 'DOWNLOAD_REPORT_FAILED',
@@ -30,6 +31,25 @@ export const loadSummaryReport = (pageRequest: PageRequest, filter: SummaryRepor
         dispatch({
             type: SummaryReportActionType.LOAD_REPORT_FAILED,
         })
+    }
+    dispatch({
+        type: UNSET_APP_LOADING_ACTION
+    })
+}
+
+export const getSummaryReportTotal = (filter: SummaryReportFilter) => async (dispatch: Dispatch<AnyAction>): Promise<void> => {
+    dispatch({
+        type: SET_APP_LOADING_ACTION
+    })
+    
+    try {
+        const response = await Api.invoice.getSummaryReportTotal(filter)
+        dispatch({
+            type: SummaryReportActionType.GET_REPORT_TOTAL_SUCCESS,
+            payload: response
+        })
+    } catch (_) {
+        // ignored
     }
     dispatch({
         type: UNSET_APP_LOADING_ACTION

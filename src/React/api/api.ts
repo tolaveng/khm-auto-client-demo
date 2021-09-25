@@ -11,6 +11,7 @@ import { ResponseResult } from '../types/response-result';
 import { ServiceIndex } from '../types/service-index';
 import { SummaryReport } from '../types/summary-report';
 import { SummaryReportFilter } from '../types/summary-report-filter';
+import { SummaryReportTotal } from '../types/summary-report-total';
 
 export const KHM_JWT_TOKEN = 'KHM_JWT_TOKEN';
 
@@ -50,6 +51,7 @@ const invoice = {
     loadServiceIndices: (serviceName: string): Promise<ServiceIndex[]> => requests.getWithParams<ServiceIndex[]>('invoice/getserviceindex', {serviceName}),
     getSummaryReport: (pageRequest: PageRequest, filter: SummaryReportFilter): Promise<PageResponse<SummaryReport>> => requests.getWithParams<PageResponse<SummaryReport>>('/invoice/getSummaryReport', {...pageRequest, ...filter}),
     downloadSummaryReport: (filter: SummaryReportFilter): Promise<AxiosResponse<Blob>> => requests.getBlobWithParams<Blob>('/invoice/downloadSummaryReport', {...filter}),
+    getSummaryReportTotal: (filter: SummaryReportFilter): Promise<SummaryReportTotal> => requests.getWithParams<SummaryReportTotal>('/invoice/getSummaryReportTotal', {...filter}),
     fromQuote: (quoteId: number): Promise<Invoice> => requests.get<Invoice>(`/invoice/fromquote/${quoteId}`),
 };
 

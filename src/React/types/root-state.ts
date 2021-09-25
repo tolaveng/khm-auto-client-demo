@@ -7,6 +7,7 @@ import { ServiceIndex } from "./service-index";
 import { Quote } from "./quote";
 import { Company } from "./company";
 import { InvoiceFilter } from "./invoice-filter";
+import { SummaryReportTotal } from "./summary-report-total";
 
 export interface AppState {
     isAppLoading?: boolean,
@@ -46,5 +47,6 @@ export interface RootState {
     quoteState: QuoteState;
     serviceIndices: ServiceIndex[];
     summaryReports: PageResponse<SummaryReport>;
+    sumaryReportTotal: SummaryReportTotal;
     company: Company;
 }

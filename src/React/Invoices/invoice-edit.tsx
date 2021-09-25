@@ -160,13 +160,15 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
     }
 
     function makeInvoiceFromForm(formData: InvoiceFormProps, serviceData: Service[]): Invoice {
+        const formOdo = Number(formData.odo) ? Number(formData.odo) : 0;
+
         const car: Car = {
             carNo: formData.carNo,
             color: formData.color,
             carModel: formData.model,
             carMake: formData.make,
             carYear: Number(formData.year) ? Number(formData.year) : 0,
-            odo: Number(formData.odo) ? Number(formData.odo) : 0
+            odo: invoice.odo != formOdo ? formOdo : invoice.car.odo         // if odo changed ? form odo : car odo
         };
 
         return {
@@ -176,7 +178,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             paymentMethod: Number(formData.paymentMethod),
             gst: invoice.gst,
             note: formData.note,
-            odo: Number(formData.odo) ? Number(formData.odo) : 0,
+            odo: formOdo,
             fullName: formData.fullName,
             phone: formData.phoneNumber,
             email: formData.email,
@@ -247,7 +249,7 @@ const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props
             address: invoice.address ?? '',
             carNo: invoice.car.carNo ? invoice.car.carNo : '',
             color: invoice.car.color ? invoice.car.color : '',
-            odo: (invoice.car && invoice.car.odo)? invoice.car.odo.toString() : '',
+            odo: invoice.odo? invoice.odo.toString() : '',
             make: (invoice.car && invoice.car.carMake)? invoice.car.carMake : '',
             model: (invoice.car && invoice.car.carModel)? invoice.car.carModel : '',
             year: (invoice.car && invoice.car.carYear) ? invoice.car?.carYear.toString() : '',

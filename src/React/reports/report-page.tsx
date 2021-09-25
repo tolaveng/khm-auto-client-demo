@@ -7,25 +7,28 @@ import { PageRequest } from '../types/page-request';
 import { PageResponse } from '../types/page-response';
 import { SummaryReport } from '../types/summary-report';
 import { RootState } from '../types/root-state';
-import { downloadSummaryReport, loadSummaryReport } from './actions';
+import { downloadSummaryReport, getSummaryReportTotal, loadSummaryReport } from './actions';
 import moment from 'moment';
 import ReactDatePicker from 'react-datepicker';
 import { SummaryReportFilter } from '../types/summary-report-filter';
+import { SummaryReportTotal } from '../types/summary-report-total';
 
 
 interface IStateProps {
-    summaryReports: PageResponse<SummaryReport>
+    summaryReports: PageResponse<SummaryReport>,
+    sumaryReportTotal: SummaryReportTotal
 }
 
 interface IDispatchProps {
     actions: {
         loadSummaryReport: (pageRequest: PageRequest, filter: SummaryReportFilter) => void,
+        getSummaryReportTotal: (filter: SummaryReportFilter) => void,
         downloadSummaryReport: (filter: SummaryReportFilter) => void
     };
 }
 
 const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
-    const { actions, summaryReports } = props;
+    const { actions, summaryReports, sumaryReportTotal } = props;
 
     const now = new Date();
     const firstDate = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -66,6 +69,7 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
     useEffect(() => {
         if (filter.shouldUpdate) {
             actions.loadSummaryReport(pageRequest, filter);
+            actions.getSummaryReportTotal(filter);
         }
     }, [pageRequest, filter])
 
@@ -109,6 +113,49 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
         return reportList;
     }
 
+    const renderTotal = () => {
+        if (!summaryReports || summaryReports.data.length == 0) return null;
+
+        let sumSubTotal = 0;
+        let sumDiscount = 0;
+        let sumAmountTotal = 0;
+        let sumGstTotal = 0;
+        let sumAmountGstTotal = 0;
+        summaryReports.data.forEach(report => {
+          sumSubTotal += report.subTotal;
+          sumDiscount += report.discount;
+          sumAmountTotal += report.amountTotal;
+          sumGstTotal += report.gstTotal;
+          sumAmountGstTotal += (report.amountTotal + report.gstTotal);
+        });
+
+        return (
+            <Table.Row key={summaryReports.data.length} style={{height: '50px', backgroundColor: '#ccc'}}>
+                <Table.Cell colSpan={3} style={{borderTop: '2px solid #000'}}>Sum per page</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumSubTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumDiscount.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumGstTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountGstTotal.toFixed(2)}</Table.Cell>
+            </Table.Row>
+        );
+    }
+
+    const renderTotalAllPages = () => {
+        if (!sumaryReportTotal) return null;
+
+        return (
+            <Table.Row style={{height: '50px', backgroundColor: '#ccc'}}>
+                <Table.Cell colSpan={3} style={{fontWeight: 'bold', borderTop: '2px solid #000'}}>Sum All Pages</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumaryReportTotal.sumSubTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumaryReportTotal.sumDiscount.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumGstTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountGstTotal.toFixed(2)}</Table.Cell>
+            </Table.Row>
+        );
+    }
+
     const renderFilterForm = () => {
         return (
             <Segment>
@@ -129,19 +176,18 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                             onChange={(date) => setFilterDate('toDate', date as Date)}
                         />
                     </Form.Field>
-                    <div>
+                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                         <Button type='submit' basic color='blue' icon labelPosition='left'>
                             <Icon name='search' />
                             <span>Filter</span>
                         </Button>
-                        <Button type='button' color='blue' icon labelPosition='left' style={{ float: 'right' }}
+                        <Button type='button' color='blue' icon labelPosition='left' style={{alignSelf: 'flex-end'}}
                          onClick={downloadHandler}
                           loading={summaryReports.isDownloading}
                           disabled={summaryReports.isDownloading}>
                             <Icon name='share' />
                             <span>Export</span>
                         </Button>
-                        <div style={{ clear: 'both' }}></div>
                     </div>
                 </Form>
             </Segment>
@@ -151,7 +197,7 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
     return (
         <Container fluid>
             <HeaderLine label='Summary Report' />
-            <Grid columns={2} relaxed='very'>
+            <Grid relaxed='very'>
                 <Grid.Column width={12}>
                     {summaryReports.error && <Message negative color='red' attached='bottom'>
                         <Icon name='exclamation' />
@@ -175,12 +221,18 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                                 <Table.HeaderCell collapsing>Total (in GST)</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <Table.Body>{renderReports()}</Table.Body>
+                        <Table.Body>
+                            {renderReports()}
+                        </Table.Body>
+                        <Table.Footer>
+                            {renderTotal()}
+                            {renderTotalAllPages()}
+                        </Table.Footer>
                     </Table>
                     <Pagination
                         activePage={pageRequest.PageNumber}
                         onPageChange={handlePaginationChange}
-                        totalPages={1}
+                        totalPages={summaryReports.totalCount ? Math.ceil(summaryReports.totalCount / summaryReports.pageSize) : 1}
                         ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
                         firstItem={{ content: <Icon name='angle double left' />, icon: true }}
                         lastItem={{ content: <Icon name='angle double right' />, icon: true }}
@@ -196,13 +248,15 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
 
 const mapStateToProps = (state: RootState): IStateProps => {
     return {
-        summaryReports: state.summaryReports
+        summaryReports: state.summaryReports,
+        sumaryReportTotal: state.sumaryReportTotal,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>): IDispatchProps => ({
     actions: {
         loadSummaryReport: bindActionCreators(loadSummaryReport, dispatch),
+        getSummaryReportTotal: bindActionCreators(getSummaryReportTotal, dispatch),
         downloadSummaryReport: bindActionCreators(downloadSummaryReport, dispatch)
     }
 });

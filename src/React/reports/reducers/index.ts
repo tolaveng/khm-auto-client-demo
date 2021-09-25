@@ -1,9 +1,10 @@
 import { AnyAction } from "redux"
 import { SummaryReport } from "src/React/types/summary-report"
+import { SummaryReportTotal } from "src/React/types/summary-report-total"
 import { PageResponse } from "../../types/page-response"
 import { SummaryReportActionType } from "../actions"
 
-const initState: PageResponse<SummaryReport> = {
+const summaryReport: PageResponse<SummaryReport> = {
     data: [],
     hasNext: false,
     pageNumber: 1,
@@ -11,7 +12,8 @@ const initState: PageResponse<SummaryReport> = {
     totalCount: 0
 }
 
-export const SummaryReportReducer = (state = initState, action: AnyAction) => {
+
+export const SummaryReportReducer = (state = summaryReport, action: AnyAction) => {
     switch (action.type) {
         case SummaryReportActionType.LOAD_REPORT_SUCCESS:
             return {
@@ -39,4 +41,21 @@ export const SummaryReportReducer = (state = initState, action: AnyAction) => {
         default:
             return state
     }
+}
+
+const summaryReportTotal: SummaryReportTotal = {
+    sumSubTotal : 0,
+    sumDiscount : 0,
+    sumAmountTotal : 0,
+    sumGstTotal : 0,
+    sumAmountGstTotal : 0
+}
+
+export const summaryReportTotalReducer = (state = summaryReportTotal, action: AnyAction) => {
+
+    if (action.type === SummaryReportActionType.GET_REPORT_TOTAL_SUCCESS) {
+        return action.payload;
+    }
+
+    return state;
 }
