@@ -48,9 +48,8 @@ class InvoicePrintComp extends React.Component<IProps> {
             subTotal += Number(service.servicePrice) * Number(service.serviceQty);
         });
         
-        subTotal = subTotal - invoice.discount;
-        gstTotal = RoundToTwo(subTotal * invoice.gst/100);
-        amountTotal = subTotal + gstTotal;
+        amountTotal = subTotal - invoice.discount;
+        gstTotal = RoundToTwo(amountTotal / (invoice.gst + 1));
 
         return {
             subTotal, amountTotal, gstTotal
@@ -170,7 +169,7 @@ class InvoicePrintComp extends React.Component<IProps> {
                                 </tr>
                             }
                             <tr>
-                                <td style={{ textAlign: 'right' }}>GST</td>
+                                <td style={{ textAlign: 'right' }}>in GST</td>
                                 <td style={{ textAlign: 'right' }}>{calTotal.gstTotal.toFixed(2)}</td>
                             </tr>
                             <tr style={{ backgroundColor: '#cccccc' }}>

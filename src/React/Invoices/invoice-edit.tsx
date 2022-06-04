@@ -7,7 +7,7 @@ import { RootState } from '../types/root-state';
 import { Invoice } from '../types/invoice';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
 import { Service } from '../types/service';
-import { RoundToTwo } from '../utils/helper';
+import { calculateTotal, RoundToTwo } from '../utils/helper';
 import { clearInvoice, copyInvoice, deleteInvoice, findCars, loadCarMakes, loadCarModels, loadInvoice, loadServiceIndices, makeInvoiceFromQuote, makeNewInvoice, saveInvoice } from './actions';
 import { Car } from '../types/car';
 import { ResponseResult } from '../types/response-result';
@@ -48,25 +48,6 @@ interface InvoiceEditDispatchProps {
 }
 
 type Props = InvoiceEditStateProps & InvoiceEditDispatchProps;
-
-
-const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst: number) => {
-    let subTotal = 0;
-    let gstTotal = 0;
-    let amountTotal = 0;
-
-    services.forEach((service) => {
-        subTotal += Number(service.servicePrice) * Number(service.serviceQty);
-    });
-
-    subTotal = subTotal - invoiceDiscount;
-    gstTotal = RoundToTwo(subTotal * invoiceGst/100);
-    amountTotal = subTotal + gstTotal;
-    
-    return {
-        subTotal, gstTotal, amountTotal
-    }
-}
 
 const InvoiceEditComp: React.FC<RouteComponentProps<RequestId> & Props> = (props) => {
     const { isLoading, userId, invoice, actions, history, serviceIndices, isFailed, carFoundResults, carMakes, carModels } = props;

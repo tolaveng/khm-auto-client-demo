@@ -3,5 +3,5 @@ export interface SummaryReportTotal {
     sumDiscount: number;
     sumAmountTotal: number;
     sumGstTotal: number;
-    sumAmountGstTotal: number;
+    sumAmountExclGstTotal: number;
 }

@@ -103,9 +103,9 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                         </Table.Cell>
                     <Table.Cell textAlign='right'>{report.subTotal.toFixed(2)}</Table.Cell>
                     <Table.Cell textAlign='right'>{report.discount.toFixed(2)}</Table.Cell>
-                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.amountTotal.toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{(report.amountTotal - report.gstTotal).toFixed(2)}</Table.Cell>
                     <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.gstTotal.toFixed(2)}</Table.Cell>
-                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{(report.amountTotal + report.gstTotal).toFixed(2)}</Table.Cell>
+                    <Table.Cell textAlign='right' style={{ fontWeight: 'bold' }}>{report.amountTotal.toFixed(2)}</Table.Cell>
                 </Table.Row>
             );
         });
@@ -118,15 +118,15 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
 
         let sumSubTotal = 0;
         let sumDiscount = 0;
-        let sumAmountTotal = 0;
+        let sumAmountExclGstTotal = 0;
         let sumGstTotal = 0;
-        let sumAmountGstTotal = 0;
+        let sumAmountTotal = 0;
         summaryReports.data.forEach(report => {
           sumSubTotal += report.subTotal;
           sumDiscount += report.discount;
-          sumAmountTotal += report.amountTotal;
+          sumAmountExclGstTotal += (report.amountTotal - report.gstTotal);
           sumGstTotal += report.gstTotal;
-          sumAmountGstTotal += (report.amountTotal + report.gstTotal);
+          sumAmountTotal += report.amountTotal;
         });
 
         return (
@@ -134,9 +134,9 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                 <Table.Cell colSpan={3} style={{borderTop: '2px solid #000'}}>Sum per page</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumSubTotal.toFixed(2)}</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumDiscount.toFixed(2)}</Table.Cell>
-                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountExclGstTotal.toFixed(2)}</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumGstTotal.toFixed(2)}</Table.Cell>
-                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountGstTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumAmountTotal.toFixed(2)}</Table.Cell>
             </Table.Row>
         );
     }
@@ -149,9 +149,9 @@ const ReportPageComp: React.FC<IStateProps & IDispatchProps> = (props) => {
                 <Table.Cell colSpan={3} style={{fontWeight: 'bold', borderTop: '2px solid #000'}}>Sum All Pages</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumaryReportTotal.sumSubTotal.toFixed(2)}</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000'}}>{sumaryReportTotal.sumDiscount.toFixed(2)}</Table.Cell>
-                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountExclGstTotal.toFixed(2)}</Table.Cell>
                 <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumGstTotal.toFixed(2)}</Table.Cell>
-                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountGstTotal.toFixed(2)}</Table.Cell>
+                <Table.Cell textAlign='right' style={{ fontWeight: 'bold', borderTop: '2px solid #000' }}>{sumaryReportTotal.sumAmountTotal.toFixed(2)}</Table.Cell>
             </Table.Row>
         );
     }

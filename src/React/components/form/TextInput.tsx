@@ -16,6 +16,12 @@ interface TextInputProps extends FormFieldProps {
     //onChange: React.ChangeEvent<HTMLInputElement> | undefined
 }
 
+const emptyStyle : CSSProperties = {
+}
+
+const readOnlyStyle : CSSProperties = {
+    backgroundColor: '#ededed'
+}
 
 type Props = TextInputProps;
 
@@ -35,6 +41,8 @@ const TextInput: React.FC<Props> = (props) => {
         if (onTextChange) onTextChange(event.target.value)
     }
 
+    const style = (readOnly ? readOnlyStyle : emptyStyle);
+
     return (
         <Form.Field error={isError} inline={inline}>
             <label>{label}</label>
@@ -44,7 +52,7 @@ const TextInput: React.FC<Props> = (props) => {
                     //value={field.value}
                     //onBlur={field.handleBlur}
                     onChange={onChangeHandler}
-                    readOnly={readOnly} style={styles}
+                    readOnly={readOnly} style={{...styles, ...style}}
                     {...rest}
                 />
             }
@@ -53,7 +61,7 @@ const TextInput: React.FC<Props> = (props) => {
                 <input type={type} placeholder={placeholder}
                     {...field}
                     onChange={onChangeHandler}
-                    readOnly={readOnly} style={styles}
+                    readOnly={readOnly} style={{...styles, ...style}}
                     {...rest}
                 />
             }

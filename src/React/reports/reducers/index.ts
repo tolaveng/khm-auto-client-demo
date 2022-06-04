@@ -48,7 +48,7 @@ const summaryReportTotal: SummaryReportTotal = {
     sumDiscount : 0,
     sumAmountTotal : 0,
     sumGstTotal : 0,
-    sumAmountGstTotal : 0
+    sumAmountExclGstTotal : 0
 }
 
 export const summaryReportTotalReducer = (state = summaryReportTotal, action: AnyAction) => {

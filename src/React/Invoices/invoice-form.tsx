@@ -15,7 +15,7 @@ import AutoSuggestInput from '../components/form/AutoSuggestInput';
 import { Field, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { RoundToTwo } from '../utils/helper';
+import { calculateTotal } from '../utils/helper';
 import { Car } from '../types/car';
 import Colors from '../constants/colors';
 
@@ -98,23 +98,6 @@ interface IProps {
     setInvoiceFormik: (formik: FormikProps<InvoiceFormProps>) => void;
 }
 
-const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst: number) => {
-    let subTotal = 0;
-    let gstTotal = 0;
-    let amountTotal = 0;
-
-    services.forEach((service) => {
-        subTotal += Number(service.servicePrice) * Number(service.serviceQty);
-    });
-
-    subTotal = subTotal - invoiceDiscount;
-    gstTotal = RoundToTwo(subTotal * invoiceGst / 100);
-    amountTotal = subTotal + gstTotal;
-
-    return {
-        subTotal, gstTotal, amountTotal
-    }
-}
 
 const InvoiceFormComp: React.FC<IProps> = (props) => {
     const { initValues, invoice, onSaveInvoice, serviceIndices, isLoadFailed, carSearchHandler, carMakes, carModels,
@@ -369,7 +352,7 @@ const InvoiceFormComp: React.FC<IProps> = (props) => {
                                         styles={{ textAlign: 'right' }}
                                         onTextChange={(val: string) => onDiscountChange(val, formik)}
                                     />
-                                    <Field label='GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
+                                    <Field label='in GST' name='gstTotal' type='text' component={TextInput} inline readOnly styles={{ textAlign: 'right' }} />
                                     <Field
                                         label='Balance due'
                                         name='amountTotal'

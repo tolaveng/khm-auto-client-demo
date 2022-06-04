@@ -1,3 +1,5 @@
+import { Service } from "../types/service";
+
 export const GetToDay = (): string => {
   const today = new Date();
   const d = (today.getDate() < 10 ? "0" : "") + today.getDate();
@@ -8,7 +10,7 @@ export const GetToDay = (): string => {
 };
 
 
-export const RoundToTwo = (num: number) => {
+export const RoundToTwo = (num: number): number => {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
 
@@ -24,4 +26,22 @@ export const pad8 = (number: number): string => {
      return ("0000000"+number).slice(-8);
   }
   return number.toString();
+}
+
+export const calculateTotal = (services: Service[], invoiceDiscount: number, invoiceGst: number)
+: {subTotal: number, gstTotal: number, amountTotal: number} => {
+  let subTotal = 0;
+  let gstTotal = 0;
+  let amountTotal = 0;
+
+  services.forEach((service) => {
+      subTotal += Number(service.servicePrice) * Number(service.serviceQty);
+  });
+
+  amountTotal = subTotal - invoiceDiscount;
+  gstTotal = RoundToTwo(amountTotal / (invoiceGst + 1));
+  
+  return {
+      subTotal, gstTotal, amountTotal
+  }
 }
