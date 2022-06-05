@@ -79,8 +79,8 @@ class BackUpComp extends React.PureComponent<IProps, IStates> {
         }
 
         this.hubConnection!.on('JobUpdate', this.updateBackupJob);
-        this.hubConnection!.on('BackupFailed', this.backupFailedHander);
-        this.hubConnection!.on('BackupCompleted', this.backupCompletedHander);
+        this.hubConnection!.on('JobFailed', this.backupFailedHander);
+        this.hubConnection!.on('JobCompleted', this.backupCompletedHander);
 
 
         this.hubConnection!.start().then(_ => {
@@ -94,8 +94,8 @@ class BackUpComp extends React.PureComponent<IProps, IStates> {
     componentWillUnmount(): void {
         if (this.hubConnection) {
             this.hubConnection.off('JobUpdate', this.updateBackupJob);
-            this.hubConnection.off('BackupFailed', this.backupFailedHander);
-            this.hubConnection.off('BackupCompleted', this.backupCompletedHander);
+            this.hubConnection.off('JobFailed', this.backupFailedHander);
+            this.hubConnection.off('JobCompleted', this.backupCompletedHander);
 
             setTimeout(() => {
                 this.stopConnection();

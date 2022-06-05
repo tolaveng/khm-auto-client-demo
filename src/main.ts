@@ -109,6 +109,12 @@ const createWindow = (): void => {
                     click() {
                         mainWindow?.webContents.send('navigateTo', '/backup');
                     }
+                },
+                {
+                    label: 'Restore Database',
+                    click() {
+                        mainWindow?.webContents.send('navigateTo', '/restore');
+                    }
                 }
             ]
         }
