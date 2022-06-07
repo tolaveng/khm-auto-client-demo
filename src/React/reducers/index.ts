@@ -4,6 +4,7 @@ import { UserReducer } from '../components/users/reducers';
 import { invoiceReducer, serviceIndexReducer } from '../invoices/reducers';
 import { quoteReducer } from '../quotes/reducers';
 import { SummaryReportReducer, summaryReportTotalReducer } from '../reports/reducers';
+import { ServiceIndexReducer } from '../serviceIndexes/serviceIndexReducer';
 import { RootState } from '../types/root-state';
 import appReducer, { CompanyReducer } from './appReducer';
 
@@ -17,4 +18,5 @@ export default combineReducers<RootState>({
     summaryReports: SummaryReportReducer,
     company: CompanyReducer,
     sumaryReportTotal: summaryReportTotalReducer,
+    serviceIndexState: ServiceIndexReducer,
 });

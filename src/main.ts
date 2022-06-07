@@ -99,6 +99,12 @@ const createWindow = (): void => {
             label: 'Tools',
             submenu: [
                 {
+                    label: 'Service Name Auto',
+                    click() {
+                        mainWindow?.webContents.send('navigateTo', '/serviceIndex');
+                    }
+                },
+                {
                     label: 'Company',
                     click() {
                         mainWindow?.webContents.send('navigateTo', '/company');

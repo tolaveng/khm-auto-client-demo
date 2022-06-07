@@ -17,6 +17,7 @@ import { QuoteEditPage } from './quotes/quote-edit';
 import { ElectronRouter } from './ElectronRoute';
 import { CompanyPage } from './company/company-page';
 import RestorePage from './backup/restore-page';
+import { ServiceIndexPage } from './serviceIndexes/serviceIndex-page';
 
 interface AppProps {
     isAppLoading: boolean;
@@ -51,6 +52,7 @@ const App: React.FC<AppProps> = (props) => {
                 <AuthRoute key={13} path={'/restore'} component={RestorePage} />
 
                 <AuthRoute key={13} path={'/company'} component={CompanyPage} />
+                <AuthRoute key={13} path={'/serviceIndex'} component={ServiceIndexPage} />
 
                 <AuthRoute key={14} path='/' component={InvoicePage} />
             </Switch>

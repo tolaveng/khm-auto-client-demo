@@ -49,4 +49,5 @@ export interface RootState {
     summaryReports: PageResponse<SummaryReport>;
     sumaryReportTotal: SummaryReportTotal;
     company: Company;
+    serviceIndexState: PageResponse<ServiceIndex>;
 }

@@ -14,13 +14,7 @@ interface IProps extends RouteComponentProps {
 
 const hubUrl = process.env.REACT_APP_BAKUPHUB_URL ? process.env.REACT_APP_BAKUPHUB_URL : 'https://localhost:5001/backuphub';
 const jobId = Date.now().toString();
-const token = window.sessionStorage.getItem(KHM_JWT_TOKEN);
-const hubConnection = new HubConnectionBuilder().withUrl(`${hubUrl}?JobId=${jobId}`, {
-    accessTokenFactory: () => token!
-})
-    .withAutomaticReconnect()
-    .configureLogging(LogLevel.Debug)
-    .build();
+let hubConnection : HubConnection;
 
 const RestorePage: React.FC<IProps> = () => {
     const [error, setError] = useState('');
@@ -43,9 +37,17 @@ const RestorePage: React.FC<IProps> = () => {
     }
 
     useEffect(() => {
+        const token = window.sessionStorage.getItem(KHM_JWT_TOKEN);
         if (!token) {
             history.push('/login')
         }
+
+        hubConnection = new HubConnectionBuilder().withUrl(`${hubUrl}?JobId=${jobId}`, {
+            accessTokenFactory: () => token!
+        })
+            .withAutomaticReconnect()
+            .configureLogging(LogLevel.Debug)
+            .build();
 
         // bind handler
         hubConnection.on('JobUpdate', updateRestoreJob);

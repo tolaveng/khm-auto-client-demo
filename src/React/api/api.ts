@@ -99,12 +99,20 @@ const car = {
     loadCarModels: (): Promise<string[]> => requests.get<string[]>('/car/getmodels'),
 }
 
+const serviceIndex = {
+    findByServiceName: (pageRequest: PageRequest, serviceName: string): Promise<PageResponse<ServiceIndex>> =>
+     requests.getWithParams<PageResponse<ServiceIndex>>('/serviceindex/findByServiceName', {...pageRequest, serviceName}),
+     deleteServiceIndex: (id: number): Promise<void> => requests.delete(`/serviceindex/${id}`),
+     saveServiceIndex: (serviceIndex: ServiceIndex): Promise<void> => requests.post('/serviceindex/updateServiceIndex', serviceIndex),
+}
+
 const Api = {
     invoice,
     quote,
     user,
     car,
     company,
+    serviceIndex,
 };
 
 export default Api;
