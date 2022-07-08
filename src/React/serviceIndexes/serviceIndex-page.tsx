@@ -42,7 +42,7 @@ const ServiceIndexPageComp: React.FC<IStateProps & IDispatchProps> = (props) => 
         setPageRequest({ ...pageRequest, PageNumber: Number(activePage) })
     }
 
-    const setFilterValue = (evt: ChangeEvent<HTMLInputElement>) => {
+    const setFilterValue = (evt: ChangeEvent<HTMLTextAreaElement>) => {
         const val = evt.target.value;
         setFilter(val);
         setShouldUpdate(false);
@@ -109,7 +109,7 @@ const ServiceIndexPageComp: React.FC<IStateProps & IDispatchProps> = (props) => 
                 <Form onSubmit={filterHandler} autoComplete='false'>
                     <Form.Field>
                         <label>Service Name</label>
-                        <input name='txtServiceName' value={filter} onChange={setFilterValue} />
+                        <textarea name='txtServiceName' rows={2} value={filter} onChange={setFilterValue} />
                     </Form.Field>
                     <Button type='submit' basic color='blue' icon labelPosition='left'>
                         <Icon name='search' />
